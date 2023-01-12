@@ -1,0 +1,12 @@
+{
+  "project": "convex-fullstack-app",
+  "team": "vakila",
+  "prodUrl": "https://silent-cod-109.convex.cloud",
+  "functions": "convex/",
+  "authInfo": [
+    {
+      "domain": "https://dev-q6pbtli453usw7ul.us.auth0.com/",
+      "applicationID": "639AOoxTqneICxl2kQtb0sYpturbT1MP"
+    }
+  ]
+}

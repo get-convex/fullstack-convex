@@ -1,17 +1,10 @@
 import { query } from './_generated/server'
 import { Document } from './_generated/dataModel'
+import { findUser } from './getCurrentUser'
 
 export default query(async ({ db, auth }): Promise<Document[]> => {
-  // If logged in, fetch the user ID for filtering
-  const identity = await auth.getUserIdentity()
-  const user = identity
-    ? await db
-        .query('users')
-        .filter((q) =>
-          q.eq(q.field('tokenIdentifier'), identity.tokenIdentifier)
-        )
-        .unique()
-    : null
+  // If logged in, fetch the stored user to get ID for filtering
+  const user = await findUser(db, auth)
 
   // Get all public tickets, even if not logged in
   // If user is logged in, also get their owned tickets

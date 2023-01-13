@@ -11,6 +11,7 @@
 
 import type { ApiFromModules } from "convex/api";
 import type * as createTicket from "../createTicket";
+import type * as getCurrentUser from "../getCurrentUser";
 import type * as getTicket from "../getTicket";
 import type * as listTickets from "../listTickets";
 import type * as storeUser from "../storeUser";
@@ -26,6 +27,7 @@ import type * as storeUser from "../storeUser";
  */
 export type API = ApiFromModules<{
   createTicket: typeof createTicket;
+  getCurrentUser: typeof getCurrentUser;
   getTicket: typeof getTicket;
   listTickets: typeof listTickets;
   storeUser: typeof storeUser;

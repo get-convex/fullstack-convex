@@ -59,7 +59,7 @@ export default function App() {
     }
     createUser().catch(console.error)
     return () => setUserId(null)
-  }, [storeUser])
+  }, [storeUser, user])
 
   const tickets = useQuery('listTickets')
 

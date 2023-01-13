@@ -1,3 +1,4 @@
+import { findUser } from './getCurrentUser'
 import { Id } from './_generated/dataModel'
 import { mutation } from './_generated/server'
 
@@ -8,18 +9,10 @@ export default mutation(
     visibility: string,
     description?: string
   ) => {
-    const identity = await auth.getUserIdentity()
-    if (!identity) {
-      throw new Error('Called createTicket without authentication present')
-    }
-    console.log(identity)
-    const user = await db
-      .query('users')
-      .filter((q) => q.eq(q.field('tokenIdentifier'), identity.tokenIdentifier))
-      .unique()
+    const user = await findUser(db, auth)
 
     if (!user) {
-      throw new Error('User identity not found')
+      throw new Error('Error creating ticket: User identity not found')
     }
 
     const ticket = {

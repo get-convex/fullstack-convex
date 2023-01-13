@@ -6,10 +6,10 @@ export default query(async ({ db, auth }): Promise<Document[]> => {
   // If logged in, fetch the stored user to get ID for filtering
   const user = await findUser(db, auth)
 
-  // Get all public tickets, even if not logged in
-  // If user is logged in, also get their owned tickets
-  const tickets = await db
-    .query('tickets')
+  // Get all public tasks, even if not logged in
+  // If user is logged in, also get their owned tasks
+  const tasks = await db
+    .query('tasks')
     .order('desc')
     .filter((q) =>
       user
@@ -23,7 +23,7 @@ export default query(async ({ db, auth }): Promise<Document[]> => {
 
   // Join with owner details from users table
   return Promise.all(
-    tickets.map(async (t) => {
+    tasks.map(async (t) => {
       const owner = await db.get(t.ownerId)
       return { ...t, owner }
     })

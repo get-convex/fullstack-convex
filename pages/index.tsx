@@ -61,7 +61,7 @@ export default function App() {
     return () => setUserId(null)
   }, [storeUser, user])
 
-  const tickets = useQuery('listTickets')
+  const tasks = useQuery('listTasks')
 
   return (
     <main>
@@ -103,21 +103,21 @@ export default function App() {
           ))}
         </div>
         <div>
-          {tickets && (
+          {tasks && (
             <span id="showing">
-              Showing {tickets.length} of {tickets.length} tasks
+              Showing {tasks.length} of {tasks.length} tasks
             </span>
           )}
-          <Link href="/ticket/new">
+          <Link href="/task/new">
             <button id="new">New Task</button>
           </Link>
         </div>
       </div>
 
-      {tickets === undefined ? (
-        'Loading tickets...'
-      ) : tickets === null ? (
-        'No tickets found'
+      {tasks === undefined ? (
+        'Loading tasks...'
+      ) : tasks === null ? (
+        'No tasks found'
       ) : (
         <table>
           <thead>
@@ -129,20 +129,20 @@ export default function App() {
             </tr>
           </thead>
           <tbody>
-            {tickets.map((ticket, i) => (
-              // TODO replace i with the real ticket number (not yet stored)
+            {tasks.map((task, i) => (
+              // TODO replace i with the real task number (not yet stored)
               <tr key={i}>
                 <td>{i}</td>
-                <td>{ticket.title}</td>
+                <td>{task.title}</td>
                 <td>
                   <div
                     className="avatar"
                     style={{ width: 30, height: 30, fontSize: '1.2em' }}
                   >
-                    {ticket.owner.name[0].toUpperCase()}
+                    {task.owner.name[0].toUpperCase()}
                   </div>
                 </td>
-                <td>{ticket.status}</td>
+                <td>{task.status}</td>
               </tr>
             ))}
           </tbody>

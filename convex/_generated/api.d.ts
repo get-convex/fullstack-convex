@@ -10,10 +10,10 @@
  */
 
 import type { ApiFromModules } from "convex/api";
-import type * as createTicket from "../createTicket";
+import type * as createTask from "../createTask";
 import type * as getCurrentUser from "../getCurrentUser";
-import type * as getTicket from "../getTicket";
-import type * as listTickets from "../listTickets";
+import type * as getTask from "../getTask";
+import type * as listTasks from "../listTasks";
 import type * as storeUser from "../storeUser";
 
 /**
@@ -26,9 +26,9 @@ import type * as storeUser from "../storeUser";
  * `ConvexReactClient` to create app-specific types.
  */
 export type API = ApiFromModules<{
-  createTicket: typeof createTicket;
+  createTask: typeof createTask;
   getCurrentUser: typeof getCurrentUser;
-  getTicket: typeof getTicket;
-  listTickets: typeof listTickets;
+  getTask: typeof getTask;
+  listTasks: typeof listTasks;
   storeUser: typeof storeUser;
 }>;

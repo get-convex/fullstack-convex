@@ -12,16 +12,16 @@ export default mutation(
     const user = await findUser(db, auth)
 
     if (!user) {
-      throw new Error('Error creating ticket: User identity not found')
+      throw new Error('Error creating task: User identity not found')
     }
 
-    const ticket = {
+    const task = {
       title,
       ownerId: user._id,
       visibility,
       description,
       status: 'New',
     }
-    return await db.insert('tickets', ticket)
+    return await db.insert('tasks', task)
   }
 )

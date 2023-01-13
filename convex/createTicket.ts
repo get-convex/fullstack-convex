@@ -24,11 +24,10 @@ export default mutation(
 
     const ticket = {
       title,
-      authorId: user._id,
       ownerId: user._id,
       visibility,
       description,
-      status: 'new',
+      status: 'New',
     }
     return await db.insert('tickets', ticket)
   }

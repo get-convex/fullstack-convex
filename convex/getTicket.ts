@@ -4,7 +4,6 @@ import { Document, Id } from './_generated/dataModel'
 export default query(async ({ db, auth }, ticketId: Id): Promise<Document> => {
   const identity = await auth.getUserIdentity()
   const ticket = await db.get(ticketId)
-  const author = await db.get(ticket.authorId)
   const owner = await db.get(ticket.ownerId)
   if (!ticket) return null
   if (ticket.visibility === 'private') {
@@ -14,5 +13,5 @@ export default query(async ({ db, auth }, ticketId: Id): Promise<Document> => {
       return { error: 'You do not have permission to view this ticket' }
   }
 
-  return { ...ticket, author, owner }
+  return { ...ticket, owner }
 })

@@ -17,6 +17,7 @@ export default query(async ({ db, auth }): Promise<Document[]> => {
   // If user is logged in, also get their owned tickets
   const tickets = await db
     .query('tickets')
+    .order('desc')
     .filter((q) =>
       user
         ? q.or(
@@ -27,12 +28,11 @@ export default query(async ({ db, auth }): Promise<Document[]> => {
     )
     .collect()
 
-  // Join with author/owner details from users table
+  // Join with owner details from users table
   return Promise.all(
     tickets.map(async (t) => {
-      const author = await db.get(t.authorId)
       const owner = await db.get(t.ownerId)
-      return { ...t, author, owner }
+      return { ...t, owner }
     })
   )
 })

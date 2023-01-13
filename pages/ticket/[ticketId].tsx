@@ -30,7 +30,7 @@ export default function TicketDetailPage({ ticketId }: { ticketId: string }) {
         <p>{ticket.description}</p>
         <p>Owner: {ticket.owner.name}</p>
         <p>
-          Created by: <span>{ticket.author.name}</span> on{' '}
+          Created on{' '}
           <span>{new Date(ticket._creationTime).toDateString()}</span>
         </p>
       </main>

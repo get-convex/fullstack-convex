@@ -15,13 +15,20 @@ export default mutation(
       throw new Error('Error creating task: User identity not found')
     }
 
+    // Generate a number for this task, by finding the most
+    // recently created task's number and incrementing
+    const lastCreatedTask = await db.query('tasks').order('desc').first()
+    const number = lastCreatedTask ? lastCreatedTask.number + 1 : 1
+
     const task = {
       title,
       ownerId: user._id,
       visibility,
       description,
       status: 'New',
+      number,
     }
-    return await db.insert('tasks', task)
+    const id = await db.insert('tasks', task)
+    return { id, number }
   }
 )

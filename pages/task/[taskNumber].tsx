@@ -1,14 +1,8 @@
 import { useQuery } from '../../convex/_generated/react'
 import { Id } from '../../convex/_generated/dataModel'
 
-export default function TaskDetailPage({ taskId }: { taskId: string }) {
-  const id = new Id('tasks', taskId)
-  if (!id) throw new Error(`Invalid task ID: ${id}`)
-
-  // TODO getTask will throw an error if the ID isn't valid,
-  // e.g. '1234', which shouldn't happen during normal app use
-  // but should be handled nonetheless (in case of e.g. manually entered route)
-  const task = useQuery('getTask', id)
+export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
+  const task = useQuery('getTask', taskNumber)
 
   if (task === null)
     return (
@@ -40,11 +34,11 @@ export default function TaskDetailPage({ taskId }: { taskId: string }) {
 export async function getServerSideProps({
   params,
 }: {
-  params: { taskId: string }
+  params: { taskNumber: number }
 }) {
-  // Capture the dynamic route segment [taskId] (trickier to do client side)
-  const { taskId } = params
+  // Capture the dynamic route segment [taskNumber] (trickier to do client side)
+  const { taskNumber } = params
   return {
-    props: { taskId },
+    props: { taskNumber: +taskNumber },
   }
 }

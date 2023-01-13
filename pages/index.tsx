@@ -129,10 +129,9 @@ export default function App() {
             </tr>
           </thead>
           <tbody>
-            {tasks.map((task, i) => (
-              // TODO replace i with the real task number (not yet stored)
-              <tr key={i}>
-                <td>{i}</td>
+            {tasks.map((task) => (
+              <tr key={task.number}>
+                <td>{task.number}</td>
                 <td>{task.title}</td>
                 <td>
                   <div

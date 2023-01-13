@@ -65,38 +65,89 @@ export default function App() {
 
   return (
     <main>
-      <h1>Convex Todos</h1>
-      <p className="badge">
-        <span>{user?.name || 'Anonymous'}</span>
-        {user ? <LogoutButton /> : <LoginButton />}
-      </p>
+      <header>
+        <h1>Fullstack Task Manager</h1>
+        <div style={{ display: 'flex' }}>
+          {user && user.name && (
+            <div className="avatar" style={{ width: 50, height: 50 }}>
+              {user.name[0].toUpperCase()}
+            </div>
+          )}
+          {user ? <LogoutButton /> : <LoginButton />}
+        </div>
+      </header>
+
+      <div id="controls">
+        <div id="search">
+          <input
+            value=""
+            onChange={() => null}
+            placeholder="Search will be here"
+          />
+        </div>
+        <div id="filters">
+          {['New', 'In Progress', 'Done', 'Cancelled'].map((status) => (
+            <>
+              <input
+                type="checkbox"
+                id={`filter-${status.toLowerCase().replace(' ', '-')}`}
+                value={status}
+                onChange={() => null}
+              />
+              <label
+                htmlFor={`filter-${status.toLowerCase().replace(' ', '-')}`}
+              >
+                {status}
+              </label>
+            </>
+          ))}
+        </div>
+        <div>
+          {tickets && (
+            <span id="showing">
+              Showing {tickets.length} of {tickets.length} tasks
+            </span>
+          )}
+          <Link href="/ticket/new">
+            <button id="new">New Task</button>
+          </Link>
+        </div>
+      </div>
+
       {tickets === undefined ? (
         'Loading tickets...'
       ) : tickets === null ? (
         'No tickets found'
       ) : (
         <table>
-          <tr>
-            <th>Task</th>
-            <th>Owner</th>
-            <th>Status</th>
-            <th>Visibility</th>
-            <th>Created</th>
-          </tr>
-          {tickets.map((ticket) => (
-            <tr key={ticket._id.toString()}>
-              <td>{ticket.title}</td>
-              <td>{ticket.owner.name}&nbsp;</td>
-              <td>{ticket.status}</td>
-              <td>{ticket.visibility}&nbsp;</td>
-              <td>{new Date(ticket._creationTime).toDateString()}</td>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Task</th>
+              <th>Owner</th>
+              <th>Status</th>
             </tr>
-          ))}
+          </thead>
+          <tbody>
+            {tickets.map((ticket, i) => (
+              // TODO replace i with the real ticket number (not yet stored)
+              <tr key={i}>
+                <td>{i}</td>
+                <td>{ticket.title}</td>
+                <td>
+                  <div
+                    className="avatar"
+                    style={{ width: 30, height: 30, fontSize: '1.2em' }}
+                  >
+                    {ticket.owner.name[0].toUpperCase()}
+                  </div>
+                </td>
+                <td>{ticket.status}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       )}
-      <Link href="/ticket/new">
-        <button className="btn btn-primary">New ticket</button>
-      </Link>
     </main>
   )
 }

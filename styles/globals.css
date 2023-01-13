@@ -9,12 +9,13 @@
 body {
   font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', helvetica,
     sans-serif;
+  font-size: 16px;
 }
 
 main {
   padding-top: 1em;
   padding-bottom: 1em;
-  width: min(800px, 95vw);
+  width: min(900px, 95vw);
   margin: 0 auto;
 }
 
@@ -85,27 +86,116 @@ input:not([type]) {
   padding: 6px 12px 6px 12px;
   color: rgb(33, 37, 41);
   border: solid 1px rgb(206, 212, 218);
-  border-radius: 8px;
+  border-radius: 2px;
   font-size: 16px;
 }
 
 input[type='submit'],
 button {
   margin-left: 4px;
-  background: lightblue;
   color: white;
-  padding: 6px 12px 6px 12px;
-  border-radius: 8px;
+  padding: 12px 24px 12px 24px;
+  border-radius: 2px;
   font-size: 16px;
-  background-color: rgb(49, 108, 244);
+  background-color:  #0F172A;
+  border: solid 1px #0F172A;
+  font-weight: bold;
+
 }
 
 input[type='submit']:hover,
 button:hover {
-  background-color: rgb(41, 93, 207);
+  color:  #0F172A;
+  border: solid 1px #0F172A;
+  background-color: white;
 }
 
 input[type='submit']:disabled,
 button:disabled {
-  background-color: rgb(122, 160, 248);
+  color: white;
+  border-color: rgb(143, 148, 153);
+  background-color:  rgb(143, 148, 153);
+}
+
+header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.avatar {
+  font-size: 2em;
+  text-align: center;
+  color: white;
+  background-color: green;
+  border-radius: 100%;
+  margin: 0px 10px
+  
+}
+
+#controls {
+  width: 90%;
+  margin: 24px auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+#filters > label {
+  margin: 0px 16px 0px 8px;
+}
+
+input[type="checkbox"] {
+  accent-color: #0F172A;
+}
+
+
+#search {
+  margin: 0px auto;
+}
+
+
+#search > input {
+  border: 1px solid #E2E8F0;
+  width: 713px;
+}
+
+#new {
+  border-radius: 100px;
+  padding: 4px 12px 4px 12px;
+}
+
+#new::before {
+  content: "+";
+  margin-right: 8px;
+}
+
+#showing {
+  font-weight: 400;
+  color: #94A3B8;
+  padding-right: 16px;
+}
+
+table {
+  width: 95%;
+  text-align: left;
+  margin: 0px auto;
+}
+
+tbody {
+  color: #475569;
+}
+
+th, td {
+  padding: 8px 16px 8px 16px;
+}
+
+th:nth-child(2) {
+  min-width: 70%;
+}
+
+th:nth-child(4) {
+  min-width: 15%;
 }

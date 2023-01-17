@@ -40,6 +40,24 @@ export function LoginPage() {
   )
 }
 
+export function HeaderWithLogin({ user }) {
+  return (
+    <header>
+      <Link href="/">
+        <h1>Fullstack Task Manager</h1>
+      </Link>
+      <div style={{ display: 'flex' }}>
+        {user && user.name && (
+          <div className="avatar" style={{ width: 50, height: 50 }}>
+            {user.name[0].toUpperCase()}
+          </div>
+        )}
+        {user ? <LogoutButton /> : <LoginButton />}
+      </div>
+    </header>
+  )
+}
+
 export default function App() {
   // Check if the user is logged in with Auth0 for full write access
   // If user is not logged in, they can still read some data
@@ -65,17 +83,7 @@ export default function App() {
 
   return (
     <main>
-      <header>
-        <h1>Fullstack Task Manager</h1>
-        <div style={{ display: 'flex' }}>
-          {user && user.name && (
-            <div className="avatar" style={{ width: 50, height: 50 }}>
-              {user.name[0].toUpperCase()}
-            </div>
-          )}
-          {user ? <LogoutButton /> : <LoginButton />}
-        </div>
-      </header>
+      <HeaderWithLogin user={user} />
 
       <div id="controls">
         <div id="search">
@@ -109,7 +117,9 @@ export default function App() {
             </span>
           )}
           <Link href="/task/new">
-            <button id="new">New Task</button>
+            <button className="pill-button" id="new">
+              New Task
+            </button>
           </Link>
         </div>
       </div>

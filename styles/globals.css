@@ -23,22 +23,17 @@ main {
 
 h1 {
   text-align: center;
-  margin-bottom: 8px;
-  font-size: 1.8em;
+  font-size: 36px;
   font-weight: 500;
 }
 
+
 .badge {
-  text-align: center;
-  margin-bottom: 16px;
-}
-.badge span {
   background-color: #212529;
   color: #ffffff;
   border-radius: 6px;
   font-weight: bold;
   padding: 4px 8px 4px 8px;
-  font-size: 0.75em;
 }
 
 ul {
@@ -117,12 +112,15 @@ button:disabled {
   color: white;
   border-color: rgb(143, 148, 153);
   background-color:  rgb(143, 148, 153);
+  cursor: not-allowed;
 }
 
 header {
   width: 100%;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 
 .avatar {
@@ -164,7 +162,7 @@ input[type="checkbox"] {
   width: 713px;
 }
 
-#new {
+.pill-button {
   border-radius: 100px;
   padding: 4px 12px 4px 12px;
 }
@@ -202,11 +200,42 @@ th:nth-child(4) {
   min-width: 15%;
 }
 
-td > a {
+a {
   text-decoration: none;
   color: inherit;
 }
 
 tr:hover a {
   color: #0F172A;
+}
+
+#task-details {
+  width: 90%;
+  margin: 24px auto;
+}
+
+#task-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+#task-header h2 span {
+  color: #475569;
+  padding-right: 24px;
+}
+
+#task-header h2 {
+  font-weight: normal;
+  font-size: 2em;
+}
+
+#task-info {
+  display: grid;
+  grid-template-columns: 20% 1fr;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  grid-gap: 24px;
 }

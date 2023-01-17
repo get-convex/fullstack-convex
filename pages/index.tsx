@@ -131,8 +131,12 @@ export default function App() {
           <tbody>
             {tasks.map((task) => (
               <tr key={task.number}>
-                <td>{task.number}</td>
-                <td>{task.title}</td>
+                <td>
+                  <Link href={`/task/${task.number}`}>{task.number}</Link>
+                </td>
+                <td>
+                  <Link href={`/task/${task.number}`}>{task.title}</Link>
+                </td>
                 <td>
                   <div
                     className="avatar"

@@ -19,8 +19,8 @@ export default function CreateTaskPage() {
 
   async function handleCreateTask(event: FormEvent) {
     event.preventDefault()
-    const taskId = await createTask(title, visibility, description)
-    router.push(`/task/${taskId}`)
+    const { number } = await createTask(title, visibility, description)
+    router.push(`/task/${number}`)
   }
 
   return (

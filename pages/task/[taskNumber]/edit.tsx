@@ -71,7 +71,7 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
             <select
               onChange={(e) => setPatch({ ...patch, status: e.target.value })}
             >
-              {['New', 'In Progress', 'Done', 'Canceled'].map((status) => (
+              {['New', 'In Progress', 'Done', 'Cancelled'].map((status) => (
                 <option
                   key={status}
                   value={status}

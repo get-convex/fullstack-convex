@@ -81,6 +81,17 @@ export default function App() {
 
   const tasks = useQuery('listTasks')
 
+  const [checked, setChecked] = useState({
+    New: true,
+    'In Progress': true,
+    Done: false,
+    Cancelled: false,
+  })
+
+  function toggleChecked(value: string) {
+    setChecked({ ...checked, [value]: !checked[value] })
+  }
+
   return (
     <main>
       <HeaderWithLogin user={user} />
@@ -100,7 +111,8 @@ export default function App() {
                 type="checkbox"
                 id={`filter-${status.toLowerCase().replace(' ', '-')}`}
                 value={status}
-                onChange={() => null}
+                onChange={(e) => toggleChecked(e.target.value)}
+                checked={checked[status]}
               />
               <label
                 htmlFor={`filter-${status.toLowerCase().replace(' ', '-')}`}
@@ -139,25 +151,27 @@ export default function App() {
             </tr>
           </thead>
           <tbody>
-            {tasks.map((task) => (
-              <tr key={task.number}>
-                <td>
-                  <Link href={`/task/${task.number}`}>{task.number}</Link>
-                </td>
-                <td>
-                  <Link href={`/task/${task.number}`}>{task.title}</Link>
-                </td>
-                <td>
-                  <div
-                    className="avatar"
-                    style={{ width: 30, height: 30, fontSize: '1.2em' }}
-                  >
-                    {task.owner.name[0].toUpperCase()}
-                  </div>
-                </td>
-                <td>{task.status}</td>
-              </tr>
-            ))}
+            {tasks
+              .filter((task) => checked[task.status])
+              .map((task) => (
+                <tr key={task.number}>
+                  <td>
+                    <Link href={`/task/${task.number}`}>{task.number}</Link>
+                  </td>
+                  <td>
+                    <Link href={`/task/${task.number}`}>{task.title}</Link>
+                  </td>
+                  <td>
+                    <div
+                      className="avatar"
+                      style={{ width: 30, height: 30, fontSize: '1.2em' }}
+                    >
+                      {task.owner.name[0].toUpperCase()}
+                    </div>
+                  </td>
+                  <td>{task.status}</td>
+                </tr>
+              ))}
           </tbody>
         </table>
       )}

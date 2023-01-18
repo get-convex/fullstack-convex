@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, ChangeEvent } from 'react'
 import { useMutation, useQuery } from '../convex/_generated/react'
 import { useAuth0, User } from '@auth0/auth0-react'
 import Link from 'next/link'
@@ -59,8 +59,11 @@ export function HeaderWithLogin({ user }: { user?: User }) {
   )
 }
 
-export type Status = 'New' | 'In Progress' | 'Done' | 'Cancelled'
-export type SortKey = 'number' | 'title' | 'owner' | 'status'
+const STATUS = ['New', 'In Progress', 'Done', 'Cancelled'] as const
+type Status = typeof STATUS[number]
+
+const SORTKEY = ['number', 'title', 'owner', 'status'] as const
+type SortKey = typeof SORTKEY[number]
 
 export default function App() {
   // Check if the user is logged in with Auth0 for full write access
@@ -83,18 +86,38 @@ export default function App() {
     return () => setUserId(null)
   }, [storeUser, user])
 
-  const tasks = useQuery('listTasks')
+  const [statusFilter, setStatusFilter] = useState(['New', 'In Progress'])
 
-  const [checked, setChecked] = useState({
-    New: true,
-    'In Progress': true,
-    Done: false,
-    Cancelled: false,
-  })
-
-  function toggleChecked(value: Status) {
-    setChecked({ ...checked, [value]: !checked[value] })
+  function handleChangeFilters(event: ChangeEvent<HTMLInputElement>) {
+    // Process a checkbox change event affecting the status filter
+    const { value, checked } = event.target as {
+      value: Status
+      checked: boolean
+    }
+    const newFilter = checked
+      ? // A formerly unchecked status filter is now checked; add value to filter
+        STATUS.filter((s) => statusFilter.includes(s) || s === value)
+      : // A formerly checked status filter is now unchecked; remove value from filter
+        statusFilter.filter((s) => s !== value)
+    setStatusFilter(newFilter)
   }
+
+  const tasks = useQuery('listTasks', statusFilter)
+  const [loadedTasks, setLoadedTasks] = useState([] as Document[])
+
+  useEffect(() => {
+    // TODO this feels wrong, is there a better solution?
+    // The reactive tasks array returned by useQuery is undefined while results are loading/updating
+    // Capture results in loadedTasks to avoid the flash of empty tasks list
+    if (tasks === undefined) return // Data is loading or updating
+    if (tasks === null) {
+      // Empty result
+      setLoadedTasks([])
+    } else {
+      // Nonempty result
+      setLoadedTasks(tasks)
+    }
+  }, [tasks])
 
   const [sortKey, setSortKey] = useState('number' as SortKey)
   const [sortReverse, setSortReverse] = useState(1) // 1 or -1, affects sort order (see sortTasks)
@@ -163,17 +186,18 @@ export default function App() {
                 type="checkbox"
                 id={`filter-${status.toLowerCase().replace(' ', '-')}`}
                 value={status}
-                onChange={(e) => toggleChecked(e.target.value as Status)}
-                checked={checked[status as Status]}
+                onChange={(e) => handleChangeFilters(e)}
+                checked={statusFilter.includes(status)}
               />
               {status}
             </label>
           ))}
         </div>
         <div>
-          {tasks && (
+          {loadedTasks && (
             <span id="showing">
-              Showing {tasks.length} of {tasks.length} tasks
+              Showing {loadedTasks.length} task
+              {loadedTasks.length === 1 ? '' : 's'}
             </span>
           )}
           <Link href="/task/new">
@@ -184,54 +208,45 @@ export default function App() {
         </div>
       </div>
 
-      {tasks === undefined ? (
-        'Loading tasks...'
-      ) : tasks === null ? (
-        'No tasks found'
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th id="number" onClick={handleChangeSort}>
-                #
-              </th>
-              <th id="title" onClick={handleChangeSort}>
-                Task
-              </th>
-              <th id="owner" onClick={handleChangeSort}>
-                Owner
-              </th>
-              <th id="status" onClick={handleChangeSort}>
-                Status
-              </th>
+      <table>
+        <thead>
+          <tr>
+            <th id="number" onClick={handleChangeSort}>
+              #
+            </th>
+            <th id="title" onClick={handleChangeSort}>
+              Task
+            </th>
+            <th id="owner" onClick={handleChangeSort}>
+              Owner
+            </th>
+            <th id="status" onClick={handleChangeSort}>
+              Status
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {loadedTasks.sort(sortTasks).map((task) => (
+            <tr key={task.number}>
+              <td>
+                <Link href={`/task/${task.number}`}>{task.number}</Link>
+              </td>
+              <td>
+                <Link href={`/task/${task.number}`}>{task.title}</Link>
+              </td>
+              <td>
+                <div
+                  className="avatar"
+                  style={{ width: 30, height: 30, fontSize: '1.2em' }}
+                >
+                  {task.owner.name[0].toUpperCase()}
+                </div>
+              </td>
+              <td>{task.status}</td>
             </tr>
-          </thead>
-          <tbody>
-            {tasks
-              .filter((task) => checked[task.status as Status])
-              .sort(sortTasks)
-              .map((task) => (
-                <tr key={task.number}>
-                  <td>
-                    <Link href={`/task/${task.number}`}>{task.number}</Link>
-                  </td>
-                  <td>
-                    <Link href={`/task/${task.number}`}>{task.title}</Link>
-                  </td>
-                  <td>
-                    <div
-                      className="avatar"
-                      style={{ width: 30, height: 30, fontSize: '1.2em' }}
-                    >
-                      {task.owner.name[0].toUpperCase()}
-                    </div>
-                  </td>
-                  <td>{task.status}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      )}
+          ))}
+        </tbody>
+      </table>
     </main>
   )
 }

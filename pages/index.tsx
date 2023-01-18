@@ -58,6 +58,8 @@ export function HeaderWithLogin({ user }: { user?: User }) {
   )
 }
 
+export type Status = 'New' | 'In Progress' | 'Done' | 'Cancelled'
+
 export default function App() {
   // Check if the user is logged in with Auth0 for full write access
   // If user is not logged in, they can still read some data
@@ -88,7 +90,7 @@ export default function App() {
     Cancelled: false,
   })
 
-  function toggleChecked(value: string) {
+  function toggleChecked(value: Status) {
     setChecked({ ...checked, [value]: !checked[value] })
   }
 
@@ -111,8 +113,8 @@ export default function App() {
                 type="checkbox"
                 id={`filter-${status.toLowerCase().replace(' ', '-')}`}
                 value={status}
-                onChange={(e) => toggleChecked(e.target.value)}
-                checked={checked[status]}
+                onChange={(e) => toggleChecked(e.target.value as Status)}
+                checked={checked[status as Status]}
               />
               <label
                 htmlFor={`filter-${status.toLowerCase().replace(' ', '-')}`}
@@ -152,7 +154,7 @@ export default function App() {
           </thead>
           <tbody>
             {tasks
-              .filter((task) => checked[task.status])
+              .filter((task) => checked[task.status as Status])
               .map((task) => (
                 <tr key={task.number}>
                   <td>

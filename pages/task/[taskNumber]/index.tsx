@@ -1,13 +1,12 @@
 import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
-import { useQuery } from '../../convex/_generated/react'
-import { HeaderWithLogin } from '../index'
+import { useQuery } from '../../../convex/_generated/react'
+import { HeaderWithLogin } from '../../index'
 
 export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
   const user = useQuery('getCurrentUser')
   const task = useQuery('getTask', taskNumber)
   const isOwner = user && task && user._id.equals(task.ownerId)
-  console.log(user, task, isOwner)
 
   if (task === null)
     return (

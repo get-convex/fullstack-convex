@@ -79,12 +79,13 @@ form {
   justify-content: center;
 }
 
-input:not([type]) {
+input:not([type]), textarea, select {
   padding: 6px 12px 6px 12px;
   color: rgb(33, 37, 41);
   border: solid 1px rgb(206, 212, 218);
   border-radius: 2px;
   font-size: 16px;
+  font-family: inherit;
 }
 
 input[type='submit'],

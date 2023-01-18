@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { useMutation } from '../../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useRouter } from 'next/router'

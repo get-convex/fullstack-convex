@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { useMutation, useQuery } from '../convex/_generated/react'
-import { useAuth0 } from '@auth0/auth0-react'
+import { useAuth0, User } from '@auth0/auth0-react'
 import Link from 'next/link'
 
 function LogoutButton() {
@@ -40,7 +40,7 @@ export function LoginPage() {
   )
 }
 
-export function HeaderWithLogin({ user }) {
+export function HeaderWithLogin({ user }: { user?: User }) {
   return (
     <header>
       <Link href="/">

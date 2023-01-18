@@ -1,7 +1,8 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery } from '../convex/_generated/react'
 import { useAuth0, User } from '@auth0/auth0-react'
 import Link from 'next/link'
+import type { Document } from '../convex/_generated/dataModel'
 
 function LogoutButton() {
   const { logout } = useAuth0()
@@ -59,6 +60,7 @@ export function HeaderWithLogin({ user }: { user?: User }) {
 }
 
 export type Status = 'New' | 'In Progress' | 'Done' | 'Cancelled'
+export type SortKey = 'number' | 'title' | 'owner' | 'status'
 
 export default function App() {
   // Check if the user is logged in with Auth0 for full write access
@@ -92,6 +94,53 @@ export default function App() {
 
   function toggleChecked(value: Status) {
     setChecked({ ...checked, [value]: !checked[value] })
+  }
+
+  const [sortKey, setSortKey] = useState('number' as SortKey)
+  const [sortReverse, setSortReverse] = useState(1) // 1 or -1, affects sort order (see sortTasks)
+
+  function handleChangeSort(event) {
+    event.stopPropagation()
+    const target = event.target as HTMLElement
+    const key = target.id
+    if (sortKey === key) {
+      // We are already sorting by this key, so a click indicates an order reversal
+      setSortReverse(-1 * sortReverse)
+    } else {
+      setSortKey(key as SortKey)
+      setSortReverse(1)
+    }
+  }
+
+  function sortTasks(a: Document, b: Document) {
+    // Use the sortKey to compare items by returning a positive/negative/zero number
+    // Multiply by the sortReverse factor to change ascending/descending order
+
+    // General cases
+    if (a[sortKey] === b[sortKey]) return 0 // Equal
+    if (!a[sortKey]) return -1 // First item missing key
+    if (!b[sortKey]) return 1 // Second item missing key
+
+    switch (sortKey) {
+      case 'status':
+        // Predefined order
+        const order = ['New', 'In Progress', 'Done', 'Cancelled']
+        return (order.indexOf(a.status) - order.indexOf(b.status)) * sortReverse
+      case 'owner':
+        // Alphabetical by owner name
+        return a.owner.name.toLowerCase() < b.owner.name.toLowerCase()
+          ? sortReverse * -1
+          : sortReverse
+      case 'title':
+        // Alphabetical by title
+        return a.title.toLowerCase() < b.title.toLowerCase()
+          ? sortReverse * -1
+          : sortReverse
+      case 'number':
+      default:
+        // Numeric order
+        return (a.number - b.number) * sortReverse
+    }
   }
 
   return (
@@ -146,15 +195,24 @@ export default function App() {
         <table>
           <thead>
             <tr>
-              <th>#</th>
-              <th>Task</th>
-              <th>Owner</th>
-              <th>Status</th>
+              <th id="number" onClick={handleChangeSort}>
+                #
+              </th>
+              <th id="title" onClick={handleChangeSort}>
+                Task
+              </th>
+              <th id="owner" onClick={handleChangeSort}>
+                Owner
+              </th>
+              <th id="status" onClick={handleChangeSort}>
+                Status
+              </th>
             </tr>
           </thead>
           <tbody>
             {tasks
               .filter((task) => checked[task.status as Status])
+              .sort(sortTasks)
               .map((task) => (
                 <tr key={task.number}>
                   <td>

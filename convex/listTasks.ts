@@ -10,7 +10,6 @@ export default query(async ({ db, auth }): Promise<Document[]> => {
   // If user is logged in, also get their owned tasks
   const tasks = await db
     .query('tasks')
-    .order('desc')
     .filter((q) =>
       user
         ? q.or(

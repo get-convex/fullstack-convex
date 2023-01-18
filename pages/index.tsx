@@ -157,20 +157,17 @@ export default function App() {
         </div>
         <div id="filters">
           {['New', 'In Progress', 'Done', 'Cancelled'].map((status) => (
-            <>
+            <label key={`filter-${status.toLowerCase().replace(' ', '-')}`}>
               <input
+                key={status}
                 type="checkbox"
                 id={`filter-${status.toLowerCase().replace(' ', '-')}`}
                 value={status}
                 onChange={(e) => toggleChecked(e.target.value as Status)}
                 checked={checked[status as Status]}
               />
-              <label
-                htmlFor={`filter-${status.toLowerCase().replace(' ', '-')}`}
-              >
-                {status}
-              </label>
-            </>
+              {status}
+            </label>
           ))}
         </div>
         <div>

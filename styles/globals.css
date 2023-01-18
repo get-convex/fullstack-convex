@@ -116,6 +116,10 @@ button:disabled {
   cursor: not-allowed;
 }
 
+input[type='checkbox'] {
+  margin-right: 8px;
+}
+
 header {
   width: 100%;
   display: flex;

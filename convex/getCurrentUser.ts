@@ -9,6 +9,7 @@ import {
 export async function findUser(db: DatabaseReader<AnyDataModel>, auth: Auth) {
   // Expose this as its own function for reusability in other queries/mutations
   const identity = await auth.getUserIdentity()
+  if (!identity) return null
   return await db
     .query('users')
     .filter((q) => q.eq(q.field('tokenIdentifier'), identity?.tokenIdentifier))

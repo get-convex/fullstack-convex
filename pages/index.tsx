@@ -1,63 +1,9 @@
 import { useEffect, useState, ChangeEvent } from 'react'
 import { useMutation, useQuery } from '../convex/_generated/react'
-import { useAuth0, User } from '@auth0/auth0-react'
+import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import type { Document } from '../convex/_generated/dataModel'
-
-function LogoutButton() {
-  const { logout } = useAuth0()
-  return (
-    <button
-      className="btn btn-primary"
-      onClick={() => logout({ returnTo: window.location.origin })}
-    >
-      Log out
-    </button>
-  )
-}
-
-function LoginButton() {
-  const { isLoading, loginWithRedirect } = useAuth0()
-  return (
-    <button
-      className="btn btn-primary"
-      disabled={isLoading}
-      onClick={loginWithRedirect}
-    >
-      Log in
-    </button>
-  )
-}
-
-export function LoginPage() {
-  return (
-    <main className="py-4">
-      <h1 className="text-center">Convex Todos</h1>
-      <p className="text-center">Please log in to continue</p>
-      <div className="text-center">
-        <span>{LoginButton()}</span>
-      </div>
-    </main>
-  )
-}
-
-export function HeaderWithLogin({ user }: { user?: User }) {
-  return (
-    <header>
-      <Link href="/">
-        <h1>Fullstack Task Manager</h1>
-      </Link>
-      <div style={{ display: 'flex' }}>
-        {user && user.name && (
-          <div className="avatar" style={{ width: 50, height: 50 }}>
-            {user.name[0].toUpperCase()}
-          </div>
-        )}
-        {user ? <LogoutButton /> : <LoginButton />}
-      </div>
-    </header>
-  )
-}
+import { HeaderWithLogin } from '../components/login'
 
 const STATUS = ['New', 'In Progress', 'Done', 'Cancelled'] as const
 type Status = typeof STATUS[number]
@@ -200,11 +146,13 @@ export default function App() {
               {loadedTasks.length === 1 ? '' : 's'}
             </span>
           )}
-          <Link href="/task/new">
-            <button className="pill-button" id="new">
-              New Task
-            </button>
-          </Link>
+          {user && (
+            <Link href="/task/new">
+              <button className="pill-button" id="new">
+                New Task
+              </button>
+            </Link>
+          )}
         </div>
       </div>
 

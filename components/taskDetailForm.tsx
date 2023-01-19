@@ -78,14 +78,11 @@ export function TaskDetailForm({
       <div id="task-info">
         <h4>Status</h4>
         <select
+          value={taskInfo.status}
           onChange={(e) => setTaskInfo({ ...taskInfo, status: e.target.value })}
         >
           {['New', 'In Progress', 'Done', 'Cancelled'].map((status) => (
-            <option
-              key={status}
-              value={status}
-              selected={status === taskInfo.status}
-            >
+            <option key={status} value={status}>
               {status}
             </option>
           ))}
@@ -93,14 +90,12 @@ export function TaskDetailForm({
 
         <h4>Description</h4>
         <textarea
-          contentEditable={true}
+          value={taskInfo.description}
           rows={3}
           onChange={(e) =>
             setTaskInfo({ ...taskInfo, description: e.target.value })
           }
-        >
-          {taskInfo.description}
-        </textarea>
+        />
 
         <h4>Owner</h4>
         <select
@@ -125,12 +120,13 @@ export function TaskDetailForm({
 
         <h4>Visibility</h4>
         <select
+          value={taskInfo.visibility}
           onChange={(e) =>
             setTaskInfo({ ...taskInfo, visibility: e.target.value })
           }
         >
           {['private', 'public'].map((v) => (
-            <option key={v} value={v} selected={v === taskInfo.visibility}>
+            <option key={v} value={v}>
               {v}
             </option>
           ))}

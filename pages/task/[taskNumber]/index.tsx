@@ -1,7 +1,6 @@
-import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import { useQuery } from '../../../convex/_generated/react'
-import { HeaderWithLogin } from '../../index'
+import { HeaderWithLogin } from '../../../components/login'
 
 export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
   const user = useQuery('getCurrentUser')

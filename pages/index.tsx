@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import type { Document } from '../convex/_generated/dataModel'
-import { HeaderWithLogin } from '../components/login'
+import { HeaderWithLogin, Avatar } from '../components/login'
 
 const STATUS = ['New', 'In Progress', 'Done', 'Cancelled'] as const
 type Status = typeof STATUS[number]
@@ -184,15 +184,8 @@ export default function App() {
               <td>
                 <Link href={`/task/${task.number}`}>{task.title}</Link>
               </td>
-              <td>
-                {task.owner && (
-                  <div
-                    className="avatar"
-                    style={{ width: 30, height: 30, fontSize: '1.2em' }}
-                  >
-                    {task.owner.name[0].toUpperCase()}
-                  </div>
-                )}
+              <td style={{ textAlign: 'center' }}>
+                {task.owner && <Avatar user={task.owner} size={30} />}
               </td>
               <td>{task.status}</td>
             </tr>

@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { FormEvent, useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
-import { Document, Id } from '../convex/_generated/dataModel'
+import { Document } from '../convex/_generated/dataModel'
+import { Avatar } from './login'
 import type { MutationNames } from 'convex/dist/types/api/api'
 import type { API } from '../convex/_generated/api'
 
@@ -93,8 +94,13 @@ export function TaskDetailForm({
         />
 
         <h4>Owner</h4>
-        <div>
-          <span>{taskInfo.owner && taskInfo.owner.name}</span>
+        <div className="owner-details">
+          {taskInfo.owner && (
+            <>
+              <Avatar user={taskInfo.owner} />
+              {taskInfo.owner.name}
+            </>
+          )}
           {isOwner ? (
             <button
               className="pill-button"

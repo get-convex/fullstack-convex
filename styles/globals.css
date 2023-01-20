@@ -128,14 +128,14 @@ header {
   margin-bottom: 24px;
 }
 
-.avatar {
-  font-size: 2em;
-  text-align: center;
-  color: white;
-  background-color: green;
+img {
   border-radius: 100%;
-  margin: 0px 10px
-  
+}
+
+.owner-details {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 #controls {

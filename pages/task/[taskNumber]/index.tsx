@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useQuery, useMutation } from '../../../convex/_generated/react'
-import { HeaderWithLogin } from '../../../components/login'
+import { HeaderWithLogin, Avatar } from '../../../components/login'
 import type { Document } from '../../../convex/_generated/dataModel'
 
 export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
@@ -78,7 +78,14 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
             <p>{task.description}</p>
 
             <h4>Owner</h4>
-            <p>{task.owner?.name}</p>
+            <p>
+              {task.owner && (
+                <div className="owner-details">
+                  <Avatar user={task.owner} />
+                  {task.owner.name}
+                </div>
+              )}
+            </p>
 
             <h4>Visibility</h4>
             <p>{task.visibility}</p>

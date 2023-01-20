@@ -15,7 +15,7 @@ import type * as getCurrentUser from "../getCurrentUser";
 import type * as getTask from "../getTask";
 import type * as listTasks from "../listTasks";
 import type * as listUsers from "../listUsers";
-import type * as storeUser from "../storeUser";
+import type * as saveUser from "../saveUser";
 import type * as updateTask from "../updateTask";
 
 /**
@@ -33,6 +33,6 @@ export type API = ApiFromModules<{
   getTask: typeof getTask;
   listTasks: typeof listTasks;
   listUsers: typeof listUsers;
-  storeUser: typeof storeUser;
+  saveUser: typeof saveUser;
   updateTask: typeof updateTask;
 }>;

@@ -1,5 +1,6 @@
-import { useAuth0, User } from '@auth0/auth0-react'
+import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
+import type { Document } from '../convex/_generated/dataModel'
 
 function LogoutButton() {
   const { logout } = useAuth0()
@@ -26,7 +27,7 @@ function LoginButton() {
   )
 }
 
-export function HeaderWithLogin({ user }: { user?: User }) {
+export function HeaderWithLogin({ user }: { user?: Document }) {
   return (
     <header>
       <Link href="/">

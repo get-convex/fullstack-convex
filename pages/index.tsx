@@ -14,23 +14,25 @@ type SortKey = typeof SORTKEY[number]
 export default function App() {
   // Check if the user is logged in with Auth0 for full write access
   // If user is not logged in, they can still read some data
-  const { user } = useAuth0()
-  const [userId, setUserId] = useState<any>(null)
-  const storeUser = useMutation('storeUser')
-  // Call the `storeUser` mutation function to store/retrieve
-  // the current user in the `users` table and return the `Id` value.
+  const { user: auth0User } = useAuth0()
+
+  // Once this user's profile has been saved to Convex, this query will update
+  const user = useQuery('getCurrentUser')
+
+  // Call the `saveUser` mutation function to store/retrieve
+  // the current Auth0 user in the `users` table
+  const saveUser = useMutation('saveUser')
   useEffect(() => {
-    // Store the user in the database (or get an existing user)
-    // Recall that `storeUser` gets the user information via the `auth`
+    // Save the user in the database (or get an existing user)
+    // Recall that `saveUser` gets the user information via the `auth`
     // object on the server. You don't need to pass anything manually here.
-    if (!user) return () => null
+    if (!auth0User) return () => null
     async function createUser() {
-      const id = await storeUser()
-      setUserId(id)
+      await saveUser()
     }
     createUser().catch(console.error)
-    return () => setUserId(null)
-  }, [storeUser, user])
+    return () => {}
+  }, [saveUser, auth0User])
 
   const [statusFilter, setStatusFilter] = useState(['New', 'In Progress'])
 

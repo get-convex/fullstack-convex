@@ -29,7 +29,7 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
       )
 
     const isPublic = task.visibility === 'public'
-    const isOwner = user._id.equals(task.ownerId)
+    const isOwner = user?._id.equals(task.ownerId)
 
     return (
       <main>
@@ -41,7 +41,7 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
               {task.title}
             </h2>
             <div>
-              {isPublic && !isOwner && (
+              {user && isPublic && !isOwner && (
                 <button
                   className="pill-button"
                   title="Make yourself the owner of this task"

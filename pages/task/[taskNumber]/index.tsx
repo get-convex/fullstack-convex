@@ -10,6 +10,15 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
 
   function handleClaimTask() {
     const taskInfo = { ...task, ownerId: user._id } as Partial<Document>
+    saveChanges(taskInfo)
+  }
+
+  function handleUnclaimTask() {
+    const taskInfo = { ...task, ownerId: null, owner: null }
+    saveChanges(taskInfo)
+  }
+
+  function saveChanges(taskInfo: Partial<Document>) {
     delete taskInfo.owner // Un-join with owner object
     updateTask(taskInfo)
   }
@@ -30,7 +39,7 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
 
     const isPublic = task.visibility === 'public'
     const isOwner = user?._id.equals(task.ownerId)
-
+    const canChangeOwner = user && isPublic
     return (
       <main>
         <HeaderWithLogin user={user} />
@@ -41,13 +50,15 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
               {task.title}
             </h2>
             <div>
-              {user && isPublic && !isOwner && (
+              {canChangeOwner && (
                 <button
                   className="pill-button"
-                  title="Make yourself the owner of this task"
-                  onClick={handleClaimTask}
+                  title={`${
+                    isOwner ? 'Unassign yourself as' : 'Make yourself'
+                  } the owner of this task`}
+                  onClick={isOwner ? handleUnclaimTask : handleClaimTask}
                 >
-                  Claim task
+                  {isOwner ? 'Disown task' : 'Claim task'}
                 </button>
               )}
               <Link href={`/task/${task.number}/edit`}>

@@ -32,7 +32,7 @@ export default query(
     // Join with owner details from users table
     return Promise.all(
       tasks.map(async (t) => {
-        const owner = await db.get(t.ownerId)
+        const owner = t.ownerId && (await db.get(t.ownerId))
         return { ...t, owner }
       })
     )

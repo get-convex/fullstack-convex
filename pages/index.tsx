@@ -183,12 +183,14 @@ export default function App() {
                 <Link href={`/task/${task.number}`}>{task.title}</Link>
               </td>
               <td>
-                <div
-                  className="avatar"
-                  style={{ width: 30, height: 30, fontSize: '1.2em' }}
-                >
-                  {task.owner.name[0].toUpperCase()}
-                </div>
+                {task.owner && (
+                  <div
+                    className="avatar"
+                    style={{ width: 30, height: 30, fontSize: '1.2em' }}
+                  >
+                    {task.owner.name[0].toUpperCase()}
+                  </div>
+                )}
               </td>
               <td>{task.status}</td>
             </tr>

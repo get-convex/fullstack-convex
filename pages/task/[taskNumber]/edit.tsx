@@ -4,7 +4,7 @@ import { TaskDetailForm } from '../../../components/taskDetailForm'
 
 export default function EditTaskPage({ taskNumber }: { taskNumber: number }) {
   const user = useQuery('getCurrentUser')
-  const task = useQuery('getTask', taskNumber, false)
+  const task = useQuery('getTask', taskNumber)
 
   if (task === null)
     return (

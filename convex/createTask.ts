@@ -14,7 +14,6 @@ export default mutation(async ({ db, auth }, taskInfo: Partial<Document>) => {
   const number = lastCreatedTask ? lastCreatedTask.number + 1 : 1
 
   const task = {
-    ownerId: user._id,
     number,
     ...taskInfo,
   }

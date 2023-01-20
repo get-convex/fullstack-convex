@@ -13,31 +13,27 @@ export function TaskDetailForm({
 }: {
   user: Document
   mutationName: MutationNames<API>
-  initialTaskInfo?: Document
+  initialTaskInfo: Partial<Document>
 }) {
   const router = useRouter()
   const saveTask = useMutation(mutationName)
 
-  const taskNumber = initialTaskInfo?.number
-  const creationTime = initialTaskInfo?._creationTime
-  const taskOwner = initialTaskInfo?.owner || user
-  const userList = [taskOwner]
-  if (!taskOwner._id.equals(user._id)) {
-    userList.push(user)
-  }
+  const {
+    number: taskNumber,
+    _creationTime: creationTime,
+    owner: taskOwner,
+  } = initialTaskInfo
 
-  const [taskInfo, setTaskInfo] = useState(
-    initialTaskInfo ||
-      ({
-        status: 'New',
-        visibility: 'private',
-      } as Partial<Document>)
-  )
+  const [taskInfo, setTaskInfo] = useState(initialTaskInfo)
 
-  const invalid = !taskInfo.title
+  const isOwner = user._id.equals(taskInfo.ownerId)
+  const isPublic = taskInfo.visibility === 'public'
+
+  const invalidInput = !taskInfo.title
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
+    delete taskInfo.owner // Un-join with owner object
     const task = await saveTask(taskInfo)
     router.push(`/task/${task.number}`)
   }
@@ -53,7 +49,6 @@ export function TaskDetailForm({
           {taskNumber && <span>#{taskNumber}</span>}
           <input
             value={taskInfo.title}
-            // onChange={(e) => setTitle(e.target.value)}
             onChange={(e) =>
               setTaskInfo({ ...taskInfo, title: e.target.value })
             }
@@ -66,8 +61,8 @@ export function TaskDetailForm({
             type="submit"
             value="Save"
             className="pill-button"
-            disabled={invalid}
-            title={invalid ? 'Title cannot be empty' : 'Save task'}
+            disabled={invalidInput}
+            title={invalidInput ? 'Title cannot be empty' : 'Save task'}
           />
           <Link href={taskNumber ? `/task/${taskNumber}` : `/`}>
             <button className="cancel">Cancel</button>
@@ -98,32 +93,53 @@ export function TaskDetailForm({
         />
 
         <h4>Owner</h4>
-        <select
-          onChange={(e) =>
-            setTaskInfo({
-              ...taskInfo,
-              ownerId: new Id('users', e.target.value),
-            })
-          }
-        >
-          {userList.map((u: Document) => (
-            // TODO this is terrible, currently exposing all users' emails
-            <option
-              key={u._id}
-              value={u._id}
-              selected={u._id.equals(taskInfo.ownerId)}
+        <div>
+          <span>{taskInfo.owner && taskInfo.owner.name}</span>
+          {isOwner ? (
+            <button
+              className="pill-button"
+              onClick={(event) => {
+                event.preventDefault()
+                setTaskInfo({ ...taskInfo, ownerId: null, owner: null })
+              }}
+              disabled={!isPublic}
+              title={
+                !isPublic
+                  ? 'Private tasks cannot be disowned'
+                  : 'Unassign yourself as the owner of this task'
+              }
             >
-              {u.name}
-            </option>
-          ))}
-        </select>
+              Disown task
+            </button>
+          ) : (
+            <button
+              className="pill-button"
+              onClick={(event) => {
+                event.preventDefault()
+                setTaskInfo({ ...taskInfo, ownerId: user._id, owner: user })
+              }}
+              title="Make yourself the owner of this task"
+            >
+              Claim task
+            </button>
+          )}
+        </div>
 
         <h4>Visibility</h4>
         <select
           value={taskInfo.visibility}
-          onChange={(e) =>
-            setTaskInfo({ ...taskInfo, visibility: e.target.value })
+          disabled={!taskInfo.ownerId}
+          title={
+            isPublic && !taskInfo.ownerId
+              ? 'Unowned tasks cannot be made private'
+              : 'Public tasks will be visible to all users'
           }
+          onChange={(e) => {
+            setTaskInfo({
+              ...taskInfo,
+              visibility: e.target.value,
+            })
+          }}
         >
           {['private', 'public'].map((v) => (
             <option key={v} value={v}>

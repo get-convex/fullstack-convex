@@ -1,4 +1,4 @@
-import { useEffect, useState, ChangeEvent } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   useMutation,
   useQuery,
@@ -6,14 +6,17 @@ import {
 } from '../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
-import type { Document } from '../convex/_generated/dataModel'
 import { HeaderWithLogin, Avatar } from '../components/login'
+import type { ChangeEvent } from 'react'
+import type { Document } from '../convex/_generated/dataModel'
 
 const STATUS = ['New', 'In Progress', 'Done', 'Cancelled'] as const
 type Status = typeof STATUS[number]
 
 const SORTKEY = ['number', 'title', 'owner', 'status'] as const
 type SortKey = typeof SORTKEY[number]
+
+const PAGE_SIZE = 10
 
 export default function App() {
   // Check if the user is logged in with Auth0 for full write access
@@ -54,12 +57,32 @@ export default function App() {
     setStatusFilter(newFilter)
   }
 
-  const {
-    results: tasks,
-    status: loadStatus,
-    loadMore,
-  } = usePaginatedQuery('listTasks', { initialNumItems: 10 }, statusFilter)
+  // Results are paginated, additional pages loaded automatically in infinite scroll
+  const { results: tasks, loadMore } = usePaginatedQuery(
+    'listTasks',
+    { initialNumItems: PAGE_SIZE },
+    statusFilter
+  )
   const [loadedTasks, setLoadedTasks] = useState([] as Document[])
+
+  // We use an IntersectionObserver to notice user has reached bottom of list
+  const bottom = useRef(null)
+  function loadOnScroll(entries: IntersectionObserverEntry[]) {
+    if (entries[0].isIntersecting && loadMore) {
+      loadMore(PAGE_SIZE)
+    }
+  }
+  useEffect(() => {
+    const observer = new IntersectionObserver(loadOnScroll, { threshold: 1 })
+    if (bottom.current) {
+      observer.observe(bottom.current)
+    }
+    return () => {
+      if (bottom.current) {
+        observer.unobserve(bottom.current)
+      }
+    }
+  }, [bottom, loadOnScroll])
 
   useEffect(() => {
     // TODO this feels wrong, is there a better solution?
@@ -200,15 +223,7 @@ export default function App() {
           ))}
         </tbody>
       </table>
-      {loadMore && (
-        <button
-          onClick={() => {
-            loadMore(5)
-          }}
-        >
-          Load More
-        </button>
-      )}
+      <div ref={bottom} />
     </main>
   )
 }

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useQuery, useMutation } from '../../../convex/_generated/react'
 import { HeaderWithLogin, Avatar } from '../../../components/login'
+import { Comments } from '../../../components/comments'
 import type { Document } from '../../../convex/_generated/dataModel'
 
 export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
@@ -105,6 +106,9 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
             <p>
               <span>{new Date(task._creationTime).toDateString()}</span>
             </p>
+
+            <h4>Comments</h4>
+            {task && <Comments user={user} taskId={task._id} />}
           </div>
         </div>
       </main>

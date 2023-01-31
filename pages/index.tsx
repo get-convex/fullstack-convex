@@ -1,5 +1,9 @@
 import { useEffect, useState, ChangeEvent } from 'react'
-import { useMutation, useQuery } from '../convex/_generated/react'
+import {
+  useMutation,
+  useQuery,
+  usePaginatedQuery,
+} from '../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import type { Document } from '../convex/_generated/dataModel'
@@ -50,7 +54,11 @@ export default function App() {
     setStatusFilter(newFilter)
   }
 
-  const tasks = useQuery('listTasks', statusFilter)
+  const {
+    results: tasks,
+    status: loadStatus,
+    loadMore,
+  } = usePaginatedQuery('listTasks', { initialNumItems: 10 }, statusFilter)
   const [loadedTasks, setLoadedTasks] = useState([] as Document[])
 
   useEffect(() => {
@@ -192,6 +200,15 @@ export default function App() {
           ))}
         </tbody>
       </table>
+      {loadMore && (
+        <button
+          onClick={() => {
+            loadMore(5)
+          }}
+        >
+          Load More
+        </button>
+      )}
     </main>
   )
 }

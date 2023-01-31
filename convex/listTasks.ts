@@ -3,11 +3,11 @@ import { Document } from './_generated/dataModel'
 import { findUser } from './getCurrentUser'
 
 export default query(
-  async ({ db, auth }, statusFilter: string[]): Promise<Document[]> => {
+  async ({ db, auth }, paginationOptions, statusFilter: string[]) => {
     // If logged in, fetch the stored user to get ID for filtering
     const user = await findUser(db, auth)
 
-    const tasks = await db
+    const { page, isDone, continueCursor } = await db
       .query('tasks')
       .filter((q) =>
         q.and(
@@ -27,14 +27,18 @@ export default query(
           )
         )
       )
-      .collect()
+      .paginate(paginationOptions)
 
-    // Join with owner details from users table
-    return Promise.all(
-      tasks.map(async (t) => {
-        const owner = t.ownerId && (await db.get(t.ownerId))
-        return { ...t, owner }
-      })
-    )
+    return {
+      page: await Promise.all(
+        // Join each task with owner details from users table
+        page.map(async (task) => {
+          const owner = task.ownerId && (await db.get(task.ownerId))
+          return { ...task, owner }
+        })
+      ),
+      isDone,
+      continueCursor,
+    }
   }
 )

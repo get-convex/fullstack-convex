@@ -12,6 +12,7 @@ export default function CreateTaskPage() {
   const newTaskInfo = {
     status: 'New',
     visibility: 'public',
+    ownerId: null,
   } as Partial<Document>
 
   return (

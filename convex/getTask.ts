@@ -13,7 +13,6 @@ export default query(
     const owner = task.ownerId && (await db.get(task.ownerId))
 
     if (task.visibility === 'private') {
-      // TODO currently only available to logged-in users, will change
       if (!identity) return { error: 'You must be logged in to view this task' }
       if (identity.tokenIdentifier !== owner?.tokenIdentifier)
         return { error: 'You do not have permission to view this task' }

@@ -12,7 +12,6 @@ import { mutation } from './_generated/server'
 // which of those need to be persisted.
 export default mutation(async ({ db, auth }): Promise<Id<'users'>> => {
   const identity = await auth.getUserIdentity()
-  console.log(identity)
   if (!identity) {
     throw new Error('Called storeUser without authentication present')
   }

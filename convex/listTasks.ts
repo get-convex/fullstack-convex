@@ -44,10 +44,8 @@ export default query(
         // Join each task with owner details from users table
         page.map(async (task) => {
           const owner = task.ownerId && (await db.get(task.ownerId))
-          const commentCount = await countResults(
-            findCommentsByTask(db, task._id)
-          )
-          return { ...task, owner, commentCount }
+          const comments = await countResults(findCommentsByTask(db, task._id))
+          return { ...task, owner, comments }
         })
       ),
       isDone,

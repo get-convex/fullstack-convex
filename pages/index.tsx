@@ -13,8 +13,8 @@ import type { Document } from '../convex/_generated/dataModel'
 const STATUS = ['New', 'In Progress', 'Done', 'Cancelled'] as const
 type Status = typeof STATUS[number]
 
-const SORTKEY = ['number', 'title', 'owner', 'status'] as const
-type SortKey = typeof SORTKEY[number]
+const SORT_KEY = ['number', 'title', 'owner', 'status', 'comments'] as const
+type SortKey = typeof SORT_KEY[number]
 
 const PAGE_SIZE = 10
 
@@ -132,8 +132,8 @@ export default function App() {
 
     // General cases
     if (a[sortKey] === b[sortKey]) return 0 // Equal
-    if (!a[sortKey]) return -1 // First item missing key
-    if (!b[sortKey]) return 1 // Second item missing key
+    if (a[sortKey] === undefined) return -1 // First item missing key
+    if (b[sortKey] === undefined) return 1 // Second item missing key
 
     switch (sortKey) {
       case 'status':
@@ -150,6 +150,9 @@ export default function App() {
         return a.title.toLowerCase() < b.title.toLowerCase()
           ? sortReverse * -1
           : sortReverse
+      case 'comments':
+        // Default sort order for comment counts is descending
+        return (b.comments - a.comments) * sortReverse
       case 'number':
       default:
         // Numeric order
@@ -204,7 +207,7 @@ export default function App() {
 
       <table>
         <thead>
-          <tr>
+          <tr id="column-headers">
             <th
               id="number"
               onClick={handleChangeSort}
@@ -221,7 +224,9 @@ export default function App() {
             <th id="status" onClick={handleChangeSort}>
               Status
             </th>
-            <th id="comments">Comments</th>
+            <th id="comments" onClick={handleChangeSort}>
+              Comments
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -237,7 +242,7 @@ export default function App() {
                 {task.owner && <Avatar user={task.owner} size={30} />}
               </td>
               <td>{task.status}</td>
-              <td>{task.commentCount}</td>
+              <td>{task.comments}</td>
             </tr>
           ))}
         </tbody>

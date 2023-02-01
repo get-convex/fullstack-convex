@@ -186,40 +186,46 @@ export default function App() {
         </div>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th id="number" onClick={handleChangeSort}>
-              #
-            </th>
-            <th id="title" onClick={handleChangeSort}>
-              Task
-            </th>
-            <th id="owner" onClick={handleChangeSort}>
-              Owner
-            </th>
-            <th id="status" onClick={handleChangeSort}>
-              Status
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {loadedTasks.sort(sortTasks).map((task) => (
-            <tr key={task.number}>
-              <td>
-                <Link href={`/task/${task.number}`}>{task.number}</Link>
-              </td>
-              <td>
-                <Link href={`/task/${task.number}`}>{task.title}</Link>
-              </td>
-              <td style={{ textAlign: 'center' }}>
-                {task.owner && <Avatar user={task.owner} size={30} />}
-              </td>
-              <td>{task.status}</td>
+      {loadedTasks && (
+        <table>
+          <thead>
+            <tr>
+              <th
+                id="number"
+                onClick={handleChangeSort}
+                style={{ minWidth: '2ch' }}
+              >
+                #
+              </th>
+              <th id="title" onClick={handleChangeSort}>
+                Task
+              </th>
+              <th id="owner" onClick={handleChangeSort}>
+                Owner
+              </th>
+              <th id="status" onClick={handleChangeSort}>
+                Status
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {loadedTasks.sort(sortTasks).map((task) => (
+              <tr key={task.number}>
+                <td>
+                  <Link href={`/task/${task.number}`}>{task.number}</Link>
+                </td>
+                <td>
+                  <Link href={`/task/${task.number}`}>{task.title}</Link>
+                </td>
+                <td style={{ textAlign: 'center' }}>
+                  {task.owner && <Avatar user={task.owner} size={30} />}
+                </td>
+                <td>{task.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       <div ref={bottom} />
     </main>
   )

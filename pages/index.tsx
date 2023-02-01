@@ -58,7 +58,11 @@ export default function App() {
   }
 
   // Results are paginated, additional pages loaded automatically in infinite scroll
-  const { results: tasks, loadMore } = usePaginatedQuery(
+  const {
+    results: tasks,
+    status: loadStatus,
+    loadMore,
+  } = usePaginatedQuery(
     'listTasks',
     { initialNumItems: PAGE_SIZE },
     statusFilter
@@ -85,18 +89,11 @@ export default function App() {
   }, [bottom, loadOnScroll])
 
   useEffect(() => {
-    // TODO this feels wrong, is there a better solution?
-    // The reactive tasks array returned by useQuery is undefined while results are loading/updating
-    // Capture results in loadedTasks to avoid the flash of empty tasks list
-    if (tasks === undefined) return // Data is loading or updating
-    if (tasks === null) {
-      // Empty result
-      setLoadedTasks([])
-    } else {
-      // Nonempty result
-      setLoadedTasks(tasks)
-    }
-  }, [tasks])
+    // The reactive tasks array might become empty while results are loading/updating
+    // Capture final results in loadedTasks to avoid the flash of an empty tasks list
+    if (loadStatus === 'LoadingMore') return // Data is loading/updating, wait
+    setLoadedTasks(tasks)
+  }, [tasks, loadStatus])
 
   const [sortKey, setSortKey] = useState('number' as SortKey)
   const [sortReverse, setSortReverse] = useState(1) // 1 or -1, affects sort order (see sortTasks)

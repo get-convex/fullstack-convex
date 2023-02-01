@@ -1,6 +1,6 @@
 import { query } from './_generated/server'
-import { Document } from './_generated/dataModel'
-import {
+import type { Document } from './_generated/dataModel'
+import type {
   DatabaseReader,
   Auth,
   AnyDataModel,

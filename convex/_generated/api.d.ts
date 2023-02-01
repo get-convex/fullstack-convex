@@ -10,6 +10,7 @@
  */
 
 import type { ApiFromModules } from "convex/api";
+import type * as countTasks from "../countTasks";
 import type * as createTask from "../createTask";
 import type * as getCurrentUser from "../getCurrentUser";
 import type * as getTask from "../getTask";
@@ -30,6 +31,7 @@ import type * as updateTask from "../updateTask";
  * `ConvexReactClient` to create app-specific types.
  */
 export type API = ApiFromModules<{
+  countTasks: typeof countTasks;
   createTask: typeof createTask;
   getCurrentUser: typeof getCurrentUser;
   getTask: typeof getTask;

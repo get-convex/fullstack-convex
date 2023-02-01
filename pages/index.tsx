@@ -68,6 +68,7 @@ export default function App() {
     statusFilter
   )
   const [loadedTasks, setLoadedTasks] = useState([] as Document[])
+  const [isFirstLoad, setIsFirstLoad] = useState(true)
 
   // We use an IntersectionObserver to notice user has reached bottom of list
   const bottom = useRef(null)
@@ -93,7 +94,21 @@ export default function App() {
     // Capture final results in loadedTasks to avoid the flash of an empty tasks list
     if (loadStatus === 'LoadingMore') return // Data is loading/updating, wait
     setLoadedTasks(tasks)
+    setIsFirstLoad(false)
   }, [tasks, loadStatus])
+
+  // Display the total number of tasks in the db that match the filters,
+  // even if all haven't been loaded on the page yet
+  const matchCount = useQuery('countTasks', statusFilter)
+  const showing = loadedTasks.length
+
+  // Avoid changing the count of matching documents while the query is loading
+  // To avoid quick flashes of empty string while data is loading/updating
+  const [matching, setMatching] = useState(0)
+  useEffect(() => {
+    if (matchCount === undefined) return // Query is still loading, wait
+    setMatching(matchCount || 0)
+  }, [matchCount])
 
   const [sortKey, setSortKey] = useState('number' as SortKey)
   const [sortReverse, setSortReverse] = useState(1) // 1 or -1, affects sort order (see sortTasks)
@@ -170,12 +185,13 @@ export default function App() {
           ))}
         </div>
         <div>
-          {loadedTasks && (
-            <span id="showing">
-              Showing {loadedTasks.length} task
-              {loadedTasks.length === 1 ? '' : 's'}
-            </span>
-          )}
+          <span id="showing">
+            {isFirstLoad
+              ? 'Loading tasks...'
+              : `Showing ${showing} of ${matching} task${
+                  matching === 1 ? '' : 's'
+                }`}
+          </span>
           {user && (
             <Link href="/task/new">
               <button className="pill-button" id="new">
@@ -186,46 +202,44 @@ export default function App() {
         </div>
       </div>
 
-      {loadedTasks && (
-        <table>
-          <thead>
-            <tr>
-              <th
-                id="number"
-                onClick={handleChangeSort}
-                style={{ minWidth: '2ch' }}
-              >
-                #
-              </th>
-              <th id="title" onClick={handleChangeSort}>
-                Task
-              </th>
-              <th id="owner" onClick={handleChangeSort}>
-                Owner
-              </th>
-              <th id="status" onClick={handleChangeSort}>
-                Status
-              </th>
+      <table>
+        <thead>
+          <tr>
+            <th
+              id="number"
+              onClick={handleChangeSort}
+              style={{ minWidth: '2ch' }}
+            >
+              #
+            </th>
+            <th id="title" onClick={handleChangeSort}>
+              Task
+            </th>
+            <th id="owner" onClick={handleChangeSort}>
+              Owner
+            </th>
+            <th id="status" onClick={handleChangeSort}>
+              Status
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {loadedTasks.sort(sortTasks).map((task) => (
+            <tr key={task.number}>
+              <td>
+                <Link href={`/task/${task.number}`}>{task.number}</Link>
+              </td>
+              <td>
+                <Link href={`/task/${task.number}`}>{task.title}</Link>
+              </td>
+              <td style={{ textAlign: 'center' }}>
+                {task.owner && <Avatar user={task.owner} size={30} />}
+              </td>
+              <td>{task.status}</td>
             </tr>
-          </thead>
-          <tbody>
-            {loadedTasks.sort(sortTasks).map((task) => (
-              <tr key={task.number}>
-                <td>
-                  <Link href={`/task/${task.number}`}>{task.number}</Link>
-                </td>
-                <td>
-                  <Link href={`/task/${task.number}`}>{task.title}</Link>
-                </td>
-                <td style={{ textAlign: 'center' }}>
-                  {task.owner && <Avatar user={task.owner} size={30} />}
-                </td>
-                <td>{task.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          ))}
+        </tbody>
+      </table>
       <div ref={bottom} />
     </main>
   )

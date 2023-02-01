@@ -186,6 +186,7 @@ table {
   width: 95%;
   text-align: left;
   margin: 0px auto;
+  border-spacing: 0;
 }
 
 tbody {
@@ -207,6 +208,15 @@ th:nth-child(4) {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+tr:hover {
+  background-color:  #E2E8F0;
+}
+
+#column-headers:hover {
+  background-color: #ffffff;
+  cursor: pointer;
 }
 
 tr:hover a {

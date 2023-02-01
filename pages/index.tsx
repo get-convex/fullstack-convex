@@ -221,6 +221,7 @@ export default function App() {
             <th id="status" onClick={handleChangeSort}>
               Status
             </th>
+            <th id="comments">Comments</th>
           </tr>
         </thead>
         <tbody>
@@ -236,6 +237,7 @@ export default function App() {
                 {task.owner && <Avatar user={task.owner} size={30} />}
               </td>
               <td>{task.status}</td>
+              <td>{task.commentCount}</td>
             </tr>
           ))}
         </tbody>

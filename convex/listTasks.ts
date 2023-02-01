@@ -1,7 +1,8 @@
-import { query } from './_generated/server'
+import { query, type DatabaseReader } from './_generated/server'
 import { findUser } from './getCurrentUser'
 import type { Document } from './_generated/dataModel'
-import type { DatabaseReader } from './_generated/server'
+import { findCommentsByTask } from './listComments'
+import { countResults } from './countTasks'
 
 // Expose this as its own function for reusability in other queries
 export function findMatchingTasks(
@@ -43,7 +44,10 @@ export default query(
         // Join each task with owner details from users table
         page.map(async (task) => {
           const owner = task.ownerId && (await db.get(task.ownerId))
-          return { ...task, owner }
+          const commentCount = await countResults(
+            findCommentsByTask(db, task._id)
+          )
+          return { ...task, owner, commentCount }
         })
       ),
       isDone,

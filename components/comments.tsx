@@ -30,7 +30,7 @@ export function Comments({
   user,
   taskId,
 }: {
-  user: Document<'users'> | null | undefined
+  user?: Document<'users'> | null
   taskId: Id<'tasks'>
 }) {
   const comments = useQuery('listComments', taskId)

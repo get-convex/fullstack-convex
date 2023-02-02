@@ -46,11 +46,7 @@ export function Avatar({
   )
 }
 
-export function HeaderWithLogin({
-  user,
-}: {
-  user: Document<'users'> | null | undefined
-}) {
+export function HeaderWithLogin({ user }: { user?: Document<'users'> | null }) {
   return (
     <header>
       <Link href="/">

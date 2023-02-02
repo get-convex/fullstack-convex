@@ -4,17 +4,17 @@ import { FormEvent, useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
 import { Document } from '../convex/_generated/dataModel'
 import { Avatar } from './login'
-import type { API } from '../convex/_generated/api'
-import type { MutationNames } from 'convex/api'
+import type { Task } from '../convex/getTask'
+import { Status, Visibility } from '../convex/schema'
 
 export function TaskDetailForm({
   user,
   mutationName,
   initialTaskInfo,
 }: {
-  user: Document
-  mutationName: MutationNames<API>
-  initialTaskInfo: Partial<Document>
+  user: Document<'users'>
+  mutationName: 'createTask' | 'updateTask'
+  initialTaskInfo: Partial<Task>
 }) {
   const router = useRouter()
   const saveTask = useMutation(mutationName)
@@ -28,7 +28,7 @@ export function TaskDetailForm({
   const [taskInfo, setTaskInfo] = useState(initialTaskInfo)
 
   const isOwner = user._id.equals(taskInfo.ownerId)
-  const isPublic = taskInfo.visibility === 'public'
+  const isPublic = taskInfo.visibility === Visibility.PUBLIC
 
   const invalidInput = !taskInfo.title
 
@@ -75,9 +75,14 @@ export function TaskDetailForm({
         <h4>Status</h4>
         <select
           value={taskInfo.status}
-          onChange={(e) => setTaskInfo({ ...taskInfo, status: e.target.value })}
+          onChange={(e) =>
+            setTaskInfo({
+              ...taskInfo,
+              status: e.target.value as Status,
+            })
+          }
         >
-          {['New', 'In Progress', 'Done', 'Cancelled'].map((status) => (
+          {Object.values(Status).map((status) => (
             <option key={status} value={status}>
               {status}
             </option>
@@ -143,11 +148,11 @@ export function TaskDetailForm({
           onChange={(e) => {
             setTaskInfo({
               ...taskInfo,
-              visibility: e.target.value,
+              visibility: e.target.value as Visibility,
             })
           }}
         >
-          {['private', 'public'].map((v) => (
+          {Object.values(Visibility).map((v) => (
             <option key={v} value={v}>
               {v}
             </option>

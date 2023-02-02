@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, FormEvent } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   useMutation,
   useQuery,
@@ -7,14 +7,17 @@ import {
 import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import { HeaderWithLogin, Avatar } from '../components/login'
-import type { Document } from '../convex/_generated/dataModel'
 import type { MouseEventHandler, ChangeEventHandler } from 'react'
+import { TaskListing } from '../convex/listTasks'
+import { Status } from '../convex/schema'
 
-const STATUS = ['New', 'In Progress', 'Done', 'Cancelled'] as const
-type Status = typeof STATUS[number]
-
-const SORT_KEY = ['number', 'title', 'owner', 'status', 'comments'] as const
-type SortKey = typeof SORT_KEY[number]
+enum Sort {
+  NUMBER = 'number',
+  TITLE = 'title',
+  OWNER = 'owner',
+  STATUS = 'status',
+  COMMENTS = 'comments',
+}
 
 const PAGE_SIZE = 10
 
@@ -41,7 +44,10 @@ export default function App() {
     return () => {}
   }, [saveUser, auth0User])
 
-  const [statusFilter, setStatusFilter] = useState(['New', 'In Progress'])
+  const [statusFilter, setStatusFilter] = useState([
+    Status.NEW,
+    Status.IN_PROGRESS,
+  ])
 
   const handleChangeFilters: ChangeEventHandler = (event) => {
     // Process a checkbox change event affecting the status filter
@@ -49,7 +55,9 @@ export default function App() {
     const { value, checked } = target
     const newFilter = checked
       ? // A formerly unchecked status filter is now checked; add value to filter
-        STATUS.filter((s) => statusFilter.includes(s) || s === value)
+        Object.values(Status).filter(
+          (s) => statusFilter.includes(s) || s === value
+        )
       : // A formerly checked status filter is now unchecked; remove value from filter
         statusFilter.filter((s) => s !== value)
     setStatusFilter(newFilter)
@@ -65,7 +73,7 @@ export default function App() {
     { initialNumItems: PAGE_SIZE },
     statusFilter
   )
-  const [loadedTasks, setLoadedTasks] = useState([] as Document[])
+  const [loadedTasks, setLoadedTasks] = useState([] as TaskListing[])
   const [isFirstLoad, setIsFirstLoad] = useState(true)
 
   // We use an IntersectionObserver to notice user has reached bottom of list
@@ -108,7 +116,7 @@ export default function App() {
     setMatching(matchCount || 0)
   }, [matchCount])
 
-  const [sortKey, setSortKey] = useState('number' as SortKey)
+  const [sortKey, setSortKey] = useState(Sort.NUMBER)
   const [sortReverse, setSortReverse] = useState(1) // 1 or -1, affects sort order (see sortTasks)
 
   const handleChangeSort: MouseEventHandler = (event) => {
@@ -119,28 +127,27 @@ export default function App() {
       // We are already sorting by this key, so a click indicates an order reversal
       setSortReverse(-1 * sortReverse)
     } else {
-      setSortKey(key as SortKey)
+      setSortKey(key as Sort)
       setSortReverse(1)
     }
   }
 
-  function sortTasks(a: Document, b: Document) {
+  function sortTasks(a: TaskListing, b: TaskListing) {
     // Use the sortKey to compare items by returning a positive/negative/zero number
     // Multiply by the sortReverse factor to change ascending/descending order
 
-    // General cases
     if (a[sortKey] === b[sortKey]) return 0 // Equal
-    if (a[sortKey] === undefined) return -1 // First item missing key
-    if (b[sortKey] === undefined) return 1 // Second item missing key
 
     switch (sortKey) {
       case 'status':
-        // Predefined order
-        const order = ['New', 'In Progress', 'Done', 'Cancelled']
+        // Predefined status order, not alphabetical
+        const order = Object.values(Status)
         return (order.indexOf(a.status) - order.indexOf(b.status)) * sortReverse
       case 'owner':
         // Alphabetical by owner name
-        return a.owner.name.toLowerCase() < b.owner.name.toLowerCase()
+        if (!a.owner?.name) return -1 * sortReverse
+        if (!b.owner?.name) return sortReverse
+        return a.owner?.name.toLowerCase() < b.owner.name.toLowerCase()
           ? sortReverse * -1
           : sortReverse
       case 'title':
@@ -171,7 +178,7 @@ export default function App() {
           />
         </div>
         <div id="filters">
-          {['New', 'In Progress', 'Done', 'Cancelled'].map((status) => (
+          {Object.values(Status).map((status) => (
             <label key={`filter-${status.toLowerCase().replace(' ', '-')}`}>
               <input
                 key={status}

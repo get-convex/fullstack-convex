@@ -1,6 +1,7 @@
 import { useQuery } from '../../convex/_generated/react'
 import { HeaderWithLogin } from '../../components/login'
 import { TaskDetailForm } from '../../components/taskDetailForm'
+import { Status, Visibility } from '../../convex/schema'
 
 export default function CreateTaskPage() {
   const user = useQuery('getCurrentUser')
@@ -10,8 +11,8 @@ export default function CreateTaskPage() {
     throw new Error('User must be logged in to create a task')
 
   const newTaskInfo = {
-    status: 'New',
-    visibility: 'public',
+    status: Status.NEW,
+    visibility: Visibility.PUBLIC,
     ownerId: null,
   } as Partial<Document>
 

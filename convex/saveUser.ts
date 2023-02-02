@@ -17,9 +17,11 @@ export default mutation(async ({ db, auth }): Promise<Id<'users'>> => {
   }
 
   const { tokenIdentifier, name, email, pictureUrl } = identity
+  if (!(tokenIdentifier && name && email && pictureUrl))
+    throw new Error('Could not save user: Incomplete identity info')
 
   // Check if we've already stored this identity before.
-  const user: Document | null = await db
+  const user = await db
     .query('users')
     .filter((q) => q.eq(q.field('tokenIdentifier'), tokenIdentifier))
     .first()

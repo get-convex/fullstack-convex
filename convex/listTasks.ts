@@ -3,11 +3,17 @@ import { findUser } from './getCurrentUser'
 import type { Document } from './_generated/dataModel'
 import { findCommentsByTask } from './listComments'
 import { countResults } from './countTasks'
+import { Visibility } from './schema'
+import { Task } from './getTask'
+
+export interface TaskListing extends Task {
+  comments: number
+}
 
 // Expose this as its own function for reusability in other queries
 export function findMatchingTasks(
   db: DatabaseReader,
-  user: Document,
+  user: Document<'users'> | null,
   statusFilter: string[]
 ) {
   return db.query('tasks').filter((q) =>
@@ -15,11 +21,11 @@ export function findMatchingTasks(
       user
         ? // Logged in users see their private tasks as well as public
           q.or(
-            q.eq(q.field('visibility'), 'public'),
+            q.eq(q.field('visibility'), Visibility.PUBLIC),
             q.eq(q.field('ownerId'), user._id)
           )
         : // Logged out users only see public tasks
-          q.eq(q.field('visibility'), 'public'),
+          q.eq(q.field('visibility'), Visibility.PUBLIC),
       q.or(
         // Match any of the given status values
         ...statusFilter.map((status: string) => q.eq(q.field('status'), status))

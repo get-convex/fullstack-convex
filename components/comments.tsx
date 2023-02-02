@@ -3,8 +3,9 @@ import { useQuery, useMutation } from '../convex/_generated/react'
 import type { FormEvent } from 'react'
 import { Avatar } from './login'
 import type { Document, Id } from '../convex/_generated/dataModel'
+import type { Comment } from '../convex/listComments'
 
-function CommentList({ comments }: { comments: Document[] }) {
+function CommentList({ comments }: { comments: Comment[] }) {
   return (
     <ul>
       {comments.map(({ _id, body, author, _creationTime }) => {
@@ -25,7 +26,13 @@ function CommentList({ comments }: { comments: Document[] }) {
   )
 }
 
-export function Comments({ user, taskId }: { user: Document; taskId: Id }) {
+export function Comments({
+  user,
+  taskId,
+}: {
+  user: Document<'users'> | null | undefined
+  taskId: Id<'tasks'>
+}) {
   const comments = useQuery('listComments', taskId)
   const saveComment = useMutation('saveComment')
   const [newComment, setNewComment] = useState('')

@@ -3,7 +3,10 @@ import type { Document } from './_generated/dataModel'
 import type { DatabaseReader } from './_generated/server'
 import type { Auth } from 'convex/server'
 
-export async function findUser(db: DatabaseReader, auth: Auth) {
+export async function findUser(
+  db: DatabaseReader,
+  auth: Auth
+): Promise<Document<'users'> | null> {
   // Expose this as its own function for reusability in other queries/mutations
   const identity = await auth.getUserIdentity()
   if (!identity) return null
@@ -13,6 +16,6 @@ export async function findUser(db: DatabaseReader, auth: Auth) {
     .unique()
 }
 
-export default query(async ({ db, auth }): Promise<Document> => {
+export default query(async ({ db, auth }) => {
   return await findUser(db, auth)
 })

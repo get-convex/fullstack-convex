@@ -28,7 +28,13 @@ function LoginButton() {
   )
 }
 
-export function Avatar({ user, size = 30 }: { user: Document; size?: number }) {
+export function Avatar({
+  user,
+  size = 30,
+}: {
+  user: Document<'users'>
+  size?: number
+}) {
   return (
     <Image
       src={user.pictureUrl}
@@ -40,7 +46,11 @@ export function Avatar({ user, size = 30 }: { user: Document; size?: number }) {
   )
 }
 
-export function HeaderWithLogin({ user }: { user?: Document }) {
+export function HeaderWithLogin({
+  user,
+}: {
+  user: Document<'users'> | null | undefined
+}) {
   return (
     <header>
       <Link href="/">

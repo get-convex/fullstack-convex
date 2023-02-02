@@ -1,10 +1,11 @@
 import { useQuery } from '../../../convex/_generated/react'
 import { HeaderWithLogin } from '../../../components/login'
 import { TaskDetailForm } from '../../../components/taskDetailForm'
+import { Task } from '../../../convex/getTask'
 
 export default function EditTaskPage({ taskNumber }: { taskNumber: number }) {
   const user = useQuery('getCurrentUser')
-  const task = useQuery('getTask', taskNumber)
+  const task = useQuery('getTask', taskNumber) as Task
 
   if (task === null)
     return (
@@ -15,12 +16,10 @@ export default function EditTaskPage({ taskNumber }: { taskNumber: number }) {
   if (task) {
     const isOwner = user && task && user._id.equals(task.ownerId)
 
-    if (task.error || !isOwner)
+    if (!isOwner)
       return (
         <main>
-          <h1>
-            {task.error || 'You do not have permission to edit this task'}
-          </h1>
+          <h1>{'You do not have permission to edit this task'}</h1>
         </main>
       )
 

@@ -28,18 +28,24 @@ export default defineSchema(
         s.literal(Visibility.PUBLIC),
         s.literal(Visibility.PRIVATE)
       ),
-    }),
+    })
+      .index('by_number', ['number'])
+      .index('by_owner', ['ownerId'])
+      .index('by_status', ['status'])
+      .index('by_title', ['title']),
+
     users: defineTable({
       email: s.string(),
       name: s.string(),
       pictureUrl: s.string(),
       tokenIdentifier: s.string(),
-    }),
+    }).index('by_tokenIdentifier', ['tokenIdentifier']),
+
     comments: defineTable({
       body: s.string(),
       taskId: s.id('tasks'),
       userId: s.id('users'),
-    }),
+    }).index('by_task', ['taskId']),
   },
   { strict: false }
 )

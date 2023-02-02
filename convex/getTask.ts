@@ -10,7 +10,7 @@ export default query(async ({ db, auth }, taskNumber: number) => {
   const identity = await auth.getUserIdentity()
   const task = await db
     .query('tasks')
-    .filter((q) => q.eq(q.field('number'), taskNumber))
+    .withIndex('by_number', (q) => q.eq('number', taskNumber))
     .unique()
   if (!task) return null
 

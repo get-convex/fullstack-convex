@@ -12,7 +12,9 @@ export async function findUser(
   if (!identity) return null
   return await db
     .query('users')
-    .filter((q) => q.eq(q.field('tokenIdentifier'), identity?.tokenIdentifier))
+    .withIndex('by_tokenIdentifier', (q) =>
+      q.eq('tokenIdentifier', identity?.tokenIdentifier)
+    )
     .unique()
 }
 

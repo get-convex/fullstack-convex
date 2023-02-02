@@ -7,7 +7,9 @@ export interface Comment extends Document<'comments'> {
 
 // Expose this as its own function for reusability in other queries
 export function findCommentsByTask(db: DatabaseReader, taskId: Id<'tasks'>) {
-  return db.query('comments').filter((q) => q.eq(q.field('taskId'), taskId))
+  return db
+    .query('comments')
+    .withIndex('by_task', (q) => q.eq('taskId', taskId))
 }
 
 export default query(async ({ db }, taskId: Id<'tasks'>) => {

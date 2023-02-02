@@ -40,8 +40,10 @@ export function Comments({
   async function handleAddComment(event: FormEvent) {
     event.preventDefault()
     setNewComment('')
-    await saveComment(taskId, newComment)
+    await saveComment(taskId, newComment.trim())
   }
+
+  const invalid = !newComment.trim()
 
   return (
     <div>
@@ -58,8 +60,8 @@ export function Comments({
             type="submit"
             className="pill-button"
             value="Add comment"
-            title="Add comment"
-            disabled={!newComment}
+            title={invalid ? 'Comment cannot be empty' : 'Add comment'}
+            disabled={invalid}
           />
         </form>
       )}

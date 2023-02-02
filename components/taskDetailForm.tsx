@@ -30,10 +30,13 @@ export function TaskDetailForm({
   const isOwner = user._id.equals(taskInfo.ownerId)
   const isPublic = taskInfo.visibility === Visibility.PUBLIC
 
-  const invalidInput = !taskInfo.title
+  const invalidInput = !taskInfo.title?.trim()
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
+    if (taskInfo.title) {
+      taskInfo.title = taskInfo.title.trim()
+    }
     delete taskInfo.owner // Un-join with owner object
     const task = await saveTask(taskInfo)
     router.push(`/task/${task.number}`)

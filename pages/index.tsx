@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, FormEvent } from 'react'
 import {
   useMutation,
   useQuery,
@@ -7,8 +7,8 @@ import {
 import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import { HeaderWithLogin, Avatar } from '../components/login'
-import type { ChangeEvent } from 'react'
 import type { Document } from '../convex/_generated/dataModel'
+import type { MouseEventHandler, ChangeEventHandler } from 'react'
 
 const STATUS = ['New', 'In Progress', 'Done', 'Cancelled'] as const
 type Status = typeof STATUS[number]
@@ -43,12 +43,10 @@ export default function App() {
 
   const [statusFilter, setStatusFilter] = useState(['New', 'In Progress'])
 
-  function handleChangeFilters(event: ChangeEvent<HTMLInputElement>) {
+  const handleChangeFilters: ChangeEventHandler = (event) => {
     // Process a checkbox change event affecting the status filter
-    const { value, checked } = event.target as {
-      value: Status
-      checked: boolean
-    }
+    const target = event.target as HTMLInputElement
+    const { value, checked } = target
     const newFilter = checked
       ? // A formerly unchecked status filter is now checked; add value to filter
         STATUS.filter((s) => statusFilter.includes(s) || s === value)
@@ -113,7 +111,7 @@ export default function App() {
   const [sortKey, setSortKey] = useState('number' as SortKey)
   const [sortReverse, setSortReverse] = useState(1) // 1 or -1, affects sort order (see sortTasks)
 
-  function handleChangeSort(event) {
+  const handleChangeSort: MouseEventHandler = (event) => {
     event.stopPropagation()
     const target = event.target as HTMLElement
     const key = target.id

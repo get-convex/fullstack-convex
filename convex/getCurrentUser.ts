@@ -1,12 +1,9 @@
 import { query } from './_generated/server'
 import type { Document } from './_generated/dataModel'
-import type {
-  DatabaseReader,
-  Auth,
-  AnyDataModel,
-} from 'convex/dist/types/server/server'
+import type { DatabaseReader } from './_generated/server'
+import type { Auth } from 'convex/server'
 
-export async function findUser(db: DatabaseReader<AnyDataModel>, auth: Auth) {
+export async function findUser(db: DatabaseReader, auth: Auth) {
   // Expose this as its own function for reusability in other queries/mutations
   const identity = await auth.getUserIdentity()
   if (!identity) return null

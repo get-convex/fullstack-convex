@@ -4,8 +4,8 @@ import { FormEvent, useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
 import { Document } from '../convex/_generated/dataModel'
 import { Avatar } from './login'
-import type { MutationNames } from 'convex/dist/types/api/api'
 import type { API } from '../convex/_generated/api'
+import type { MutationNames } from 'convex/api'
 
 export function TaskDetailForm({
   user,

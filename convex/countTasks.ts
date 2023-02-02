@@ -1,10 +1,7 @@
 import { query } from './_generated/server'
 import { findUser } from './getCurrentUser'
 import { findMatchingTasks } from './listTasks'
-import type {
-  GenericTableInfo,
-  OrderedQuery,
-} from 'convex/dist/types/server/server'
+import type { GenericTableInfo, OrderedQuery } from 'convex/server'
 
 export async function countResults(query: OrderedQuery<GenericTableInfo>) {
   // If we don't actually care about the task documents, rather

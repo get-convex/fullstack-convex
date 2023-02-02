@@ -4,9 +4,10 @@ import type { AppProps } from 'next/app'
 import { ConvexProvider, ConvexReactClient } from 'convex/react'
 import { ConvexProviderWithAuth0 } from 'convex/react-auth0'
 import convexConfig from '../convex.json'
-import clientConfig from '../convex/_generated/clientConfig'
 
-const convex = new ConvexReactClient(clientConfig)
+const address = process.env.NEXT_PUBLIC_CONVEX_URL
+if (!address) throw new Error('Convex URL not found')
+const convex = new ConvexReactClient(address)
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

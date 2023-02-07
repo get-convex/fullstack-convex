@@ -10,7 +10,7 @@ import { HeaderWithLogin, Avatar } from '../components/login'
 import type { MouseEventHandler, ChangeEventHandler } from 'react'
 import { TaskListing } from '../convex/listTasks'
 import { Status } from '../convex/schema'
-import { useStableData } from '../hooks/useStableData'
+import { useStableData, useStablePaginatedData } from '../hooks/useStableData'
 
 enum Sort {
   NUMBER = 'number',
@@ -65,17 +65,10 @@ export default function App() {
   }
 
   // Results are paginated, additional pages loaded automatically in infinite scroll
-  const {
-    results: tasks,
-    status: loadStatus,
-    loadMore,
-  } = usePaginatedQuery(
-    'listTasks',
-    { initialNumItems: PAGE_SIZE },
-    statusFilter
+  const [loadedTasks, loadStatus, loadMore] = useStablePaginatedData(
+    usePaginatedQuery('listTasks', { initialNumItems: PAGE_SIZE }, statusFilter)
   )
-  const [loadedTasks, setLoadedTasks] = useState([] as TaskListing[])
-  const [isFirstLoad, setIsFirstLoad] = useState(true)
+  const isLoading = loadStatus === 'LoadingMore'
 
   // We use an IntersectionObserver to notice user has reached bottom of list
   const bottom = useRef(null)
@@ -96,29 +89,12 @@ export default function App() {
     }
   }, [bottom, loadOnScroll])
 
-  useEffect(() => {
-    // The reactive tasks array might become empty while results are loading/updating
-    // Capture final results in loadedTasks to avoid the flash of an empty tasks list
-    if (loadStatus === 'LoadingMore') return // Data is loading/updating, wait
-    setLoadedTasks(tasks)
-    setIsFirstLoad(false)
-  }, [tasks, loadStatus])
-
   const matching = useStableData(
     // Get the total number of tasks in the db that match the filters,
     // even if all haven't been loaded on the page yet
     useQuery('countTasks', statusFilter)
   )
-  //
-  const showing = loadedTasks.length
-
-  // // Avoid changing the count of matching documents while the query is loading
-  // // To avoid quick flashes of empty string while data is loading/updating
-  // const [matching, setMatching] = useState(0)
-  // useEffect(() => {
-  //   if (matchCount === undefined) return // Query is still loading, wait
-  //   setMatching(matchCount || 0)
-  // }, [matchCount])
+  const showing = loadedTasks?.length
 
   const [sortKey, setSortKey] = useState(Sort.NUMBER)
   const [sortReverse, setSortReverse] = useState(1) // 1 or -1, affects sort order (see sortTasks)
@@ -198,11 +174,13 @@ export default function App() {
         </div>
         <div>
           <span id="showing">
-            {matching === undefined
-              ? 'Loading tasks...'
-              : `Showing ${showing} of ${matching} task${
-                  matching === 1 ? '' : 's'
-                }`}
+            {isLoading
+              ? 'Loading... ' // TODO should be a loading spinner or such
+              : ''}
+            {matching !== undefined &&
+              `Showing ${showing} of ${matching} task${
+                matching === 1 ? '' : 's'
+              }`}
           </span>
           {user && (
             <Link href="/task/new">
@@ -239,21 +217,22 @@ export default function App() {
           </tr>
         </thead>
         <tbody>
-          {loadedTasks.sort(sortTasks).map((task) => (
-            <tr key={task.number}>
-              <td>
-                <Link href={`/task/${task.number}`}>{task.number}</Link>
-              </td>
-              <td>
-                <Link href={`/task/${task.number}`}>{task.title}</Link>
-              </td>
-              <td style={{ textAlign: 'center' }}>
-                {task.owner && <Avatar user={task.owner} size={30} />}
-              </td>
-              <td>{task.status}</td>
-              <td>{task.comments}</td>
-            </tr>
-          ))}
+          {loadedTasks &&
+            loadedTasks.sort(sortTasks).map((task) => (
+              <tr key={task.number}>
+                <td>
+                  <Link href={`/task/${task.number}`}>{task.number}</Link>
+                </td>
+                <td>
+                  <Link href={`/task/${task.number}`}>{task.title}</Link>
+                </td>
+                <td style={{ textAlign: 'center' }}>
+                  {task.owner && <Avatar user={task.owner} size={30} />}
+                </td>
+                <td>{task.status}</td>
+                <td>{task.comments}</td>
+              </tr>
+            ))}
         </tbody>
       </table>
       <div ref={bottom} />

@@ -1,5 +1,5 @@
-import { UsePaginatedQueryResult } from 'convex/react'
 import { useRef } from 'react'
+import type { UsePaginatedQueryResult } from 'convex/react'
 
 export function useStableData<T>(result: T) {
   const stored = useRef<T>() // ref objects are stable between rerenders

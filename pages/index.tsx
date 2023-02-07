@@ -10,6 +10,7 @@ import { HeaderWithLogin, Avatar } from '../components/login'
 import type { MouseEventHandler, ChangeEventHandler } from 'react'
 import { TaskListing } from '../convex/listTasks'
 import { Status } from '../convex/schema'
+import { useStableData } from '../hooks/useStableData'
 
 enum Sort {
   NUMBER = 'number',
@@ -103,18 +104,21 @@ export default function App() {
     setIsFirstLoad(false)
   }, [tasks, loadStatus])
 
-  // Display the total number of tasks in the db that match the filters,
-  // even if all haven't been loaded on the page yet
-  const matchCount = useQuery('countTasks', statusFilter)
+  const matching = useStableData(
+    // Get the total number of tasks in the db that match the filters,
+    // even if all haven't been loaded on the page yet
+    useQuery('countTasks', statusFilter)
+  )
+  //
   const showing = loadedTasks.length
 
-  // Avoid changing the count of matching documents while the query is loading
-  // To avoid quick flashes of empty string while data is loading/updating
-  const [matching, setMatching] = useState(0)
-  useEffect(() => {
-    if (matchCount === undefined) return // Query is still loading, wait
-    setMatching(matchCount || 0)
-  }, [matchCount])
+  // // Avoid changing the count of matching documents while the query is loading
+  // // To avoid quick flashes of empty string while data is loading/updating
+  // const [matching, setMatching] = useState(0)
+  // useEffect(() => {
+  //   if (matchCount === undefined) return // Query is still loading, wait
+  //   setMatching(matchCount || 0)
+  // }, [matchCount])
 
   const [sortKey, setSortKey] = useState(Sort.NUMBER)
   const [sortReverse, setSortReverse] = useState(1) // 1 or -1, affects sort order (see sortTasks)
@@ -194,7 +198,7 @@ export default function App() {
         </div>
         <div>
           <span id="showing">
-            {isFirstLoad
+            {matching === undefined
               ? 'Loading tasks...'
               : `Showing ${showing} of ${matching} task${
                   matching === 1 ? '' : 's'

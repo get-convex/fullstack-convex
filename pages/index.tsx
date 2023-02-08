@@ -8,7 +8,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import { HeaderWithLogin, Avatar } from '../components/login'
 import type { MouseEventHandler, ChangeEventHandler } from 'react'
-import { Status, Sort } from '../convex/schema'
+import { Status, SortKey, SortOrder } from '../convex/schema'
 import { useStableData, useStablePaginatedData } from '../hooks/useStableData'
 
 const PAGE_SIZE = 10
@@ -39,10 +39,8 @@ export default function App() {
     Status.NEW,
     Status.IN_PROGRESS,
   ])
-
-  const [sortKey, setSortKey] = useState(Sort.STATUS)
-  const [sortReverse, setSortReverse] = useState<1 | -1>(1) // 1 or -1, affects sort order
-  const sortOrder = sortReverse < 0 ? 'desc' : 'asc'
+  const [sortKey, setSortKey] = useState(SortKey.NUMBER)
+  const [sortOrder, setSortOrder] = useState(SortOrder.ASC)
 
   const handleChangeFilters: ChangeEventHandler = (event) => {
     // Process a checkbox change event affecting the status filter
@@ -102,10 +100,10 @@ export default function App() {
     const key = target.id
     if (sortKey === key) {
       // We are already sorting by this key, so a click indicates an order reversal
-      setSortReverse((-1 * sortReverse) as 1 | -1)
+      setSortOrder(sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC)
     } else {
-      setSortKey(key as Sort)
-      setSortReverse(1)
+      setSortKey(key as SortKey)
+      setSortOrder(SortOrder.ASC)
     }
   }
 

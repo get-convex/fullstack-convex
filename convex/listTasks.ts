@@ -5,7 +5,7 @@ import { findCommentsByTask } from './listComments'
 import { countResults } from './countTasks'
 import { Visibility } from './schema'
 import { Task } from './getTask'
-import { Status, Sort } from './schema'
+import { Status, SortKey, SortOrder } from './schema'
 
 export interface TaskListing extends Task {
   comments: number
@@ -13,8 +13,8 @@ export interface TaskListing extends Task {
 
 export interface ListTasksOptions {
   statusFilter?: Status[]
-  sortKey?: Sort
-  sortOrder?: 'asc' | 'desc'
+  sortKey?: SortKey
+  sortOrder?: SortOrder
 }
 
 // Expose this as its own function for reusability in other queries
@@ -23,8 +23,8 @@ export function findMatchingTasks(
   user: Document<'users'> | null,
   {
     statusFilter = [Status.NEW, Status.IN_PROGRESS],
-    sortKey = Sort.NUMBER,
-    sortOrder = 'asc',
+    sortKey = SortKey.NUMBER,
+    sortOrder = SortOrder.ASC,
   }: ListTasksOptions
 ) {
   return db

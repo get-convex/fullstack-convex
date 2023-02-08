@@ -8,17 +8,8 @@ import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import { HeaderWithLogin, Avatar } from '../components/login'
 import type { MouseEventHandler, ChangeEventHandler } from 'react'
-import { TaskListing } from '../convex/listTasks'
-import { Status } from '../convex/schema'
+import { Status, Sort } from '../convex/schema'
 import { useStableData, useStablePaginatedData } from '../hooks/useStableData'
-
-enum Sort {
-  NUMBER = 'number',
-  TITLE = 'title',
-  OWNER = 'owner',
-  STATUS = 'status',
-  COMMENTS = 'comments',
-}
 
 const PAGE_SIZE = 10
 
@@ -49,6 +40,10 @@ export default function App() {
     Status.IN_PROGRESS,
   ])
 
+  const [sortKey, setSortKey] = useState(Sort.STATUS)
+  const [sortReverse, setSortReverse] = useState<1 | -1>(1) // 1 or -1, affects sort order
+  const sortOrder = sortReverse < 0 ? 'desc' : 'asc'
+
   const handleChangeFilters: ChangeEventHandler = (event) => {
     // Process a checkbox change event affecting the status filter
     const target = event.target as HTMLInputElement
@@ -65,7 +60,11 @@ export default function App() {
 
   // Results are paginated, additional pages loaded automatically in infinite scroll
   const [loadedTasks, loadStatus, loadMore] = useStablePaginatedData(
-    usePaginatedQuery('listTasks', { initialNumItems: PAGE_SIZE }, statusFilter)
+    usePaginatedQuery(
+      'listTasks',
+      { initialNumItems: PAGE_SIZE },
+      { statusFilter, sortKey, sortOrder }
+    )
   )
   const isLoading = loadStatus === 'LoadingMore'
 
@@ -97,55 +96,16 @@ export default function App() {
   )
   const showing = loadedTasks?.length
 
-  const [sortKey, setSortKey] = useState(Sort.NUMBER)
-  const [sortReverse, setSortReverse] = useState(1) // 1 or -1, affects sort order (see sortTasks)
-
   const handleChangeSort: MouseEventHandler = (event) => {
     event.stopPropagation()
     const target = event.target as HTMLElement
     const key = target.id
     if (sortKey === key) {
       // We are already sorting by this key, so a click indicates an order reversal
-      setSortReverse(-1 * sortReverse)
+      setSortReverse((-1 * sortReverse) as 1 | -1)
     } else {
       setSortKey(key as Sort)
       setSortReverse(1)
-    }
-  }
-
-  function sortTasks(a: TaskListing, b: TaskListing) {
-    // Use the sortKey to compare items by returning a positive/negative/zero number
-    // Multiply by the sortReverse factor to change ascending/descending order
-
-    if (a[sortKey] === b[sortKey]) return 0 // Equal
-
-    const statusOrder = Object.values(Status) // Predefined order, not alphabetical
-
-    switch (sortKey) {
-      case 'status':
-        return (
-          (statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)) *
-          sortReverse
-        )
-      case 'owner':
-        // Alphabetical by owner name
-        if (!a.owner?.name) return -1 * sortReverse
-        if (!b.owner?.name) return sortReverse
-        return a.owner?.name.toLowerCase() < b.owner.name.toLowerCase()
-          ? sortReverse * -1
-          : sortReverse
-      case 'title':
-        // Alphabetical by title
-        return a.title.toLowerCase() < b.title.toLowerCase()
-          ? sortReverse * -1
-          : sortReverse
-      case 'comments':
-        // Default sort order for comment counts is descending
-        return (b.comments - a.comments) * sortReverse
-      case 'number':
-      default:
-        // Numeric order
-        return (a.number - b.number) * sortReverse
     }
   }
 
@@ -222,7 +182,7 @@ export default function App() {
         </thead>
         <tbody>
           {loadedTasks &&
-            loadedTasks.sort(sortTasks).map((task) => (
+            loadedTasks.map((task) => (
               <tr key={task.number}>
                 <td>
                   <Link href={`/task/${task.number}`}>{task.number}</Link>

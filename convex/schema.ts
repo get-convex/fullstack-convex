@@ -10,6 +10,13 @@ export enum Visibility {
   PUBLIC = 'public',
   PRIVATE = 'private',
 }
+export enum Sort {
+  NUMBER = 'number',
+  TITLE = 'title',
+  OWNER = 'owner',
+  STATUS = 'status',
+  // COMMENTS = 'comments',
+}
 
 export default defineSchema(
   {

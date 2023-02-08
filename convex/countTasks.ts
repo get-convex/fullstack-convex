@@ -2,6 +2,7 @@ import { query } from './_generated/server'
 import { findUser } from './getCurrentUser'
 import { findMatchingTasks } from './listTasks'
 import type { GenericTableInfo, OrderedQuery } from 'convex/server'
+import { Status } from './schema'
 
 export async function countResults(query: OrderedQuery<GenericTableInfo>) {
   // If we don't actually care about the task documents, rather
@@ -16,10 +17,10 @@ export async function countResults(query: OrderedQuery<GenericTableInfo>) {
 
 // Given a user and their chosen filters, find the total number of matching tasks,
 // so we can display the total count even if paginated data hasn't loaded yet
-export default query(async ({ db, auth }, statusFilter: string[]) => {
+export default query(async ({ db, auth }, statusFilter: Status[]) => {
   // If logged in, fetch the stored user to get ID for filtering
   const user = await findUser(db, auth)
-  const tasks = findMatchingTasks(db, user, statusFilter)
+  const tasks = findMatchingTasks(db, user, { statusFilter })
 
   return await countResults(tasks)
 })

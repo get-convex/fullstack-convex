@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { FormEvent, useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
 import { Document } from '../convex/_generated/dataModel'
 import { Avatar } from './login'
@@ -19,11 +19,7 @@ export function TaskDetailForm({
   const router = useRouter()
   const saveTask = useMutation(mutationName)
 
-  const {
-    number: taskNumber,
-    _creationTime: creationTime,
-    owner: taskOwner,
-  } = initialTaskInfo
+  const { number: taskNumber, _creationTime: creationTime } = initialTaskInfo
 
   const [taskInfo, setTaskInfo] = useState(initialTaskInfo)
 

@@ -1,3 +1,4 @@
+import React from 'react'
 import Link from 'next/link'
 import { useQuery, useMutation } from '../../../convex/_generated/react'
 import { HeaderWithLogin, Avatar } from '../../../components/login'

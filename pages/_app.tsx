@@ -1,6 +1,6 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
-
+import React from 'react'
 import { ConvexProvider, ConvexReactClient } from 'convex/react'
 import { ConvexProviderWithAuth0 } from 'convex/react-auth0'
 import convexConfig from '../convex.json'

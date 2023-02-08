@@ -1,4 +1,4 @@
-import { Document, Id } from './_generated/dataModel'
+import type { Id } from './_generated/dataModel'
 import { mutation } from './_generated/server'
 
 // Insert or update the user in a Convex table then return the document's ID.

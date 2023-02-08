@@ -7,7 +7,8 @@ export async function countResults(query: OrderedQuery<GenericTableInfo>) {
   // If we don't actually care about the task documents, rather
   // than calling .collect() we run through the iterator directly
   let count = 0
-  for await (const result of query) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for await (const _ of query) {
     count++
   }
   return count

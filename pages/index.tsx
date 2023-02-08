@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
   useMutation,
   useQuery,
@@ -34,15 +34,14 @@ export default function App() {
   // the current Auth0 user in the `users` table
   const saveUser = useMutation('saveUser')
   useEffect(() => {
+    if (!auth0User) return
     // Save the user in the database (or get an existing user)
     // Recall that `saveUser` gets the user information via the `auth`
     // object on the server. You don't need to pass anything manually here.
-    if (!auth0User) return () => null
     async function createUser() {
       await saveUser()
     }
     createUser().catch(console.error)
-    return () => {}
   }, [saveUser, auth0User])
 
   const [statusFilter, setStatusFilter] = useState([
@@ -71,23 +70,25 @@ export default function App() {
   const isLoading = loadStatus === 'LoadingMore'
 
   // We use an IntersectionObserver to notice user has reached bottom of list
-  const bottom = useRef(null)
-  function loadOnScroll(entries: IntersectionObserverEntry[]) {
-    if (entries[0].isIntersecting && loadMore) {
-      loadMore(PAGE_SIZE)
-    }
-  }
+  const bottom = useRef<HTMLDivElement>(null)
+  const bottomElem = bottom.current
+
   useEffect(() => {
-    const observer = new IntersectionObserver(loadOnScroll, { threshold: 1 })
-    if (bottom.current) {
-      observer.observe(bottom.current)
-    }
-    return () => {
-      if (bottom.current) {
-        observer.unobserve(bottom.current)
+    function loadOnScroll(entries: IntersectionObserverEntry[]) {
+      if (entries[0].isIntersecting && loadMore) {
+        loadMore(PAGE_SIZE)
       }
     }
-  }, [bottom, loadOnScroll])
+    const observer = new IntersectionObserver(loadOnScroll, { threshold: 1 })
+    if (bottomElem) {
+      observer.observe(bottomElem)
+    }
+    return () => {
+      if (bottomElem) {
+        observer.unobserve(bottomElem)
+      }
+    }
+  }, [bottomElem, loadMore])
 
   const matching = useStableData(
     // Get the total number of tasks in the db that match the filters,
@@ -118,11 +119,14 @@ export default function App() {
 
     if (a[sortKey] === b[sortKey]) return 0 // Equal
 
+    const statusOrder = Object.values(Status) // Predefined order, not alphabetical
+
     switch (sortKey) {
       case 'status':
-        // Predefined status order, not alphabetical
-        const order = Object.values(Status)
-        return (order.indexOf(a.status) - order.indexOf(b.status)) * sortReverse
+        return (
+          (statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)) *
+          sortReverse
+        )
       case 'owner':
         // Alphabetical by owner name
         if (!a.owner?.name) return -1 * sortReverse

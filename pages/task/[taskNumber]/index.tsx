@@ -12,12 +12,16 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
   const updateTask = useMutation('updateTask')
 
   function handleClaimTask() {
-    const taskInfo = { ...task, ownerId: user?._id } as Partial<Task>
+    const taskInfo = {
+      ...task,
+      ownerId: user?._id,
+      ownerName: user?.name,
+    } as Partial<Task>
     saveChanges(taskInfo)
   }
 
   function handleUnclaimTask() {
-    const taskInfo = { ...task, ownerId: null, owner: null }
+    const taskInfo = { ...task, ownerId: null, ownerName: null, owner: null }
     saveChanges(taskInfo)
   }
 

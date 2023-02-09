@@ -137,7 +137,7 @@ export default function App() {
         <div>
           <span id="showing">
             {isLoading
-              ? 'Loading... ' // TODO should be a loading spinner or such
+              ? '... ' // TODO should be a loading spinner or such
               : ''}
             {matching !== undefined &&
               `Showing ${showing} of ${matching} task${

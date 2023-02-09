@@ -48,7 +48,7 @@ export function TaskDetailForm({
         <h2>
           {taskNumber && <span>#{taskNumber}</span>}
           <input
-            value={taskInfo.title}
+            value={taskInfo.title || ''}
             onChange={(e) =>
               setTaskInfo({ ...taskInfo, title: e.target.value })
             }

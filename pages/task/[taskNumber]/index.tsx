@@ -86,14 +86,14 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
           <p>{task.description}</p>
 
           <h4>Owner</h4>
-          <p>
+          <div className="owner-details">
             {task.owner && (
-              <div className="owner-details">
+              <>
                 <Avatar user={task.owner} />
                 {task.owner.name}
-              </div>
+              </>
             )}
-          </p>
+          </div>
 
           <h4>Visibility</h4>
           <p>{task.visibility}</p>

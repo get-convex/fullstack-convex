@@ -1,15 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react'
-import {
-  useMutation,
-  useQuery,
-  usePaginatedQuery,
-} from '../convex/_generated/react'
+import { useMutation, useQuery } from '../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import { HeaderWithLogin, Avatar } from '../components/login'
 import type { MouseEventHandler, ChangeEventHandler } from 'react'
 import { Status, SortKey, SortOrder } from '../convex/schema'
-import { useStableData, useStablePaginatedData } from '../hooks/useStableData'
+import {
+  useStableQuery,
+  useStablePaginatedQuery,
+} from '../hooks/useStableQuery'
 
 const PAGE_SIZE = 10
 
@@ -57,12 +56,14 @@ export default function App() {
   }
 
   // Results are paginated, additional pages loaded automatically in infinite scroll
-  const [loadedTasks, loadStatus, loadMore] = useStablePaginatedData(
-    usePaginatedQuery(
-      'listTasks',
-      { initialNumItems: PAGE_SIZE },
-      { statusFilter, sortKey, sortOrder }
-    )
+  const {
+    results: loadedTasks,
+    status: loadStatus,
+    loadMore,
+  } = useStablePaginatedQuery(
+    'listTasks',
+    { initialNumItems: PAGE_SIZE },
+    { statusFilter, sortKey, sortOrder }
   )
   const isLoading = loadStatus === 'LoadingMore'
 
@@ -87,11 +88,10 @@ export default function App() {
     }
   }, [bottomElem, loadMore])
 
-  const matching = useStableData(
-    // Get the total number of tasks in the db that match the filters,
-    // even if all haven't been loaded on the page yet
-    useQuery('countTasks', statusFilter)
-  )
+  // Get the total number of tasks in the db that match the filters,
+  // even if all haven't been loaded on the page yet
+  const matching = useStableQuery('countTasks', statusFilter)
+
   const showing = loadedTasks?.length
 
   const handleChangeSort: MouseEventHandler = (event) => {

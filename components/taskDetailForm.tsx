@@ -83,7 +83,7 @@ export function TaskDetailForm({
         >
           {Object.values(Status).map((status) => (
             <option key={status} value={status}>
-              {status}
+              {status.split('_')[1]}
             </option>
           ))}
         </select>

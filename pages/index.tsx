@@ -121,16 +121,16 @@ export default function App() {
         </div>
         <div id="filters">
           {Object.values(Status).map((status) => (
-            <label key={`filter-${status.toLowerCase().replace(' ', '-')}`}>
+            <label key={`filter-${status}`}>
               <input
                 key={status}
                 type="checkbox"
-                id={`filter-${status.toLowerCase().replace(' ', '-')}`}
+                id={`filter-${status}`}
                 value={status}
                 onChange={(e) => handleChangeFilters(e)}
                 checked={statusFilter.includes(status)}
               />
-              {status}
+              {status.split('_')[1]}
             </label>
           ))}
         </div>
@@ -191,7 +191,7 @@ export default function App() {
                 <td style={{ textAlign: 'center' }}>
                   {task.owner && <Avatar user={task.owner} size={30} />}
                 </td>
-                <td>{task.status}</td>
+                <td>{task.status.split('_')[1]}</td>
                 <td>{task.comments}</td>
               </tr>
             ))}

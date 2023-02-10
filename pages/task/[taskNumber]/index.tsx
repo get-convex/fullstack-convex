@@ -82,7 +82,7 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
           <h4>Status</h4>
           <p>
             <span className="badge" title={`Status: ${task.status}`}>
-              {task.status}
+              {task.status.split('_')[1]}
             </span>
           </p>
 

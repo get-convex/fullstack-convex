@@ -1,10 +1,10 @@
 import { defineSchema, defineTable, s } from 'convex/schema'
 
 export enum Status {
-  NEW = 'New',
-  IN_PROGRESS = 'In Progress',
-  DONE = 'Done',
-  CANCELLED = 'Cancelled',
+  NEW = '0_New',
+  IN_PROGRESS = '1_In Progress',
+  DONE = '2_Done',
+  CANCELLED = '3_Cancelled',
 }
 export enum Visibility {
   PUBLIC = 'public',

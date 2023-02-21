@@ -1,8 +1,8 @@
 import React from 'react'
 import { useQuery } from '../../convex/_generated/react'
 import { HeaderWithLogin } from '../../components/login'
-import { TaskDetailForm } from '../../components/taskDetailForm'
 import { Status, Visibility } from '../../convex/schema'
+import { EditableTaskDetails } from '../../components/taskDetails'
 
 export default function CreateTaskPage() {
   const user = useQuery('getCurrentUser')
@@ -21,7 +21,7 @@ export default function CreateTaskPage() {
     user && (
       <main className="py-4">
         <HeaderWithLogin user={user} />
-        <TaskDetailForm
+        <EditableTaskDetails
           user={user}
           mutationName="createTask"
           initialTaskInfo={newTaskInfo}

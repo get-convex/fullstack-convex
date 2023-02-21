@@ -1,7 +1,7 @@
 import React from 'react'
 import { useQuery } from '../../../convex/_generated/react'
 import { HeaderWithLogin } from '../../../components/login'
-import { TaskDetailForm } from '../../../components/taskDetailForm'
+import { EditableTaskDetails } from '../../../components/taskDetails'
 import { Task } from '../../../convex/getTask'
 
 export default function EditTaskPage({ taskNumber }: { taskNumber: number }) {
@@ -27,7 +27,7 @@ export default function EditTaskPage({ taskNumber }: { taskNumber: number }) {
     return (
       <main>
         <HeaderWithLogin user={user} />
-        <TaskDetailForm
+        <EditableTaskDetails
           user={user}
           mutationName="updateTask"
           initialTaskInfo={task}

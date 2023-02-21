@@ -4,7 +4,7 @@ import React, { FormEvent, useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
 import { Avatar } from './login'
 import { Comments } from './comments'
-import { Status, Visibility } from '../convex/schema'
+import { Status, STATUS_VALUES, Visibility } from '../convex/schema'
 import type { Task } from '../convex/getTask'
 import type { Document } from '../convex/_generated/dataModel'
 
@@ -118,8 +118,8 @@ export function TaskDetails({
       <div id="task-info">
         <h4>Status</h4>
         <p>
-          <span className="badge" title={`Status: ${task.status}`}>
-            {task.status}
+          <span className="badge" title={`Status: ${Status[task.status]}`}>
+            {Status[task.status]}
           </span>
         </p>
 
@@ -219,17 +219,17 @@ export function EditableTaskDetails({
       <div id="task-info">
         <h4>Status</h4>
         <select
-          value={taskInfo.status}
+          value={Status[taskInfo.status || 0]}
           onChange={(e) =>
             setTaskInfo({
               ...taskInfo,
-              status: e.target.value as Status,
+              status: +e.target.value,
             })
           }
         >
-          {Object.values(Status).map((status) => (
+          {STATUS_VALUES.map((status) => (
             <option key={status} value={status}>
-              {status.split('_')[1]}
+              {Status[status]}
             </option>
           ))}
         </select>

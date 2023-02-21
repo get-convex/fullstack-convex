@@ -20,7 +20,7 @@ export function findMatchingTasks(
   db: DatabaseReader,
   user: Document<'users'> | null,
   {
-    statusFilter = [Status.NEW, Status.IN_PROGRESS],
+    statusFilter = [Status.New, Status['In Progress']],
     sortKey = SortKey.NUMBER,
     sortOrder = SortOrder.ASC,
   }: ListTasksOptions
@@ -41,7 +41,7 @@ export function findMatchingTasks(
             q.eq(q.field('visibility'), Visibility.PUBLIC),
         q.or(
           // Match any of the given status values
-          ...statusFilter.map((status: string) =>
+          ...statusFilter.map((status: number) =>
             q.eq(q.field('status'), status)
           )
         )

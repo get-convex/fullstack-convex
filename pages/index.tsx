@@ -4,7 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import { HeaderWithLogin, Avatar } from '../components/login'
 import type { MouseEventHandler, ChangeEventHandler } from 'react'
-import { Status, SortKey, SortOrder } from '../convex/schema'
+import { Status, STATUS_VALUES, SortKey, SortOrder } from '../convex/schema'
 import {
   useStableQuery,
   useStablePaginatedQuery,
@@ -35,8 +35,8 @@ export default function App() {
   }, [saveUser, auth0User])
 
   const [statusFilter, setStatusFilter] = useState([
-    Status.NEW,
-    Status.IN_PROGRESS,
+    Status.New,
+    Status['In Progress'],
   ])
   const [sortKey, setSortKey] = useState(SortKey.NUMBER)
   const [sortOrder, setSortOrder] = useState(SortOrder.ASC)
@@ -47,11 +47,9 @@ export default function App() {
     const { value, checked } = target
     const newFilter = checked
       ? // A formerly unchecked status filter is now checked; add value to filter
-        Object.values(Status).filter(
-          (s) => statusFilter.includes(s) || s === value
-        )
+        STATUS_VALUES.filter((s) => statusFilter.includes(s) || s === +value)
       : // A formerly checked status filter is now unchecked; remove value from filter
-        statusFilter.filter((s) => s !== value)
+        statusFilter.filter((s) => s !== +value)
     setStatusFilter(newFilter)
   }
 
@@ -120,7 +118,7 @@ export default function App() {
           />
         </div>
         <div id="filters">
-          {Object.values(Status).map((status) => (
+          {STATUS_VALUES.map((status) => (
             <label key={`filter-${status}`}>
               <input
                 key={status}
@@ -130,7 +128,7 @@ export default function App() {
                 onChange={(e) => handleChangeFilters(e)}
                 checked={statusFilter.includes(status)}
               />
-              {status.split('_')[1]}
+              {Status[status]}
             </label>
           ))}
         </div>
@@ -191,7 +189,7 @@ export default function App() {
                 <td style={{ textAlign: 'center' }}>
                   {task.owner && <Avatar user={task.owner} size={30} />}
                 </td>
-                <td>{task.status.split('_')[1]}</td>
+                <td>{Status[task.status]}</td>
                 <td>{task.comments}</td>
               </tr>
             ))}

@@ -12,7 +12,7 @@ export default function CreateTaskPage() {
     throw new Error('User must be logged in to create a task')
 
   const newTaskInfo = {
-    status: Status.NEW,
+    status: Status.New,
     visibility: Visibility.PUBLIC,
     ownerId: null,
   } as Partial<Document>

@@ -1,11 +1,22 @@
 import { defineSchema, defineTable, s } from 'convex/schema'
 
+// Using a numeric rather than string enum for
+// ordinal (rather than alphabetical) sorting
 export enum Status {
-  NEW = '0_New',
-  IN_PROGRESS = '1_In Progress',
-  DONE = '2_Done',
-  CANCELLED = '3_Cancelled',
+  // keys are the user-facing labels for each
+  New = 0,
+  'In Progress',
+  Done,
+  Cancelled,
 }
+// Numeric enums also have a reverse mapping from
+// numeric values to string labels, so separate
+// the labels and values for easier use
+export const STATUS_VALUES = Object.values(Status).filter(
+  (k) => typeof k === 'number'
+) as number[]
+
+// The rest are string enums for simplicity
 export enum Visibility {
   PUBLIC = 'public',
   PRIVATE = 'private',
@@ -30,10 +41,10 @@ export default defineSchema(
       ownerId: s.union(s.id('users'), s.null()),
       ownerName: s.union(s.string(), s.null()),
       status: s.union(
-        s.literal(Status.NEW),
-        s.literal(Status.IN_PROGRESS),
-        s.literal(Status.DONE),
-        s.literal(Status.CANCELLED)
+        s.literal(Status.New),
+        s.literal(Status['In Progress']),
+        s.literal(Status.Done),
+        s.literal(Status.Cancelled)
       ),
       title: s.string(),
       visibility: s.union(

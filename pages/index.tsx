@@ -1,14 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useMutation, useQuery } from '../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
-import Link from 'next/link'
-import { HeaderWithLogin, Avatar } from '../components/login'
-import type { MouseEventHandler, ChangeEventHandler } from 'react'
-import { Status, STATUS_VALUES, SortKey, SortOrder } from '../convex/schema'
 import {
   useStableQuery,
   useStablePaginatedQuery,
 } from '../hooks/useStableQuery'
+import { HeaderWithLogin } from '../components/login'
+import { Status, STATUS_VALUES, SortKey, SortOrder } from '../convex/schema'
+import {
+  SearchControl,
+  StatusControl,
+  ShowingCount,
+  NewTaskButton,
+  TaskListings,
+} from '../components/taskList'
+import type { ChangeEventHandler, MouseEventHandler } from 'react'
 
 const PAGE_SIZE = 10
 
@@ -34,14 +40,12 @@ export default function App() {
     createUser().catch(console.error)
   }, [saveUser, auth0User])
 
+  // Set up state & handler for filtering by status values
   const [statusFilter, setStatusFilter] = useState([
     Status.New,
     Status['In Progress'],
   ])
-  const [sortKey, setSortKey] = useState(SortKey.NUMBER)
-  const [sortOrder, setSortOrder] = useState(SortOrder.ASC)
-
-  const handleChangeFilters: ChangeEventHandler = (event) => {
+  const handleChangeFilter: ChangeEventHandler = (event) => {
     // Process a checkbox change event affecting the status filter
     const target = event.target as HTMLInputElement
     const { value, checked } = target
@@ -53,6 +57,27 @@ export default function App() {
     setStatusFilter(newFilter)
   }
 
+  // Get the total number of tasks in the db that match the filters,
+  // even if all haven't been loaded on the page yet
+  const matching = useStableQuery('countTasks', statusFilter)
+
+  // Set up state & handler for sorting by a given key (column)
+  const [sortKey, setSortKey] = useState(SortKey.NUMBER)
+  const [sortOrder, setSortOrder] = useState(SortOrder.ASC)
+  const handleChangeSort: MouseEventHandler = (event) => {
+    event.stopPropagation()
+    const target = event.target as HTMLElement
+    const key = target.id
+    if (sortKey === key) {
+      // We are already sorting by this key, so a click indicates an order reversal
+      setSortOrder(sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC)
+    } else {
+      setSortKey(key as SortKey)
+      setSortOrder(SortOrder.ASC)
+    }
+  }
+
+  // Query the db for the given tasks in the given sort order (updates reactively)
   // Results are paginated, additional pages loaded automatically in infinite scroll
   const {
     results: loadedTasks,
@@ -63,12 +88,11 @@ export default function App() {
     { initialNumItems: PAGE_SIZE },
     { statusFilter, sortKey, sortOrder }
   )
-  const isLoading = loadStatus === 'LoadingMore'
 
   // We use an IntersectionObserver to notice user has reached bottom of list
+  // Once they have scrolled to the bottom, load the next page of results
   const bottom = useRef<HTMLDivElement>(null)
   const bottomElem = bottom.current
-
   useEffect(() => {
     function loadOnScroll(entries: IntersectionObserverEntry[]) {
       if (entries[0].isIntersecting && loadMore) {
@@ -86,115 +110,25 @@ export default function App() {
     }
   }, [bottomElem, loadMore])
 
-  // Get the total number of tasks in the db that match the filters,
-  // even if all haven't been loaded on the page yet
-  const matching = useStableQuery('countTasks', statusFilter)
-
-  const showing = loadedTasks?.length
-
-  const handleChangeSort: MouseEventHandler = (event) => {
-    event.stopPropagation()
-    const target = event.target as HTMLElement
-    const key = target.id
-    if (sortKey === key) {
-      // We are already sorting by this key, so a click indicates an order reversal
-      setSortOrder(sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC)
-    } else {
-      setSortKey(key as SortKey)
-      setSortOrder(SortOrder.ASC)
-    }
-  }
-
   return (
     <main>
       <HeaderWithLogin user={user} />
-
       <div id="controls">
-        <div id="search">
-          <input
-            value=""
-            onChange={() => null}
-            placeholder="Search will be here"
-          />
-        </div>
-        <div id="filters">
-          {STATUS_VALUES.map((status) => (
-            <label key={`filter-${status}`}>
-              <input
-                key={status}
-                type="checkbox"
-                id={`filter-${status}`}
-                value={status}
-                onChange={(e) => handleChangeFilters(e)}
-                checked={statusFilter.includes(status)}
-              />
-              {Status[status]}
-            </label>
-          ))}
-        </div>
+        <SearchControl />
+        <StatusControl
+          statusFilter={statusFilter}
+          handleChangeFilter={handleChangeFilter}
+        />
         <div>
-          <span id="showing">
-            {isLoading
-              ? '... ' // TODO should be a loading spinner or such
-              : ''}
-            {matching !== undefined &&
-              `Showing ${showing} of ${matching} task${
-                matching === 1 ? '' : 's'
-              }`}
-          </span>
-          {user && (
-            <Link href="/task/new">
-              <button className="pill-button" id="new">
-                New Task
-              </button>
-            </Link>
-          )}
+          <ShowingCount
+            isLoading={loadStatus === 'LoadingMore'}
+            showing={loadedTasks?.length}
+            matching={matching}
+          />
+          <NewTaskButton user={user} />
         </div>
       </div>
-
-      <table>
-        <thead>
-          <tr id="column-headers">
-            <th
-              id="number"
-              onClick={handleChangeSort}
-              style={{ minWidth: '2ch' }}
-            >
-              #
-            </th>
-            <th id="title" onClick={handleChangeSort}>
-              Task
-            </th>
-            <th id="owner" onClick={handleChangeSort}>
-              Owner
-            </th>
-            <th id="status" onClick={handleChangeSort}>
-              Status
-            </th>
-            <th id="comments" onClick={handleChangeSort}>
-              Comments
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {loadedTasks &&
-            loadedTasks.map((task) => (
-              <tr key={task.number}>
-                <td>
-                  <Link href={`/task/${task.number}`}>{task.number}</Link>
-                </td>
-                <td>
-                  <Link href={`/task/${task.number}`}>{task.title}</Link>
-                </td>
-                <td style={{ textAlign: 'center' }}>
-                  {task.owner && <Avatar user={task.owner} size={30} />}
-                </td>
-                <td>{Status[task.status]}</td>
-                <td>{task.comments}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+      <TaskListings tasks={loadedTasks} handleChangeSort={handleChangeSort} />
       <div ref={bottom} />
     </main>
   )

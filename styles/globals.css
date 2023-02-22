@@ -146,6 +146,7 @@ img {
 
 #controls {
   width: 90%;
+  min-height: 100px;
   margin: 24px auto;
   display: flex;
   flex-wrap: wrap;

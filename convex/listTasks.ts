@@ -5,7 +5,7 @@ import { Visibility } from './schema'
 import { Task } from './getTask'
 import { Status, SortKey, SortOrder } from './schema'
 
-export interface TaskListing extends Task {
+export interface ListedTask extends Task {
   comments: number
 }
 

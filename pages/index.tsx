@@ -128,7 +128,11 @@ export default function App() {
           <NewTaskButton user={user} />
         </div>
       </div>
-      <TaskListings tasks={loadedTasks} handleChangeSort={handleChangeSort} />
+      <TaskListings
+        tasks={loadedTasks}
+        isLoading={loadStatus === 'LoadingMore'}
+        handleChangeSort={handleChangeSort}
+      />
       <div ref={bottom} />
     </main>
   )

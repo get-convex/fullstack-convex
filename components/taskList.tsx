@@ -2,7 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Avatar } from '../components/login'
 import type { MouseEventHandler, ChangeEventHandler } from 'react'
-import { Status, STATUS_VALUES, SortKey, SortOrder } from '../convex/schema'
+import { Status, STATUS_VALUES } from '../convex/schema'
 import type { ListedTask } from '../convex/listTasks'
 import type { Document } from '../convex/_generated/dataModel'
 
@@ -24,41 +24,73 @@ function TaskListing({ task }: { task: ListedTask }) {
   )
 }
 
+export function TaskListingsGhost() {
+  return (
+    <>
+      {[0, 1, 2, 3, 4].map((key) => (
+        <tr key={key}>
+          <td>
+            <p className="ghost">00</p>
+          </td>
+          <td>
+            <p className="ghost">..................................</p>
+          </td>
+          <td>
+            <div
+              className="ghost avatar-ghost"
+              style={{ margin: '0px auto' }}
+            />
+          </td>
+          <td>
+            <p className="ghost">private</p>
+          </td>
+          <td>
+            <p className="ghost">0</p>
+          </td>
+        </tr>
+      ))}
+    </>
+  )
+}
+
 export function TaskListings({
   tasks,
+  isLoading,
   handleChangeSort,
 }: {
-  tasks?: ListedTask[]
+  tasks: ListedTask[]
+  isLoading: boolean
   handleChangeSort: MouseEventHandler
 }) {
+  if (!tasks.length && !isLoading) {
+    return <p>No matching tasks found</p>
+  }
+  const sortHandler = isLoading ? () => ({}) : handleChangeSort
   return (
     <table>
       <thead>
         <tr id="column-headers">
-          <th
-            id="number"
-            onClick={handleChangeSort}
-            style={{ minWidth: '2ch' }}
-          >
+          <th id="number" onClick={sortHandler} style={{ minWidth: '2ch' }}>
             #
           </th>
-          <th id="title" onClick={handleChangeSort}>
+          <th id="title" onClick={sortHandler}>
             Task
           </th>
-          <th id="owner" onClick={handleChangeSort}>
+          <th id="owner" onClick={sortHandler}>
             Owner
           </th>
-          <th id="status" onClick={handleChangeSort}>
+          <th id="status" onClick={sortHandler}>
             Status
           </th>
-          <th id="comments" onClick={handleChangeSort}>
+          <th id="comments" onClick={sortHandler}>
             Comments
           </th>
         </tr>
       </thead>
       <tbody>
-        {tasks &&
+        {tasks.length > 0 &&
           tasks.map((task) => <TaskListing key={task.number} task={task} />)}
+        {isLoading && <TaskListingsGhost />}
       </tbody>
     </table>
   )
@@ -140,7 +172,7 @@ export function NewTaskButton({ user }: { user?: Document<'users'> | null }) {
   )
 }
 
-export function SearchControl({}) {
+export function SearchControl() {
   return (
     <div id="search">
       <input value="" onChange={() => null} placeholder="Search will be here" />

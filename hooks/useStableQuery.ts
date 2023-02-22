@@ -28,7 +28,7 @@ export const useStablePaginatedQuery = ((name, options, ...args) => {
   }
 
   return {
-    results: stored.current, // undefined on first load, stale data while loading, fresh data after loading
+    results: stored.current, // empty array on first load, stale data while loading, fresh data after loading
     status,
     loadMore,
   }

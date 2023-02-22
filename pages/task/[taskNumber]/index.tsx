@@ -7,14 +7,6 @@ export default function TaskDetailPage({ taskNumber }: { taskNumber: number }) {
   const user = useQuery('getCurrentUser')
   const task = useQuery('getTask', taskNumber)
 
-  if (!task) {
-    return (
-      <main>
-        <h1>Task not found</h1>
-      </main>
-    )
-  }
-
   return (
     <main>
       <HeaderWithLogin user={user} />

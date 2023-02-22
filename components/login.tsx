@@ -8,7 +8,7 @@ function LogoutButton() {
   const { logout } = useAuth0()
   return (
     <button
-      className="btn btn-primary"
+      className="btn-login"
       onClick={() => logout({ returnTo: window.location.origin })}
     >
       Log out
@@ -20,11 +20,19 @@ function LoginButton() {
   const { isLoading, loginWithRedirect } = useAuth0()
   return (
     <button
-      className="btn btn-primary"
+      className="btn-login"
       disabled={isLoading}
       onClick={loginWithRedirect}
     >
       Log in
+    </button>
+  )
+}
+
+function LoginGhost() {
+  return (
+    <button className="ghost" disabled>
+      Log out
     </button>
   )
 }
@@ -55,7 +63,13 @@ export function HeaderWithLogin({ user }: { user?: Document<'users'> | null }) {
       </Link>
       <div style={{ display: 'flex', gap: 10 }}>
         {user && <Avatar user={user} size={50} />}
-        {user ? <LogoutButton /> : <LoginButton />}
+        {user === undefined ? (
+          <LoginGhost />
+        ) : user ? (
+          <LogoutButton />
+        ) : (
+          <LoginButton />
+        )}
       </div>
     </header>
   )

@@ -68,3 +68,18 @@ export function Comments({
     </div>
   )
 }
+
+export function CommentsGhost() {
+  return (
+    <div>
+      <form style={{ margin: '8px 16px' }}>
+        <input
+          className="ghost"
+          style={{ flexGrow: 2 }}
+          placeholder="Write a comment…"
+        />
+        <input type="submit" className="ghost" value="Add comment" disabled />
+      </form>
+    </div>
+  )
+}

@@ -78,7 +78,7 @@ form {
   justify-content: center;
 }
 
-input:not([type]), textarea, select {
+input:not([type]):not(.ghost), textarea, select {
   padding: 6px 12px 6px 12px;
   color: rgb(33, 37, 41);
   border: solid 1px rgb(206, 212, 218);
@@ -90,29 +90,36 @@ input:not([type]), textarea, select {
 input[type='submit'],
 button {
   margin-left: 4px;
-  color: white;
   padding: 12px 24px 12px 24px;
   border-radius: 2px;
   font-size: 16px;
-  background-color:  #0F172A;
-  border: solid 1px #0F172A;
   font-weight: bold;
 
 }
 
-input[type='submit']:hover,
-button:hover {
+input[type='submit']:not(.ghost), button:not(.ghost) {
+  color: white;
+  background-color:  #0F172A;
+  border: solid 1px #0F172A;
+}
+
+input[type='submit']:not(.ghost):hover,
+button:not(.ghost):hover {
   color:  #0F172A;
   border: solid 1px #0F172A;
   background-color: white;
 }
 
-input[type='submit']:disabled,
-button:disabled {
+input[type='submit']:disabled:not(.ghost),
+button:disabled:not(.ghost) {
   color: white;
   border-color: rgb(143, 148, 153);
   background-color:  rgb(143, 148, 153);
   cursor: not-allowed;
+}
+
+.btn-login {
+  min-width: 10ch;
 }
 
 input[type='checkbox'] {
@@ -240,9 +247,12 @@ tr:hover a {
   margin-bottom: 24px;
 }
 
-#task-header h2 span {
+#task-number {
+  margin-right: 24px;
+}
+
+#task-header h2 span:not(.ghost) {
   color: #475569;
-  padding-right: 24px;
 }
 
 #task-header h2 {
@@ -256,4 +266,21 @@ tr:hover a {
   margin-top: 24px;
   margin-bottom: 24px;
   grid-gap: 24px;
+}
+
+#task-info > * {
+  min-height: 35px;
+}
+
+
+.ghost {
+  color: #E2E8F0;
+  background-color: #E2E8F0;
+  border: 0px;
+}
+
+.avatar-ghost {
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
 }

@@ -3,60 +3,22 @@ import { useRouter } from 'next/router'
 import React, { FormEvent, useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
 import { Avatar } from './login'
-import { Comments } from './comments'
+import { Comments, CommentsGhost } from './comments'
 import { Status, STATUS_VALUES, Visibility } from '../convex/schema'
 import type { Task } from '../convex/getTask'
 import type { Document } from '../convex/_generated/dataModel'
 
-function TaskDetailsGhost() {
-  return (
-    <div id="task-details">
-      <div id="task-header">
-        <h2>
-          <span>#0</span>
-          .....
-        </h2>
-        <div>
-          <button className="pill-button" disabled={true}>
-            Edit task
-          </button>
-        </div>
-      </div>
-
-      <div id="task-info">
-        <h4>Status</h4>
-        <p>
-          <span className="badge">....</span>
-        </p>
-
-        <h4>Description</h4>
-        <p>...</p>
-
-        <h4>Owner</h4>
-        <div className="owner-details">...</div>
-
-        <h4>Visibility</h4>
-        <p>....</p>
-
-        <h4>Created</h4>
-        <p>
-          <span>...</span>
-        </p>
-
-        <h4>Comments</h4>
-        <p>....</p>
-      </div>
-    </div>
-  )
-}
 export function TaskDetails({
   task,
   user,
 }: {
-  task?: Task
+  task?: Task | null
   user?: Document<'users'> | null
 }) {
   const updateTask = useMutation('updateTask')
+
+  if (task === undefined) return <TaskDetailsGhost />
+  if (task === null) return <p>Task not found</p> //TODO proper error
 
   function handleClaimTask() {
     const taskInfo = {
@@ -80,11 +42,11 @@ export function TaskDetails({
   const isPublic = task?.visibility === Visibility.PUBLIC
   const isOwner = user && user._id.equals(task?.ownerId)
   const canChangeOwner = user && isPublic
-  return task ? (
+  return (
     <div id="task-details">
       <div id="task-header">
         <h2>
-          <span>#{task.number}</span>
+          <span id="task-number">#{task.number}</span>
           {task.title}
         </h2>
         <div>
@@ -148,8 +110,6 @@ export function TaskDetails({
         {task && <Comments user={user} taskId={task._id} />}
       </div>
     </div>
-  ) : (
-    <TaskDetailsGhost />
   )
 }
 
@@ -314,5 +274,60 @@ export function EditableTaskDetails({
         )}
       </div>
     </form>
+  )
+}
+
+function TaskDetailsGhost() {
+  return (
+    <div id="task-details">
+      <div id="task-header">
+        <h2>
+          <span id="task-number" className="ghost">
+            #0
+          </span>
+          <span className="ghost">
+            ....................................................
+          </span>
+        </h2>
+        <div>
+          <button className="pill-button ghost" disabled={true}>
+            Edit task
+          </button>
+        </div>
+      </div>
+
+      <div id="task-info">
+        <h4>Status</h4>
+        <p>
+          <span className="badge ghost">..........</span>
+        </p>
+
+        <h4>Description</h4>
+        <p>
+          <span className="ghost">
+            ...........................................................
+          </span>
+        </p>
+
+        <h4>Owner</h4>
+        <div className="owner-details">
+          <div className="ghost avatar-ghost" />
+          <span className="ghost">Firstname Lastname</span>
+        </div>
+
+        <h4>Visibility</h4>
+        <div>
+          <span className="ghost">private</span>
+        </div>
+
+        <h4>Created</h4>
+        <p>
+          <span className="ghost">ddd MMM DD YYYY</span>
+        </p>
+
+        <h4>Comments</h4>
+        <CommentsGhost />
+      </div>
+    </div>
   )
 }

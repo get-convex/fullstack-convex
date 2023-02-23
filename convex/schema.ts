@@ -72,6 +72,13 @@ export default defineSchema(
       taskId: s.id('tasks'),
       userId: s.id('users'),
     }).index('by_task', ['taskId']),
+
+    files: defineTable({
+      storageId: s.string(),
+      userId: s.id('users'),
+      taskId: s.id('tasks'),
+      format: s.string(),
+    }).index('by_task', ['taskId']),
   },
   { strict: false }
 )

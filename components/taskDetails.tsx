@@ -50,17 +50,6 @@ export function TaskDetails({
           {task.title}
         </h2>
         <div>
-          {canChangeOwner && (
-            <button
-              className="pill-button"
-              title={`${
-                isOwner ? 'Unassign yourself as' : 'Make yourself'
-              } the owner of this task`}
-              onClick={isOwner ? handleUnclaimTask : handleClaimTask}
-            >
-              {isOwner ? 'Disown task' : 'Claim task'}
-            </button>
-          )}
           <Link href={`/task/${task.number}/edit`}>
             <button
               className="pill-button"
@@ -95,6 +84,17 @@ export function TaskDetails({
               <Avatar user={task.owner} />
               {task.owner.name}
             </>
+          )}
+          {canChangeOwner && (
+            <button
+              className="pill-button"
+              title={`${
+                isOwner ? 'Remove yourself as' : 'Make yourself'
+              } the owner of this task`}
+              onClick={isOwner ? handleUnclaimTask : handleClaimTask}
+            >
+              {isOwner ? 'Unclaim task' : 'Claim task'}
+            </button>
           )}
         </div>
 

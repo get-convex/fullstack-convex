@@ -5,6 +5,24 @@ import { Avatar } from './login'
 import type { Document, Id } from '../convex/_generated/dataModel'
 import type { Comment } from '../convex/listComments'
 
+export function showTimeAgo(created: Date) {
+  const now = Date.now()
+  const secondsAgo = Math.round((now - created.valueOf()) / 1000)
+  if (secondsAgo < 60) {
+    return `${secondsAgo}s`
+  }
+  const minutesAgo = Math.round(secondsAgo / 60)
+  if (minutesAgo < 60) {
+    return `${minutesAgo}m`
+  }
+  const hoursAgo = Math.round(minutesAgo / 60)
+  if (hoursAgo < 24) {
+    return `${hoursAgo}h`
+  }
+  const daysAgo = Math.round(hoursAgo / 24)
+  return `${daysAgo}d`
+}
+
 function CommentList({ comments }: { comments: Comment[] }) {
   return (
     <ul>
@@ -16,8 +34,11 @@ function CommentList({ comments }: { comments: Comment[] }) {
             <span>
               <Avatar user={author} size={20} />
             </span>
-            <span title={created.toLocaleString()}>
-              {created.toLocaleTimeString('en-UK')}
+            <span
+              title={created.toLocaleString()}
+              style={{ minWidth: '3ch', textAlign: 'right' }}
+            >
+              {showTimeAgo(created)}
             </span>
           </li>
         )
@@ -58,7 +79,6 @@ export function Comments({
           />
           <input
             type="submit"
-            className="pill-button"
             value="Add comment"
             title={invalid ? 'Comment cannot be empty' : 'Add comment'}
             disabled={invalid}

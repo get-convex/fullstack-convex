@@ -91,10 +91,12 @@ input[type='submit'],
 button {
   margin-left: 4px;
   padding: 12px 24px 12px 24px;
-  border-radius: 2px;
   font-size: 16px;
   font-weight: bold;
+}
 
+input[type='submit']:not(.pill-button), button:not(.pill-button) {
+  border-radius: 2px;
 }
 
 input[type='submit']:not(.ghost), button:not(.ghost) {

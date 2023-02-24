@@ -8,6 +8,7 @@ import type { Comment } from '../convex/listComments'
 export function showTimeAgo(created: Date) {
   const now = Date.now()
   const secondsAgo = Math.round((now - created.valueOf()) / 1000)
+  if (secondsAgo === 0) return 'now'
   if (secondsAgo < 60) {
     return `${secondsAgo}s`
   }
@@ -25,7 +26,7 @@ export function showTimeAgo(created: Date) {
 
 function CommentList({ comments }: { comments: Comment[] }) {
   return (
-    <ul>
+    <ul className="comments">
       {comments.map(({ _id, body, author, _creationTime }) => {
         const created = new Date(_creationTime)
         return (
@@ -34,12 +35,7 @@ function CommentList({ comments }: { comments: Comment[] }) {
             <span>
               <Avatar user={author} size={20} />
             </span>
-            <span
-              title={created.toLocaleString()}
-              style={{ minWidth: '3ch', textAlign: 'right' }}
-            >
-              {showTimeAgo(created)}
-            </span>
+            <span title={created.toLocaleString()}>{showTimeAgo(created)}</span>
           </li>
         )
       })}

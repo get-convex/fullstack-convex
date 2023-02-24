@@ -77,7 +77,8 @@ export default defineSchema(
       storageId: s.string(),
       userId: s.id('users'),
       taskId: s.id('tasks'),
-      format: s.string(),
+      type: s.string(),
+      name: s.string(),
     }).index('by_task', ['taskId']),
   },
   { strict: false }

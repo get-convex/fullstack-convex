@@ -12,6 +12,7 @@
 import type { ApiFromModules } from "convex/api";
 import type * as countTasks from "../countTasks";
 import type * as createTask from "../createTask";
+import type * as deleteFile from "../deleteFile";
 import type * as getCurrentUser from "../getCurrentUser";
 import type * as getTask from "../getTask";
 import type * as listComments from "../listComments";
@@ -35,6 +36,7 @@ import type * as updateTask from "../updateTask";
 export type API = ApiFromModules<{
   countTasks: typeof countTasks;
   createTask: typeof createTask;
+  deleteFile: typeof deleteFile;
   getCurrentUser: typeof getCurrentUser;
   getTask: typeof getTask;
   listComments: typeof listComments;

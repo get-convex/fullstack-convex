@@ -4,6 +4,7 @@ import React, { FormEvent, useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
 import { Avatar } from './login'
 import { Comments, CommentsGhost } from './comments'
+import { Files } from './files'
 import { Status, STATUS_VALUES, Visibility } from '../convex/schema'
 import type { Task } from '../convex/getTask'
 import type { Document } from '../convex/_generated/dataModel'
@@ -108,6 +109,9 @@ export function TaskDetails({
 
         <h4>Comments</h4>
         {task && <Comments user={user} taskId={task._id} />}
+
+        <h4>Files</h4>
+        {task && <Files user={user} taskId={task._id} />}
       </div>
     </div>
   )

@@ -47,6 +47,11 @@ ul:empty {
   display: none;
 }
 
+.files {
+  border: 0px;
+  box-shadow: none;
+}
+
 li {
   display: flex;
   justify-content: flex-start;
@@ -55,7 +60,15 @@ li {
   font-size: 16px;
 }
 
-li:last-child {
+.files li {
+  border-radius: 8px;
+  border: solid 1px lightgray;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: 4px;
+}
+
+
+.comments li:last-child {
   border: 0;
 }
 
@@ -71,6 +84,12 @@ li span:nth-child(2) {
 li span:nth-child(3) {
   color: #6c757d;
   white-space: nowrap;
+  min-width: 4ch;
+  text-align: right;
+}
+
+li a {
+  font-weight: bold;
 }
 
 form {
@@ -88,18 +107,21 @@ input:not([type]):not(.ghost), textarea, select {
 }
 
 input[type='submit'],
-button {
+button:not(.icon-button), .pill-button {
   margin-left: 4px;
-  padding: 12px 24px 12px 24px;
   font-size: 16px;
   font-weight: bold;
+}
+
+input[type='submit'], button:not(.pill-button, .icon-button) {
+  padding: 12px 24px 12px 24px;
 }
 
 input[type='submit']:not(.pill-button), button:not(.pill-button) {
   border-radius: 2px;
 }
 
-input[type='submit']:not(.ghost), button:not(.ghost) {
+input[type='submit']:not(.ghost), button:not(.ghost), .pill-button {
   color: white;
   background-color:  #0F172A;
   border: solid 1px #0F172A;
@@ -179,6 +201,17 @@ input[type="checkbox"] {
 .pill-button {
   border-radius: 100px;
   padding: 4px 12px 4px 12px;
+}
+
+button:is(.icon-button) {
+  background-color: #ffffff;
+  border: 0px;
+  margin: 2px 4px;
+}
+
+button:is(.icon-button):hover {
+  border: 0px;
+  cursor: pointer;
 }
 
 #new::before {

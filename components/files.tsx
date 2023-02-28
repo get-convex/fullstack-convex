@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '../convex/_generated/react'
 import { Avatar } from './login'
 import { FileAttachment } from '../convex/listFiles'
 import { showTimeAgo } from './comments'
-import type { FormEvent, MouseEventHandler } from 'react'
+import type { FormEvent } from 'react'
 import { Id, type Document } from '../convex/_generated/dataModel'
 
 function showFileSize(size: number) {
@@ -30,65 +30,91 @@ function showFileType(type: string) {
   }
 }
 
-function FileList({
-  files,
+function FileListing({
+  file,
   user,
+  handleDeleteFile,
 }: {
-  files: FileAttachment[]
+  file: FileAttachment
   user?: Document<'users'> | null
+  handleDeleteFile: (id: Id<'files'>) => void
 }) {
-  const deleteFile = useMutation('deleteFile')
-  const handleDeleteFile = async function (fileId: Id<'files'>) {
-    await deleteFile(fileId)
-  }
-
+  const { _id, _creationTime, name, type, author, url, size } = file
+  const created = new Date(_creationTime)
+  const isFileAuthor = user && user._id.equals(author._id)
   return (
-    <ul className="files">
-      {files.map(({ _id, _creationTime, name, type, author, url, size }) => {
-        const created = new Date(_creationTime)
-        const isFileAuthor = user && user._id.equals(author._id)
-
-        return (
-          <li key={_id.toString()} className="file">
-            <div
-              style={{
-                width: '90%',
-                marginRight: '16px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                overflowWrap: 'anywhere',
-              }}
+    <li key={_id.toString()} className="file">
+      <div
+        style={{
+          width: '90%',
+          marginRight: '16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          overflowWrap: 'anywhere',
+        }}
+      >
+        <div style={{ flexGrow: 2, marginRight: '16px' }}>
+          <span>{showFileType(type)}</span>
+          <Link href={url} target="_blank">
+            {name}
+          </Link>
+          <span> ({showFileSize(size)})</span>
+        </div>
+        <div style={{ flexShrink: 0 }}>
+          {isFileAuthor && (
+            <button
+              className="icon-button"
+              title="Delete file"
+              onClick={() => handleDeleteFile(_id)}
             >
-              <div style={{ flexGrow: 2, marginRight: '16px' }}>
-                <span>{showFileType(type)}</span>
-                <Link href={url} target="_blank">
-                  {name}
-                </Link>
-                <span> ({showFileSize(size)})</span>
-              </div>
-              <div style={{ flexShrink: 0 }}>
-                {isFileAuthor && (
-                  <button
-                    className="icon-button"
-                    title="Delete file"
-                    onClick={() => handleDeleteFile(_id)}
-                  >
-                    🗑️
-                  </button>
-                )}
-                {/* <button className="icon-button" title="Download file">
-                  ⬇️
-                </button> */}
-              </div>
-            </div>
-            <span>
-              <Avatar user={author} size={20} />
-            </span>
-            <span title={created.toLocaleString()}>{showTimeAgo(created)}</span>
-          </li>
-        )
-      })}
-    </ul>
+              🗑️
+            </button>
+          )}
+          {/* <button className="icon-button" title="Download file">
+            ⬇️
+          </button> */}
+        </div>
+      </div>
+      <span>
+        <Avatar user={author} size={20} />
+      </span>
+      <span title={created.toLocaleString()}>{showTimeAgo(created)}</span>
+    </li>
+  )
+}
+
+function FileUploading({
+  fileName,
+  fileType,
+  author,
+}: {
+  fileName: string
+  fileType: string
+  author: Document<'users'>
+}) {
+  return (
+    <li key={fileName} className="file">
+      <div
+        style={{
+          width: '90%',
+          marginRight: '16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          overflowWrap: 'anywhere',
+        }}
+      >
+        <div style={{ flexGrow: 2, marginRight: '16px' }}>
+          <span>{showFileType(fileType)}</span>
+          <Link href={'#'}>{fileName}</Link>
+          <span> (uploading...)</span>
+        </div>
+        <div style={{ flexShrink: 0 }}></div>
+      </div>
+      <span>
+        <Avatar user={author} size={20} />
+      </span>
+      <span>...</span>
+    </li>
   )
 }
 
@@ -103,28 +129,30 @@ export function Files({
   const generateUploadUrl = useMutation('saveFile:generateUploadUrl')
   const saveFile = useMutation('saveFile')
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState({ name: '', type: '' })
   const fileInput = useRef<HTMLInputElement>(null)
 
-  async function handleSelectFile(event: FormEvent) {
-    const { files } = event.target as HTMLInputElement
-    console.log(files)
-    if (files && files.length) setSelectedFile(files[0])
+  const deleteFile = useMutation('deleteFile')
+  const handleDeleteFile = async function (fileId: Id<'files'>) {
+    await deleteFile(fileId)
   }
 
   async function handleUploadFile(event: FormEvent) {
     event.preventDefault()
-    const newFile = selectedFile
-    setSelectedFile(null)
+    const { files } = event.target as HTMLInputElement
+    if (!files || files.length !== 1)
+      throw new Error('Select exactly one file to upload')
+
+    const newFile = files[0]
     if (fileInput.current) fileInput.current.value = ''
 
     // we should never end up here, but just in case
     if (!newFile) throw new Error('No file selected for upload')
-
-    const { name, type } = newFile
+    setUploading({ name: newFile.name, type: newFile.type })
 
     // Step 1: Get a short-lived upload URL
     const postUrl = await generateUploadUrl()
+
     // Step 2: POST the file to the URL
     const result = await fetch(postUrl, {
       method: 'POST',
@@ -133,20 +161,44 @@ export function Files({
     })
     const { storageId } = await result.json()
 
-    await saveFile(taskId, storageId, name, type)
+    await saveFile(taskId, storageId, newFile.name, newFile.type)
+    setUploading({ name: '', type: '' })
   }
 
   return (
     <div>
-      {files && <FileList files={files} user={user} />}
+      <ul className="files">
+        {files &&
+          files.map((file, i) => (
+            <FileListing
+              key={i}
+              file={file}
+              user={user}
+              handleDeleteFile={handleDeleteFile}
+            />
+          ))}
+        {user && uploading.name && (
+          <FileUploading
+            fileName={uploading.name}
+            fileType={uploading.type}
+            author={user}
+          />
+        )}
+      </ul>
       {user && (
-        <form style={{ margin: '8px 16px' }} onSubmit={handleUploadFile}>
+        <form
+          style={{
+            display: 'flex',
+            justifyContent: 'left',
+            margin: '8px 16px',
+          }}
+        >
           <label
             htmlFor="upload"
             className="pill-button"
             style={{ height: '1.5em' }}
           >
-            Browse files
+            + Upload file
           </label>
           <input
             id="upload"
@@ -154,15 +206,6 @@ export function Files({
             style={{ opacity: 0 }}
             onChange={handleUploadFile}
             ref={fileInput}
-          />
-
-          <input
-            type="submit"
-            value="Upload file"
-            title={
-              !selectedFile ? 'Choose a file first' : 'Upload the selected file'
-            }
-            disabled={!selectedFile}
           />
         </form>
       )}

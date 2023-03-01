@@ -21,6 +21,7 @@ function LoginButton() {
   return (
     <button
       className="btn-login"
+      title="Log in"
       disabled={isLoading}
       onClick={loginWithRedirect}
     >
@@ -31,7 +32,7 @@ function LoginButton() {
 
 function LoginGhost() {
   return (
-    <button className="ghost" disabled>
+    <button className="ghost" title="Log out" disabled>
       Log out
     </button>
   )

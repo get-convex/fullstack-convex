@@ -320,3 +320,22 @@ tr:hover a {
   height: 30px;
   border-radius: 100%;
 }
+
+.error {
+  border: 1px solid red;
+  padding: 8px 16px;
+}
+
+.error a {
+  text-decoration: underline;
+}
+
+.error > p, .error > pre {
+  margin-top: 2em;
+}
+
+.error pre {
+  color: red;
+  font-weight: bold;
+
+}

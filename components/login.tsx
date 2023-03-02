@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PropsWithChildren } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -57,12 +57,16 @@ export function Avatar({
   )
 }
 
-export function HeaderWithLogin({ user }: { user?: Document<'users'> | null }) {
+export function HeaderWithLogin({
+  user,
+  children,
+}: PropsWithChildren<{ user?: Document<'users'> | null }>) {
   return (
     <header>
       <Link href="/">
         <h1>Tasks</h1>
       </Link>
+      {children}
       <div style={{ display: 'flex', gap: 10 }}>
         {user && <Avatar user={user} size={38} />}
         {user === undefined ? (

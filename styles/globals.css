@@ -61,9 +61,23 @@ button {
   border-radius: 6px;
 }
 
+button:hover {
+  cursor: pointer;
+}
+
 /* Avatars */
 img.avatar {
   border-radius: 100%;
+}
+
+/* Controls */
+#controls {
+  margin: 24px auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
 }
 
 /* TODO cleanup after redesign
@@ -204,16 +218,7 @@ img {
   align-items: center;
 }
 
-#controls {
-  width: 90%;
-  min-height: 100px;
-  margin: 24px auto;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-}
+
 
 #filters > label {
   margin: 0px 16px 0px 8px;

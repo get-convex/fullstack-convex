@@ -6,14 +6,9 @@ import {
   useStablePaginatedQuery,
 } from '../hooks/useStableQuery'
 import { HeaderWithLogin } from '../components/login'
+import { Controls } from '../components/controls'
 import { Status, STATUS_VALUES, SortKey, SortOrder } from '../convex/schema'
-import {
-  SearchControl,
-  StatusControl,
-  ShowingCount,
-  NewTaskButton,
-  TaskListings,
-} from '../components/taskList'
+import { TaskListings } from '../components/taskList'
 import type { ChangeEventHandler, MouseEventHandler } from 'react'
 
 const PAGE_SIZE = 10
@@ -112,22 +107,14 @@ export default function App() {
 
   return (
     <main>
-      <HeaderWithLogin user={user} />
-      <div id="controls">
-        <SearchControl />
-        <StatusControl
+      <HeaderWithLogin user={user}>
+        <Controls
+          user={user}
           statusFilter={statusFilter}
           handleChangeFilter={handleChangeFilter}
         />
-        <div>
-          <ShowingCount
-            isLoading={loadStatus === 'LoadingMore'}
-            showing={loadedTasks?.length}
-            matching={matching}
-          />
-          <NewTaskButton user={user} />
-        </div>
-      </div>
+      </HeaderWithLogin>
+
       <TaskListings
         tasks={loadedTasks}
         isLoading={loadStatus === 'LoadingMore'}

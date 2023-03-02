@@ -1,10 +1,9 @@
 import React from 'react'
 import Link from 'next/link'
 import { Avatar } from '../components/login'
-import type { MouseEventHandler, ChangeEventHandler } from 'react'
-import { Status, STATUS_VALUES } from '../convex/schema'
+import type { MouseEventHandler } from 'react'
+import { Status } from '../convex/schema'
 import type { ListedTask } from '../convex/listTasks'
-import type { Document } from '../convex/_generated/dataModel'
 
 function TaskListing({ task }: { task: ListedTask }) {
   return (
@@ -93,89 +92,5 @@ export function TaskListings({
         {isLoading && <TaskListingsGhost />}
       </tbody>
     </table>
-  )
-}
-
-export function StatusControl({
-  statusFilter,
-  handleChangeFilter,
-}: {
-  statusFilter: Status[]
-  handleChangeFilter: ChangeEventHandler
-}) {
-  return (
-    <div id="filters">
-      {STATUS_VALUES.map((status) => (
-        <label key={`filter-${status}`}>
-          <input
-            key={status}
-            type="checkbox"
-            id={`filter-${status}`}
-            value={status}
-            onChange={handleChangeFilter}
-            checked={statusFilter.includes(status)}
-          />
-          {Status[status]}
-        </label>
-      ))}
-    </div>
-  )
-}
-
-export function ShowingCount({
-  isLoading,
-  showing,
-  matching,
-}: {
-  isLoading: boolean
-  showing?: number
-  matching?: number
-}) {
-  return (
-    <span id="showing">
-      {isLoading
-        ? '... ' // TODO should be a loading spinner or such
-        : ''}
-      {matching !== undefined &&
-        `Showing ${showing} of ${matching} task${matching === 1 ? '' : 's'}`}
-    </span>
-  )
-}
-
-export function NewTaskButton({ user }: { user?: Document<'users'> | null }) {
-  if (user === undefined) {
-    return (
-      <button className="pill-button ghost" id="new" disabled>
-        New Task
-      </button>
-    )
-  }
-  return (
-    <>
-      {user ? (
-        <Link href="/task/new">
-          <button className="pill-button" id="new">
-            New Task
-          </button>
-        </Link>
-      ) : (
-        <button
-          className="pill-button"
-          id="new"
-          title="Log in to create new tasks"
-          disabled
-        >
-          New Task
-        </button>
-      )}
-    </>
-  )
-}
-
-export function SearchControl() {
-  return (
-    <div id="search">
-      <input value="" onChange={() => null} placeholder="Search will be here" />
-    </div>
   )
 }

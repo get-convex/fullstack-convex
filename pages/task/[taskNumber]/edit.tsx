@@ -1,4 +1,5 @@
 import React from 'react'
+import Error from 'next/error'
 import { useQuery } from '../../../convex/_generated/react'
 import { HeaderWithLogin } from '../../../components/login'
 import { EditableTaskDetails } from '../../../components/taskDetails'
@@ -8,20 +9,17 @@ export default function EditTaskPage({ taskNumber }: { taskNumber: number }) {
   const user = useQuery('getCurrentUser')
   const task = useQuery('getTask', taskNumber) as Task
 
-  if (task === null)
-    return (
-      <main>
-        <h1>Task not found</h1>
-      </main>
-    )
+  if (task === null) return <Error statusCode={404} title="Task not found" />
+
   if (task) {
     const isOwner = user && task && user._id.equals(task.ownerId)
 
     if (!isOwner)
       return (
-        <main>
-          <h1>{'You do not have permission to edit this task'}</h1>
-        </main>
+        <Error
+          statusCode={403}
+          title="You do not have permission to edit this task"
+        />
       )
 
     return (

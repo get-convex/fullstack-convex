@@ -1,6 +1,7 @@
+import React, { FormEvent, useState } from 'react'
+import Error from 'next/error'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { FormEvent, useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
 import { Avatar } from './login'
 import { Comments, CommentsGhost } from './comments'
@@ -19,7 +20,10 @@ export function TaskDetails({
   const updateTask = useMutation('updateTask')
 
   if (task === undefined) return <TaskDetailsGhost />
-  if (task === null) return <p>Task not found</p> //TODO proper error
+  if (task === null)
+    return (
+      <Error statusCode={404} title="Task not found" withDarkMode={false} />
+    )
 
   function handleClaimTask() {
     const taskInfo = {
@@ -122,7 +126,7 @@ export function EditableTaskDetails({
   mutationName,
   initialTaskInfo,
 }: {
-  user: Document<'users'>
+  user: Document<'users'> | undefined
   mutationName: 'createTask' | 'updateTask'
   initialTaskInfo: Partial<Task>
 }) {
@@ -132,6 +136,8 @@ export function EditableTaskDetails({
   const { number: taskNumber, _creationTime: creationTime } = initialTaskInfo
 
   const [taskInfo, setTaskInfo] = useState(initialTaskInfo)
+
+  if (user === undefined) return <TaskDetailsGhost />
 
   const isOwner = user._id.equals(taskInfo.ownerId)
   const isPublic = taskInfo.visibility === Visibility.PUBLIC

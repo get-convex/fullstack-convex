@@ -48,7 +48,7 @@ export function ErrorFallback({ error }: { error: Error }) {
       <div role="alert">
         <HeaderWithLogin user={null} />
         <div className="error">
-          <h3>Oops! The application encountered an error</h3>
+          <h3>Oops! Unexpected error</h3>
           <pre>{getTitle(name, message, location)}</pre>
           <p>
             (Optional)&nbsp;Let the team know about this problem by submitting

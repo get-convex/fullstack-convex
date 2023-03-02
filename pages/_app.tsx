@@ -22,9 +22,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           // So for the logged-out case where users can still read some public data,
           // we need to explicitly wrap the logged-out app in a regular ConvexProvider
           <ConvexProvider client={convex}>
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <Component {...pageProps} />
-            </ErrorBoundary>
+            <Component {...pageProps} />
           </ConvexProvider>
         }
       >

@@ -5,25 +5,23 @@ This example demonstrates a fullstack application built with Convex, React, Next
 The app is a very simple Asana-style task management app that allows users to create, view, and manage tasks. The app features:
 
 - [x] Basic Authentication & Authorization, implemented with Auth0 and Convex
-- [ ] Task creation, where each task may have:
-    - [x] Owner
-    - [x] Title
-    - [x] Description
-    - [x] Status (New | In Progress | Done | Cancelled)
-    - [ ] Comments
-    - [ ] File attachments (from a fixed collection to prevent abuse)
+- [x] Task creation, where each task may have:
+  - [x] Owner
+  - [x] Title
+  - [x] Description
+  - [x] Status (New | In Progress | Done | Cancelled)
+  - [x] Comments
+  - [x] File attachments (from a fixed collection to prevent abuse)
 - [ ] Task management, allowing users/task owner to:
-    - [ ] Add a comment
-    - [ ] Change status (owner only)
-    - [ ] Reassign ownership (owner only)
+  - [x] Add a comment
+  - [x] Change status (owner only)
+  - [x] Reassign ownership (owner only)
 - [ ] Optional email reminders, set by the owner to be sent at a certain interval
 - [ ] Filter tasks by ticket status, creator, or owner
 - [ ] Search tasks by title, description, or comments
-- [ ] Infinite-scroll pagination to support very large task collections
+- [x] Infinite-scroll pagination to support very large task collections
 
-
-------
-
+---
 
 This application is built with Next.js, bootstrapped with [`create-next-app`](https://nextjs.org/docs/api-reference/create-next-app) and the official [Next.js `convex` example](https://github.com/vercel/next.js/tree/canary/examples/convex).
 

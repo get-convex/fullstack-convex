@@ -1,3 +1,4 @@
+import { Inter } from 'next/font/google'
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import React from 'react'
@@ -11,23 +12,27 @@ const address = process.env.NEXT_PUBLIC_CONVEX_URL
 if (!address) throw new Error('Convex URL not found')
 const convex = new ConvexReactClient(address)
 
+const inter = Inter({ subsets: ['latin'], variable: '--inter-font' })
+
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <ConvexProviderWithAuth0
-        client={convex}
-        authInfo={convexConfig.authInfo[0]}
-        loggedOut={
-          // ConvexProviderWithAuth0 only connects to Convex if the user is logged in.
-          // So for the logged-out case where users can still read some public data,
-          // we need to explicitly wrap the logged-out app in a regular ConvexProvider
-          <ConvexProvider client={convex}>
-            <Component {...pageProps} />
-          </ConvexProvider>
-        }
-      >
-        <Component {...pageProps} />
-      </ConvexProviderWithAuth0>
+      <div className={inter.className}>
+        <ConvexProviderWithAuth0
+          client={convex}
+          authInfo={convexConfig.authInfo[0]}
+          loggedOut={
+            // ConvexProviderWithAuth0 only connects to Convex if the user is logged in.
+            // So for the logged-out case where users can still read some public data,
+            // we need to explicitly wrap the logged-out app in a regular ConvexProvider
+            <ConvexProvider client={convex}>
+              <Component {...pageProps} />
+            </ConvexProvider>
+          }
+        >
+          <Component {...pageProps} />
+        </ConvexProviderWithAuth0>
+      </div>
     </ErrorBoundary>
   )
 }

@@ -8,7 +8,7 @@ function LogoutButton() {
   const { logout } = useAuth0()
   return (
     <button
-      className="btn-login"
+      className="dark"
       onClick={() => logout({ returnTo: window.location.origin })}
     >
       Log out
@@ -20,7 +20,7 @@ function LoginButton() {
   const { isLoading, loginWithRedirect } = useAuth0()
   return (
     <button
-      className="btn-login"
+      className="dark"
       title="Log in"
       disabled={isLoading}
       onClick={loginWithRedirect}
@@ -47,6 +47,7 @@ export function Avatar({
 }) {
   return (
     <Image
+      className="avatar"
       src={user.pictureUrl}
       width={size}
       height={size}
@@ -60,10 +61,10 @@ export function HeaderWithLogin({ user }: { user?: Document<'users'> | null }) {
   return (
     <header>
       <Link href="/">
-        <h1>Fullstack Task Manager</h1>
+        <h1>Tasks</h1>
       </Link>
       <div style={{ display: 'flex', gap: 10 }}>
-        {user && <Avatar user={user} size={50} />}
+        {user && <Avatar user={user} size={38} />}
         {user === undefined ? (
           <LoginGhost />
         ) : user ? (

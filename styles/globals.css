@@ -1,3 +1,4 @@
+/* Colors */
 /* reset */
 * {
   margin: 0;
@@ -6,23 +7,67 @@
   line-height: 1.5;
 }
 
+/* Colors */
+:root {
+  --color-black: #000000;
+  --color-dark: #292929;
+  --color-light: #ffffff;
+}
+
+.dark {
+  background-color: var(--color-dark);
+  color: var(--color-light);
+}
+
+/* General */
 body {
   font-size: 16px;
-  color:  #0F172A;
+  color: var(--color-black);
+  background-color: var(--color-light);
 }
 
 main {
-  padding-top: 1em;
-  padding-bottom: 1em;
-  width: min(900px, 95vw);
-  margin: 0 auto;
+  margin: 30px 33px;
 }
 
+/* Header */
 h1 {
-  text-align: center;
-  font-size: 36px;
-  font-weight: 500;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 29px;
+  line-height: 35px;
 }
+
+header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header a {
+  color: unset;
+  text-decoration: none;
+}
+
+/* Buttons */
+button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 4px 10px;
+  gap: 18px;
+  height: 38px;
+  border-radius: 6px;
+}
+
+/* Avatars */
+img.avatar {
+  border-radius: 100%;
+}
+
+/* TODO cleanup after redesign
+
 
 
 .badge {
@@ -147,13 +192,7 @@ input[type='checkbox'] {
   margin-right: 8px;
 }
 
-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
+
 
 img {
   border-radius: 100%;
@@ -258,6 +297,7 @@ tr:hover {
   background-color:  #E2E8F0;
 }
 
+
 #column-headers:hover {
   background-color: #ffffff;
   cursor: pointer;
@@ -335,4 +375,4 @@ tr:hover a {
   color: red;
   font-weight: bold;
 
-}
+} */

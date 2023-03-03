@@ -17,6 +17,14 @@ export function CaretDown() {
   )
 }
 
+export function CaretUp() {
+  return (
+    <div style={{ transform: 'rotate(180deg)' }}>
+      <CaretDown />
+    </div>
+  )
+}
+
 export function PaperClip() {
   return (
     <svg

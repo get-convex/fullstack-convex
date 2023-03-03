@@ -40,7 +40,7 @@ export default function App() {
     Status.New,
     Status['In Progress'],
   ])
-  const handleChangeFilter: ChangeEventHandler = (event) => {
+  const handleChangeStatus: ChangeEventHandler = (event) => {
     // Process a checkbox change event affecting the status filter
     const target = event.target as HTMLInputElement
     const { value, checked } = target
@@ -50,6 +50,16 @@ export default function App() {
       : // A formerly checked status filter is now unchecked; remove value from filter
         statusFilter.filter((s) => s !== +value)
     setStatusFilter(newFilter)
+  }
+
+  // Set up state & handler for filtering by owner
+  const [ownerFilter, setOwnerFilter] = useState(['anyone'])
+  const handleChangeOwner: ChangeEventHandler = (event) => {
+    const target = event.target as HTMLInputElement
+    const { value, checked } = target
+    if (checked) {
+      setOwnerFilter([value])
+    }
   }
 
   // Get the total number of tasks in the db that match the filters,
@@ -110,8 +120,13 @@ export default function App() {
       <HeaderWithLogin user={user}>
         <Controls
           user={user}
-          statusFilter={statusFilter}
-          handleChangeFilter={handleChangeFilter}
+          filters={{
+            status: { selected: statusFilter, onChange: handleChangeStatus },
+            owner: {
+              selected: ownerFilter,
+              onChange: handleChangeOwner,
+            },
+          }}
         />
       </HeaderWithLogin>
 

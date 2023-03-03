@@ -4,14 +4,18 @@
   margin: 0;
   padding: 0;
   border: 0;
-  line-height: 1.5;
 }
 
 /* Colors */
 :root {
   --color-black: #000000;
+  --color-off-white: #f5f5f5;
+  --color-light-grey: #d7d7d7;
+  --color-dark-grey: #6e6e6e;
+  --color-white: #ffffff;
+  --color-light-pink: #f4e9f1;
   --color-dark: #292929;
-  --color-light: #ffffff;
+  --color-light: var(--color-white);
 }
 
 .dark {
@@ -21,13 +25,18 @@
 
 /* General */
 body {
-  font-size: 16px;
+  font-size: 18px;
+  line-height: 30px;
   color: var(--color-black);
   background-color: var(--color-light);
 }
 
 main {
-  margin: 30px 33px;
+  margin: 0px 33px;
+}
+
+.hidden {
+  display: none;
 }
 
 /* Header */
@@ -39,10 +48,17 @@ h1 {
 }
 
 header {
+  height: 38px;
   width: 100%;
+  background-color: var(--color-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 50px;
+  padding-top: 30px;
+  position: sticky;
+  top: 0px;
+  left: 0px;
 }
 
 header a {
@@ -72,12 +88,49 @@ img.avatar {
 
 /* Controls */
 #controls {
-  margin: 24px auto;
+  margin: 0px 25px;
+  overflow-y: visible;
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 24px;
+  flex-grow: 1;
+}
+
+#controls > div {
+  height: 38px;
+  display: flex;
+  gap: 10px;
+}
+
+.select {
+  width: 153px;
+  color: var(--color-dark-grey);
+  background-color: var(--color-white);
+}
+
+.select-legend,
+.select-option {
+  height: 30px;
+  padding: 4px 10px;
+  display: flex;
+  gap: 1em;
+  align-items: center;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-light-grey);
+  border-bottom: 0px;
+}
+
+.select-legend {
+  justify-content: space-between;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.select > div:not(.hidden):last-of-type {
+  border-bottom: 1px solid var(--color-light-grey);
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
 }
 
 /* TODO cleanup after redesign

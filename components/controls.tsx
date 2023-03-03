@@ -1,32 +1,81 @@
-import React, { type ChangeEventHandler } from 'react'
+import React, { useState, type ChangeEventHandler } from 'react'
 import Link from 'next/link'
 import { Status, STATUS_VALUES } from '../convex/schema'
-import { Plus } from './icons'
+import { CaretDown, CaretUp, Plus } from './icons'
 import type { Document } from '../convex/_generated/dataModel'
 
-export function StatusControl({
-  statusFilter,
-  handleChangeFilter,
+type Value = string | number | Status
+
+interface FilterControl {
+  selected: Value[]
+  onChange: ChangeEventHandler
+}
+
+function Select({
+  name,
+  options,
+  selectedValues,
+  onChange,
+  labels,
 }: {
-  statusFilter: Status[]
-  handleChangeFilter: ChangeEventHandler
+  name: string
+  options: Value[]
+  selectedValues: Value[]
+  onChange: ChangeEventHandler
+  labels?: string[]
 }) {
+  const id = `select-${name}`
+  const isSelected = (value: Value) => selectedValues.includes(value)
+  const [showOptions, setShowOptions] = useState(false)
+  const optionLabels = labels || options
   return (
-    <div id="filters">
-      {STATUS_VALUES.map((status) => (
-        <label key={`filter-${status}`}>
-          <input
-            key={status}
-            type="checkbox"
-            id={`filter-${status}`}
-            value={status}
-            onChange={handleChangeFilter}
-            checked={statusFilter.includes(status)}
-          />
-          {Status[status]}
-        </label>
-      ))}
+    <div id={id} className="select">
+      {
+        <div
+          className="select-legend"
+          onClick={() => setShowOptions(!showOptions)}
+        >
+          {name} {showOptions ? <CaretUp /> : <CaretDown />}
+        </div>
+      }
+      {showOptions &&
+        options.map((v, i) => (
+          <div className="select-option" key={i}>
+            <input
+              type="checkbox"
+              id={`option-${v}`}
+              name={name}
+              value={v}
+              checked={isSelected(v)}
+              onChange={onChange}
+            />
+            <label htmlFor={`option-${v}`}>{optionLabels[i]}</label>
+          </div>
+        ))}
     </div>
+  )
+}
+
+export function StatusControl({ selected, onChange }: FilterControl) {
+  return (
+    <Select
+      name="Status"
+      options={STATUS_VALUES}
+      selectedValues={selected}
+      onChange={onChange}
+      labels={STATUS_VALUES.map((v) => Status[v])}
+    />
+  )
+}
+
+export function OwnerControl({ selected, onChange }: FilterControl) {
+  return (
+    <Select
+      name="Owner"
+      options={['me', 'nobody', 'anyone']}
+      selectedValues={selected}
+      onChange={onChange}
+    />
   )
 }
 
@@ -34,7 +83,8 @@ export function AddTaskButton({ user }: { user?: Document<'users'> | null }) {
   if (user === undefined) {
     return (
       <button className="ghost" id="new" disabled>
-        New Task
+        <Plus />
+        Add Task
       </button>
     )
   }
@@ -44,7 +94,7 @@ export function AddTaskButton({ user }: { user?: Document<'users'> | null }) {
         <Link href="/task/new">
           <button className="dark" id="new" title="Create a new task">
             <Plus />
-            New Task
+            Add Task
           </button>
         </Link>
       ) : (
@@ -54,20 +104,33 @@ export function AddTaskButton({ user }: { user?: Document<'users'> | null }) {
           title="Log in to create new tasks"
           disabled
         >
-          New Task
+          <Plus />
+          Add Task
         </button>
       )}
     </>
   )
 }
 
-export function Controls({ user, statusFilter, handleChangeFilter }) {
+export function Controls({
+  user,
+  filters,
+}: {
+  user: Document<'users'> | null | undefined
+  filters: { status: FilterControl; owner: FilterControl }
+}) {
   return (
     <div id="controls">
-      <StatusControl
-        statusFilter={statusFilter}
-        handleChangeFilter={handleChangeFilter}
-      />
+      <div>
+        <StatusControl
+          selected={filters.status.selected}
+          onChange={filters.status.onChange}
+        />
+        <OwnerControl
+          selected={filters.owner.selected}
+          onChange={filters.owner.onChange}
+        />
+      </div>
       <AddTaskButton user={user} />
     </div>
   )

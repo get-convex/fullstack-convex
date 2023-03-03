@@ -6,9 +6,15 @@ import { Avatar } from '../components/login'
 import { PaperClip, TextBubble, CaretDown } from './icons'
 import type { ListedTask } from '../convex/listTasks'
 
-function StatusPill({ value }: { value: Status }) {
+function StatusPill({
+  value,
+  height = 23,
+}: {
+  value: Status
+  height?: number
+}) {
   return (
-    <div className={`status-pill status-pill-${value}`}>
+    <div className={`status-pill status-pill-${value}`} style={{ height }}>
       {Status[value]} <CaretDown />
     </div>
   )

@@ -8,7 +8,7 @@ import {
 import { HeaderWithLogin } from '../components/login'
 import { Controls } from '../components/controls'
 import { Status, STATUS_VALUES, SortKey, SortOrder } from '../convex/schema'
-import { TaskListings } from '../components/taskList'
+import { TaskList } from '../components/taskList'
 import type { ChangeEventHandler, MouseEventHandler } from 'react'
 
 const PAGE_SIZE = 10
@@ -129,8 +129,7 @@ export default function App() {
           }}
         />
       </HeaderWithLogin>
-
-      <TaskListings
+      <TaskList
         tasks={loadedTasks}
         isLoading={loadStatus === 'LoadingMore'}
         handleChangeSort={handleChangeSort}

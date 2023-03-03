@@ -41,19 +41,32 @@ function LoginGhost() {
 export function Avatar({
   user,
   size = 30,
+  withName = false,
 }: {
   user: Document<'users'>
   size?: number
+  withName?: boolean
 }) {
+  let firstName = user.name.split(' ')[0]
+  if (firstName.indexOf('@') >= 0) {
+    firstName = firstName.split('@')[0]
+  }
   return (
-    <Image
-      className="avatar"
-      src={user.pictureUrl}
-      width={size}
-      height={size}
-      alt={user.name}
-      title={user.name}
-    />
+    <>
+      <Image
+        className="avatar"
+        src={user.pictureUrl}
+        width={size}
+        height={size}
+        alt={user.name}
+        title={user.name}
+      />
+      {withName && (
+        <span className="avatar-name" title={user.name}>
+          {firstName}
+        </span>
+      )}
+    </>
   )
 }
 

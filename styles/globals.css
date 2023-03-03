@@ -13,7 +13,11 @@
   --color-light-grey: #d7d7d7;
   --color-dark-grey: #6e6e6e;
   --color-white: #ffffff;
-  --color-light-pink: #f4e9f1;
+  --color-pink: #f4e9f1;
+  --color-yellow: #f8d077;
+  --color-light-red: #fcd6d5;
+  --color-green: #e5f3dc;
+  --color-purple: #e3d0df;
   --color-dark: #292929;
   --color-light: var(--color-white);
 }
@@ -131,6 +135,73 @@ img.avatar {
   border-bottom: 1px solid var(--color-light-grey);
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
+}
+
+/* Task list */
+.task-list-header,
+.task-listing {
+  display: grid;
+  grid-template-columns: 50px 1fr 125px 100px 50px 75px;
+  column-gap: 25px;
+  padding: 20px;
+}
+
+.task-list-header,
+.task-listing-owner,
+.task-listing-status {
+  font-size: 14px;
+  line-height: 17px;
+}
+
+.task-listing {
+  border-top: 1px solid var(--color-light-grey);
+}
+
+.task-listing a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.task-listing:hover {
+  background-color: var(--color-pink);
+}
+
+.task-listing > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.task-listing-owner {
+  overflow-x: hidden;
+}
+
+/* Task status */
+.status-pill {
+  height: 23px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  border: 2px solid var(--color-white);
+  border-radius: 40px;
+}
+
+.status-pill-0 {
+  background-color: var(--color-purple);
+}
+
+.status-pill-1 {
+  background-color: var(--color-yellow);
+}
+
+.status-pill-2 {
+  background-color: var(--color-green);
+}
+
+.status-pill-3 {
+  background-color: var(--color-light-red);
 }
 
 /* TODO cleanup after redesign

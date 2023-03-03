@@ -1,25 +1,41 @@
 import React from 'react'
 import Link from 'next/link'
-import { Avatar } from '../components/login'
 import type { MouseEventHandler } from 'react'
 import { Status } from '../convex/schema'
+import { Avatar } from '../components/login'
+import { PaperClip, TextBubble, CaretDown } from './icons'
 import type { ListedTask } from '../convex/listTasks'
+
+function StatusPill({ value }: { value: Status }) {
+  return (
+    <div className={`status-pill status-pill-${value}`}>
+      {Status[value]} <CaretDown />
+    </div>
+  )
+}
 
 function TaskListing({ task }: { task: ListedTask }) {
   return (
-    <tr key={task.number}>
-      <td>
+    <div className="task-listing" key={task.number}>
+      <div className="task-listing-number">
         <Link href={`/task/${task.number}`}>{task.number}</Link>
-      </td>
-      <td>
+      </div>
+      <div className="task-listing-title">
         <Link href={`/task/${task.number}`}>{task.title}</Link>
-      </td>
-      <td style={{ textAlign: 'center' }}>
-        {task.owner && <Avatar user={task.owner} size={30} />}
-      </td>
-      <td>{Status[task.status]}</td>
-      <td>{task.comments}</td>
-    </tr>
+      </div>
+      <div className="task-listing-status">
+        <StatusPill value={task.status} />
+      </div>
+      <div className="task-listing-owner">
+        {task.owner && <Avatar user={task.owner} size={23} withName={true} />}
+      </div>
+      <div className="task-listing-files">
+        <PaperClip /> 0{/*TODO */}
+      </div>
+      <div className="task-listing-comments">
+        <TextBubble /> {task.comments}
+      </div>
+    </div>
   )
 }
 
@@ -52,7 +68,7 @@ export function TaskListingsGhost() {
   )
 }
 
-export function TaskListings({
+export function TaskList({
   tasks,
   isLoading,
   handleChangeSort,
@@ -66,31 +82,34 @@ export function TaskListings({
   }
   const sortHandler = isLoading ? () => ({}) : handleChangeSort
   return (
-    <table>
-      <thead>
-        <tr id="column-headers">
-          <th id="number" onClick={sortHandler} style={{ minWidth: '2ch' }}>
-            #
-          </th>
-          <th id="title" onClick={sortHandler}>
-            Task
-          </th>
-          <th id="owner" onClick={sortHandler}>
-            Owner
-          </th>
-          <th id="status" onClick={sortHandler}>
-            Status
-          </th>
-          <th id="comments" onClick={sortHandler}>
-            Comments
-          </th>
-        </tr>
-      </thead>
-      <tbody>
+    <div className="task-list">
+      <div className="task-list-header">
+        <div id="number" onClick={sortHandler}>
+          #
+        </div>
+        <div id="title" onClick={sortHandler}>
+          Task
+        </div>
+        <div id="status" onClick={sortHandler}>
+          Status
+        </div>
+        <div id="owner" onClick={sortHandler}>
+          Owner
+        </div>
+        <div id="files">
+          {' '}
+          {/*TODO support sorting*/}
+          Files
+        </div>
+        <div id="comments" onClick={sortHandler}>
+          Comments
+        </div>
+      </div>
+      <div id="task-list-body">
         {tasks.length > 0 &&
           tasks.map((task) => <TaskListing key={task.number} task={task} />)}
         {isLoading && <TaskListingsGhost />}
-      </tbody>
-    </table>
+      </div>
+    </div>
   )
 }

@@ -12,6 +12,7 @@
   --color-off-white: #f5f5f5;
   --color-light-grey: #d7d7d7;
   --color-dark-grey: #6e6e6e;
+  --color-darkest-grey: #3f3f3f;
   --color-white: #ffffff;
   --color-pink: #f4e9f1;
   --color-yellow: #f8d077;
@@ -35,16 +36,54 @@ body {
   background-color: var(--color-light);
 }
 
-main {
-  margin: 0px 33px;
-}
-
 .hidden {
   display: none;
 }
 
-/* Header */
-h1 {
+/* Main layout & sidebar */
+.grid {
+  display: grid;
+  grid-template-rows: 70px calc(100vh - 70px);
+  gap: 30px;
+  margin-left: 30px;
+  overflow-x: scroll;
+}
+
+.with-sidebar {
+  grid-template-areas:
+    'head side'
+    'main side';
+  grid-template-columns: 1fr 500px;
+}
+
+.without-sidebar {
+  grid-template-areas:
+    'head'
+    'main';
+  grid-template-columns: 1fr;
+  margin-right: 30px;
+}
+
+aside {
+  grid-area: side;
+  background-color: var(--color-light);
+  padding: 30px 20px;
+  border-left: 1px solid var(--color-light-grey);
+  position: relative;
+}
+
+#close-sidebar {
+  color: var(--color-darkest-grey);
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Header toolbar */
+h1,
+h2 {
   font-style: normal;
   font-weight: 400;
   font-size: 29px;
@@ -52,16 +91,14 @@ h1 {
 }
 
 header {
+  grid-area: head;
   height: 38px;
-  width: 100%;
   background-color: var(--color-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 50px;
-  padding-top: 30px;
   position: sticky;
-  top: 0px;
+  top: 33px;
   left: 0px;
 }
 
@@ -85,8 +122,25 @@ button:hover {
   cursor: pointer;
 }
 
+.icon-button {
+  padding: 0px;
+  margin: 0px;
+  border-radius: 100%;
+  background-color: var(--color-light);
+  color: var(--color-darkest-grey);
+}
+
 /* Avatars */
-img.avatar {
+
+.avatar {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar img {
   border-radius: 100%;
 }
 
@@ -138,6 +192,10 @@ img.avatar {
 }
 
 /* Task list */
+.task-list {
+  grid-area: main;
+}
+
 .task-list-header,
 .task-listing {
   display: grid;
@@ -155,14 +213,11 @@ img.avatar {
 
 .task-listing {
   border-top: 1px solid var(--color-light-grey);
-}
-
-.task-listing a {
   color: inherit;
   text-decoration: none;
 }
 
-.task-listing:hover {
+.selected-task {
   background-color: var(--color-pink);
 }
 
@@ -182,9 +237,14 @@ img.avatar {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 6px;
+  padding: 3px 12px;
   border: 2px solid var(--color-white);
   border-radius: 40px;
+  flex-grow: 0;
+}
+
+.status-pill-editable:hover {
+  cursor: pointer;
 }
 
 .status-pill-0 {
@@ -201,6 +261,73 @@ img.avatar {
 
 .status-pill-3 {
   background-color: var(--color-light-red);
+}
+
+/* Task details in sidebar */
+
+#task-header {
+  position: relative;
+  top: 0px;
+  margin-bottom: 28px;
+}
+
+#task-number {
+  margin-right: 24px;
+}
+
+#task-header h2 span:not(.ghost) {
+  color: #475569;
+}
+
+#task-header h2 {
+  font-weight: normal;
+  font-size: 29px;
+}
+
+#task-info {
+  display: grid;
+  grid-template-columns: 20% 1fr;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  grid-gap: 24px;
+}
+
+#task-info h4 {
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 26px;
+  align-self: center;
+}
+
+#task-info > p,
+.owner-details {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  gap: 10px;
+}
+
+#task-description {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 30px;
+  margin-bottom: 35px;
+}
+
+/* Loading ghosts */
+
+.ghost {
+  color: #e2e8f0;
+  background-color: #e2e8f0;
+  border: 0px;
+}
+
+.avatar-ghost {
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
 }
 
 /* TODO cleanup after redesign
@@ -438,52 +565,6 @@ tr:hover a {
 #task-details {
   width: 90%;
   margin: 24px auto;
-}
-
-#task-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-#task-number {
-  margin-right: 24px;
-}
-
-#task-header h2 span:not(.ghost) {
-  color: #475569;
-}
-
-#task-header h2 {
-  font-weight: normal;
-  font-size: 2em;
-}
-
-#task-info {
-  display: grid;
-  grid-template-columns: 20% 1fr;
-  margin-top: 24px;
-  margin-bottom: 24px;
-  grid-gap: 24px;
-}
-
-#task-info > * {
-  min-height: 35px;
-}
-
-
-.ghost {
-  color: #E2E8F0;
-  background-color: #E2E8F0;
-  border: 0px;
-}
-
-.avatar-ghost {
-  width: 30px;
-  height: 30px;
-  border-radius: 100%;
 }
 
 .error {

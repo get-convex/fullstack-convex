@@ -52,9 +52,8 @@ export function Avatar({
     firstName = firstName.split('@')[0]
   }
   return (
-    <>
+    <div className="avatar">
       <Image
-        className="avatar"
         src={user.pictureUrl}
         width={size}
         height={size}
@@ -66,11 +65,26 @@ export function Avatar({
           {firstName}
         </span>
       )}
-    </>
+    </div>
   )
 }
 
-export function HeaderWithLogin({
+export function Login({ user }: { user?: Document<'users'> | null }) {
+  return (
+    <div style={{ display: 'flex', gap: 10 }}>
+      {user && <Avatar user={user} size={38} />}
+      {user === undefined ? (
+        <LoginGhost />
+      ) : user ? (
+        <LogoutButton />
+      ) : (
+        <LoginButton />
+      )}
+    </div>
+  )
+}
+
+export function Header({
   user,
   children,
 }: PropsWithChildren<{ user?: Document<'users'> | null }>) {
@@ -80,16 +94,7 @@ export function HeaderWithLogin({
         <h1>Tasks</h1>
       </Link>
       {children}
-      <div style={{ display: 'flex', gap: 10 }}>
-        {user && <Avatar user={user} size={38} />}
-        {user === undefined ? (
-          <LoginGhost />
-        ) : user ? (
-          <LogoutButton />
-        ) : (
-          <LoginButton />
-        )}
-      </div>
+      <Login user={user} />
     </header>
   )
 }

@@ -6,9 +6,11 @@ import { useMutation } from '../convex/_generated/react'
 import { Avatar } from './login'
 import { Comments, CommentsGhost } from './comments'
 import { Files } from './files'
+import { StatusPill } from './status'
 import { Status, STATUS_VALUES, Visibility } from '../convex/schema'
 import type { Task } from '../convex/getTask'
 import type { Document } from '../convex/_generated/dataModel'
+import { Calendar, CaretDown } from './icons'
 
 export function TaskDetails({
   task,
@@ -45,16 +47,17 @@ export function TaskDetails({
   }
 
   const isPublic = task?.visibility === Visibility.PUBLIC
-  const isOwner = user && user._id.equals(task?.ownerId)
+  const isOwner = user ? user._id.equals(task?.ownerId) : false
   const canChangeOwner = user && isPublic
   return (
-    <div id="task-details">
-      <div id="task-header">
-        <h2>
-          <span id="task-number">#{task.number}</span>
-          {task.title}
-        </h2>
-        <div>
+    <>
+      <div id="task-details">
+        <div id="task-header">
+          <h2>
+            <span id="task-number">{task.number}</span>
+            {task.title}
+          </h2>
+          {/* <div>
           <Link href={`/task/${task.number}/edit`}>
             <button
               className="pill-button"
@@ -68,56 +71,48 @@ export function TaskDetails({
               Edit task
             </button>
           </Link>
-        </div>
-      </div>
-
-      <div id="task-info">
-        <h4>Status</h4>
-        <p>
-          <span className="badge" title={`Status: ${Status[task.status]}`}>
-            {Status[task.status]}
-          </span>
-        </p>
-
-        <h4>Description</h4>
-        <p>{task.description}</p>
-
-        <h4>Owner</h4>
-        <div className="owner-details">
-          {task.owner && (
-            <>
-              <Avatar user={task.owner} />
-              {task.owner.name}
-            </>
-          )}
-          {canChangeOwner && (
-            <button
-              className="pill-button"
-              title={`${
-                isOwner ? 'Remove yourself as' : 'Make yourself'
-              } the owner of this task`}
-              onClick={isOwner ? handleUnclaimTask : handleClaimTask}
-            >
-              {isOwner ? 'Unclaim task' : 'Claim task'}
-            </button>
-          )}
+        </div> */}
         </div>
 
-        <h4>Visibility</h4>
-        <p>{task.visibility}</p>
+        <p id="task-description">{task.description}</p>
+        <div id="task-info">
+          <h4>Owner</h4>
+          <div className="owner-details">
+            {task.owner && <Avatar user={task.owner} withName={true} />}
+            {canChangeOwner && (
+              <button
+                className="icon-button"
+                title={`${
+                  isOwner ? 'Remove yourself as' : 'Make yourself'
+                } the owner of this task`}
+                onClick={isOwner ? handleUnclaimTask : handleClaimTask}
+              >
+                <CaretDown />
+              </button>
+            )}
+          </div>
 
-        <h4>Created</h4>
-        <p>
-          <span>{new Date(task._creationTime).toDateString()}</span>
-        </p>
+          <h4>Status</h4>
+          <p>
+            <StatusPill value={task.status} height={30} editable={isOwner} />
+          </p>
 
+          <h4>Visibility</h4>
+          <p>{task.visibility}</p>
+
+          <h4>Created</h4>
+          <p>
+            <Calendar />
+            {new Date(task._creationTime).toDateString()}
+          </p>
+        </div>
         <h4>Comments</h4>
         {task && <Comments user={user} taskId={task._id} />}
 
         <h4>Files</h4>
         {task && <Files user={user} taskId={task._id} />}
       </div>
-    </div>
+    </>
   )
 }
 
@@ -125,10 +120,12 @@ export function EditableTaskDetails({
   user,
   mutationName,
   initialTaskInfo,
+  setSelectedTask,
 }: {
   user: Document<'users'> | undefined
   mutationName: 'createTask' | 'updateTask'
   initialTaskInfo: Partial<Task>
+  setSelectedTask: React.Dispatch<React.SetStateAction<number | null>>
 }) {
   const router = useRouter()
   const saveTask = useMutation(mutationName)
@@ -152,6 +149,7 @@ export function EditableTaskDetails({
     delete taskInfo.owner // Un-join with owner object
     const task = await saveTask(taskInfo)
     router.push(`/task/${task.number}`)
+    setSelectedTask(task.number)
   }
 
   return (

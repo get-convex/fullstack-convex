@@ -1,34 +1,31 @@
 import React from 'react'
 import Link from 'next/link'
 import type { MouseEventHandler } from 'react'
-import { Status } from '../convex/schema'
-import { Avatar } from '../components/login'
-import { PaperClip, TextBubble, CaretDown } from './icons'
+import { Avatar } from './login'
+import { StatusPill } from './status'
+import { PaperClip, TextBubble } from './icons'
 import type { ListedTask } from '../convex/listTasks'
 
-function StatusPill({
-  value,
-  height = 23,
+function TaskListing({
+  task,
+  selectedTask,
+  handleSelectTask,
 }: {
-  value: Status
-  height?: number
+  task: ListedTask
+  selectedTask: number | null
+  handleSelectTask: MouseEventHandler
 }) {
   return (
-    <div className={`status-pill status-pill-${value}`} style={{ height }}>
-      {Status[value]} <CaretDown />
-    </div>
-  )
-}
-
-function TaskListing({ task }: { task: ListedTask }) {
-  return (
-    <div className="task-listing" key={task.number}>
-      <div className="task-listing-number">
-        <Link href={`/task/${task.number}`}>{task.number}</Link>
-      </div>
-      <div className="task-listing-title">
-        <Link href={`/task/${task.number}`}>{task.title}</Link>
-      </div>
+    <Link
+      href={`/task/${task.number}`}
+      className={`task-listing${
+        task.number === selectedTask ? ` selected-task` : ''
+      }`}
+      key={task.number}
+      onClick={handleSelectTask}
+    >
+      <div className="task-listing-number">{task.number}</div>
+      <div className="task-listing-title">{task.title}</div>
       <div className="task-listing-status">
         <StatusPill value={task.status} />
       </div>
@@ -41,7 +38,7 @@ function TaskListing({ task }: { task: ListedTask }) {
       <div className="task-listing-comments">
         <TextBubble /> {task.comments}
       </div>
-    </div>
+    </Link>
   )
 }
 
@@ -78,17 +75,23 @@ export function TaskList({
   tasks,
   isLoading,
   handleChangeSort,
+  selectedTask,
+  setSelectedTask,
 }: {
   tasks: ListedTask[]
   isLoading: boolean
   handleChangeSort: MouseEventHandler
+  selectedTask: number | null
+  setSelectedTask: React.Dispatch<React.SetStateAction<number | null>>
 }) {
   if (!tasks.length && !isLoading) {
     return <p>No matching tasks found</p>
   }
+
   const sortHandler = isLoading ? () => ({}) : handleChangeSort
+
   return (
-    <div className="task-list">
+    <main className="task-list">
       <div className="task-list-header">
         <div id="number" onClick={sortHandler}>
           #
@@ -113,9 +116,16 @@ export function TaskList({
       </div>
       <div id="task-list-body">
         {tasks.length > 0 &&
-          tasks.map((task) => <TaskListing key={task.number} task={task} />)}
+          tasks.map((task) => (
+            <TaskListing
+              key={task.number}
+              task={task}
+              selectedTask={selectedTask}
+              handleSelectTask={() => setSelectedTask(task.number)}
+            />
+          ))}
         {isLoading && <TaskListingsGhost />}
       </div>
-    </div>
+    </main>
   )
 }

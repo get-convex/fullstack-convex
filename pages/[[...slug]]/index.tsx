@@ -1,19 +1,25 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useMutation, useQuery } from '../convex/_generated/react'
+import { useMutation, useQuery } from '../../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
   useStableQuery,
   useStablePaginatedQuery,
-} from '../hooks/useStableQuery'
-import { HeaderWithLogin } from '../components/login'
-import { Controls } from '../components/controls'
-import { Status, STATUS_VALUES, SortKey, SortOrder } from '../convex/schema'
-import { TaskList } from '../components/taskList'
+} from '../../hooks/useStableQuery'
+import { Header } from '../../components/login'
+import { Controls } from '../../components/controls'
+import { Status, STATUS_VALUES, SortKey, SortOrder } from '../../convex/schema'
+import { TaskList } from '../../components/taskList'
+import { NewTaskSidebar, TaskDetailSidebar } from '../../components/sidebar'
 import type { ChangeEventHandler, MouseEventHandler } from 'react'
+import Head from 'next/head'
 
 const PAGE_SIZE = 10
 
-export default function App() {
+export default function App({
+  taskNumber,
+}: {
+  taskNumber: number | 'new' | null
+}) {
   // Check if the user is logged in with Auth0 for full write access
   // If user is not logged in, they can still read some data
   const { user: auth0User } = useAuth0()
@@ -34,6 +40,20 @@ export default function App() {
     }
     createUser().catch(console.error)
   }, [saveUser, auth0User])
+
+  // Set up sidebar to show selected task details
+  const [selectedTask, setSelectedTask] = useState(
+    typeof taskNumber === 'number' ? taskNumber : null
+  )
+  const task = useQuery('getTask', selectedTask)
+  const isSidebarOpen = !!taskNumber
+
+  const pageTitle =
+    taskNumber === 'new'
+      ? 'New Task'
+      : selectedTask && task
+      ? task.title
+      : 'Fullstack Task Manager'
 
   // Set up state & handler for filtering by status values
   const [statusFilter, setStatusFilter] = useState([
@@ -116,25 +136,56 @@ export default function App() {
   }, [bottomElem, loadMore])
 
   return (
-    <main>
-      <HeaderWithLogin user={user}>
-        <Controls
-          user={user}
-          filters={{
-            status: { selected: statusFilter, onChange: handleChangeStatus },
-            owner: {
-              selected: ownerFilter,
-              onChange: handleChangeOwner,
-            },
-          }}
+    <>
+      <Head>
+        <title>{pageTitle}</title>
+      </Head>
+      <div
+        className={`grid ${isSidebarOpen ? 'with-sidebar' : 'without-sidebar'}`}
+      >
+        <Header user={user}>
+          <Controls
+            user={user}
+            filters={{
+              status: { selected: statusFilter, onChange: handleChangeStatus },
+              owner: {
+                selected: ownerFilter,
+                onChange: handleChangeOwner,
+              },
+            }}
+          />
+        </Header>
+        <TaskList
+          tasks={loadedTasks}
+          isLoading={loadStatus === 'LoadingMore'}
+          handleChangeSort={handleChangeSort}
+          selectedTask={selectedTask}
+          setSelectedTask={setSelectedTask}
         />
-      </HeaderWithLogin>
-      <TaskList
-        tasks={loadedTasks}
-        isLoading={loadStatus === 'LoadingMore'}
-        handleChangeSort={handleChangeSort}
-      />
+        {isSidebarOpen &&
+          (taskNumber === 'new' ? (
+            <NewTaskSidebar user={user} setSelectedTask={setSelectedTask} />
+          ) : (
+            <TaskDetailSidebar
+              user={user}
+              task={task}
+              setSelectedTask={setSelectedTask}
+            />
+          ))}
+      </div>
       <div ref={bottom} />
-    </main>
+    </>
   )
+}
+
+export async function getServerSideProps({
+  params,
+}: {
+  params: { slug?: string[] }
+}) {
+  // Capture the dynamic route segment [taskNumber] (trickier to do client side)
+  const [, taskNumber] = params.slug || []
+  return {
+    props: { taskNumber: +taskNumber || null },
+  }
 }

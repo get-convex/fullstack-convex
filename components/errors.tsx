@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useRouter, type NextRouter } from 'next/router'
-import { HeaderWithLogin } from './login'
+import { Header } from './login'
 
 const getTitle = (name: string, message: string, location?: string) =>
   `${name}: ${message}${location ? ` (${location})` : ''}`
@@ -46,7 +46,7 @@ export function ErrorFallback({ error }: { error: Error }) {
   return (
     <main>
       <div role="alert">
-        <HeaderWithLogin user={null} />
+        <Header user={null} />
         <div className="error">
           <h3>Oops! Unexpected error</h3>
           <pre>{getTitle(name, message, location)}</pre>

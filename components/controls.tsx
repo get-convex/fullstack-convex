@@ -11,7 +11,7 @@ interface FilterControl {
   onChange: ChangeEventHandler
 }
 
-function Select({
+export function Select({
   name,
   options,
   selectedValues,

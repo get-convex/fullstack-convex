@@ -42,7 +42,10 @@ export function TaskDetails({
   }
 
   function saveChanges(taskInfo: Partial<Task>) {
-    delete taskInfo.owner // Un-join with owner object
+    // Un-join data from users, comments, & files tables
+    delete taskInfo.owner
+    delete taskInfo.commentList
+    delete taskInfo.fileList
     updateTask(taskInfo)
   }
 
@@ -97,12 +100,12 @@ export function TaskDetails({
 
         <div>
           <h4>Comments</h4>
-          {task && <Comments user={user} taskId={task._id} />}
+          {task && <Comments user={user} task={task} />}
         </div>
 
         <div>
           <h4>Files</h4>
-          {task && <Files user={user} taskId={task._id} />}
+          {task && <Files user={user} task={task} />}
         </div>
       </div>
     </>
@@ -113,12 +116,12 @@ export function EditableTaskDetails({
   user,
   mutationName,
   initialTaskInfo,
-  setSelectedTask,
+  onSave,
 }: {
   user: Document<'users'> | undefined
   mutationName: 'createTask' | 'updateTask'
   initialTaskInfo: Partial<Task>
-  setSelectedTask: React.Dispatch<React.SetStateAction<number | null>>
+  onSave: (taskID: number) => void
 }) {
   const router = useRouter()
   const saveTask = useMutation(mutationName)
@@ -142,7 +145,7 @@ export function EditableTaskDetails({
     delete taskInfo.owner // Un-join with owner object
     const task = await saveTask(taskInfo)
     router.push(`/task/${task.number}`)
-    setSelectedTask(task.number)
+    onSave(task.number)
   }
 
   return (

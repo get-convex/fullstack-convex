@@ -164,12 +164,16 @@ export default function App({
         />
         {isSidebarOpen &&
           (taskNumber === 'new' ? (
-            <NewTaskSidebar user={user} setSelectedTask={setSelectedTask} />
+            <NewTaskSidebar
+              user={user}
+              onDismiss={() => setSelectedTask(null)}
+              onSave={(taskNumber) => setSelectedTask(taskNumber)}
+            />
           ) : (
             <TaskDetailSidebar
               user={user}
               task={task}
-              setSelectedTask={setSelectedTask}
+              onDismiss={() => setSelectedTask(null)}
             />
           ))}
       </div>

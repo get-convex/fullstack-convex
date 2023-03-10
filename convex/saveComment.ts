@@ -1,7 +1,7 @@
 import { Id } from './_generated/dataModel'
 import { mutation } from './_generated/server'
 import { findUser } from './getCurrentUser'
-import { findCommentsByTask } from './listComments'
+import { findByTask } from './getTask'
 import { countResults } from './countTasks'
 
 export default mutation(
@@ -18,7 +18,7 @@ export default mutation(
 
     // Update the denormalized comment count in the tasks table
     // (used for indexing to support ordering by comment count)
-    const comments = await countResults(findCommentsByTask(db, taskId))
+    const comments = await countResults(findByTask(db, taskId, 'comments'))
 
     await db.patch(taskId, { comments })
   }

@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { useQuery, useMutation } from '../convex/_generated/react'
+import { useMutation } from '../convex/_generated/react'
 import type { FormEvent } from 'react'
 import { Avatar } from './login'
-import type { Document, Id } from '../convex/_generated/dataModel'
-import type { Comment } from '../convex/listComments'
+import type { Document } from '../convex/_generated/dataModel'
+import type { Task, Comment } from '../convex/getTask'
 
 export function showTimeAgo(created: Date) {
   const now = Date.now()
@@ -45,26 +45,25 @@ function CommentList({ comments }: { comments: Comment[] }) {
 
 export function Comments({
   user,
-  taskId,
+  task,
 }: {
   user?: Document<'users'> | null
-  taskId: Id<'tasks'>
+  task: Task
 }) {
-  const comments = useQuery('listComments', taskId)
   const saveComment = useMutation('saveComment')
   const [newComment, setNewComment] = useState('')
 
   async function handleAddComment(event: FormEvent) {
     event.preventDefault()
     setNewComment('')
-    await saveComment(taskId, newComment.trim())
+    await saveComment(task._id, newComment.trim())
   }
 
   const invalid = !newComment.trim()
 
   return (
     <div>
-      {comments && <CommentList comments={comments} />}
+      {task.commentList && <CommentList comments={task.commentList} />}
       {user && (
         <form style={{ margin: '8px 16px' }} onSubmit={handleAddComment}>
           <input

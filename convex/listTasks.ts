@@ -2,10 +2,9 @@ import { query, type DatabaseReader } from './_generated/server'
 import { findUser } from './getCurrentUser'
 import type { Document } from './_generated/dataModel'
 import { Visibility } from './schema'
-import { Task } from './getTask'
 import { Status, SortKey, SortOrder } from './schema'
 
-export interface ListedTask extends Task {
+export interface ListedTask extends Document<'tasks'> {
   comments: number
 }
 

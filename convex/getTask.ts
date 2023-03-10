@@ -1,14 +1,36 @@
-import { query } from './_generated/server'
-import { Document } from './_generated/dataModel'
+import { query, type DatabaseReader } from './_generated/server'
+import type { Document, Id } from './_generated/dataModel'
 import { Visibility } from './schema'
+
+export interface Comment extends Document<'comments'> {
+  author: Document<'users'>
+}
+
+export interface File extends Document<'files'> {
+  author: Document<'users'>
+  url: string
+  size: number
+}
 
 export interface Task extends Document<'tasks'> {
   owner: Document<'users'> | null
+  commentList: Comment[]
+  fileList: File[]
+}
+
+// Expose this as its own function for reusability in other queries
+export function findByTask(
+  db: DatabaseReader,
+  taskId: Id<'tasks'>,
+  table: 'comments' | 'files'
+) {
+  return db.query(table).withIndex('by_task', (q) => q.eq('taskId', taskId))
 }
 
 export default query(
-  async ({ db, auth }, taskNumber: number | 'new' | null) => {
-    if (typeof taskNumber !== 'number') return null
+  async ({ db, auth, storage }, taskNumber: number | 'new' | null) => {
+    if (!taskNumber || typeof taskNumber !== 'number') return null
+
     const identity = await auth.getUserIdentity()
     const task = await db
       .query('tasks')
@@ -16,6 +38,7 @@ export default query(
       .unique()
     if (!task) return null
 
+    // Join with users table
     const owner = task.ownerId && (await db.get(task.ownerId))
 
     if (task.visibility === Visibility.PRIVATE) {
@@ -24,6 +47,38 @@ export default query(
         throw new Error('You do not have permission to view this task')
     }
 
-    return { ...task, owner }
+    // Join with comments table
+    const comments = await findByTask(db, task._id, 'comments').collect()
+    const commentList = (await Promise.all(
+      comments.map(async (c) => {
+        const author = await db.get(c.userId)
+        if (!author) throw new Error('Comment author not found')
+        return { ...c, author }
+      })
+    )) as Comment[]
+
+    // Join with files table
+    const files = await findByTask(db, task._id, 'files').collect()
+    const fileList = (await Promise.all(
+      files.map(async (f) => {
+        const author = await db.get(f.userId)
+        if (!author) throw new Error('File author not found')
+
+        const url = await storage.getUrl(f.storageId)
+        if (!url)
+          throw new Error('Error loading file URL; does the file still exist?')
+
+        const metadata = await storage.getMetadata(f.storageId)
+        if (!metadata)
+          throw new Error(
+            'Error loading file metadata; does the file still exist?'
+          )
+        const { size } = metadata
+
+        return { ...f, author, url, size }
+      })
+    )) as File[]
+
+    return { ...task, owner, commentList, fileList }
   }
 )

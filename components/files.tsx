@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react'
 import Link from 'next/link'
-import { useQuery, useMutation } from '../convex/_generated/react'
+import { useMutation } from '../convex/_generated/react'
 import { Avatar } from './login'
-import { FileAttachment } from '../convex/listFiles'
 import { showTimeAgo } from './comments'
 import type { FormEvent } from 'react'
 import { Id, type Document } from '../convex/_generated/dataModel'
+import type { Task, File } from '../convex/getTask'
 
 function showFileSize(size: number) {
   if (size < 1024) return `${Math.round(size)} B`
@@ -35,7 +35,7 @@ function FileListing({
   user,
   handleDeleteFile,
 }: {
-  file: FileAttachment
+  file: File
   user?: Document<'users'> | null
   handleDeleteFile: (id: Id<'files'>) => void
 }) {
@@ -120,12 +120,11 @@ function FileUploading({
 
 export function Files({
   user,
-  taskId,
+  task,
 }: {
   user?: Document<'users'> | null
-  taskId: Id<'tasks'>
+  task: Task
 }) {
-  const files = useQuery('listFiles', taskId)
   const generateUploadUrl = useMutation('saveFile:generateUploadUrl')
   const saveFile = useMutation('saveFile')
 
@@ -161,15 +160,15 @@ export function Files({
     })
     const { storageId } = await result.json()
 
-    await saveFile(taskId, storageId, newFile.name, newFile.type)
+    await saveFile(task._id, storageId, newFile.name, newFile.type)
     setUploading({ name: '', type: '' })
   }
 
   return (
     <div>
       <ul className="files">
-        {files &&
-          files.map((file, i) => (
+        {task.fileList &&
+          task.fileList.map((file, i) => (
             <FileListing
               key={i}
               file={file}

@@ -1,10 +1,12 @@
 import { query } from './_generated/server'
 import { findUser } from './getCurrentUser'
 import { findMatchingTasks } from './listTasks'
-import type { GenericTableInfo, OrderedQuery } from 'convex/server'
+import type { GenericTableInfo, OrderedQuery, Query } from 'convex/server'
 import { Status } from './schema'
 
-export async function countResults(query: OrderedQuery<GenericTableInfo>) {
+export async function countResults(
+  query: OrderedQuery<GenericTableInfo> | Query<GenericTableInfo>
+) {
   // If we don't actually care about the task documents, rather
   // than calling .collect() we run through the iterator directly
   let count = 0

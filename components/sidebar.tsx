@@ -8,9 +8,9 @@ import type { Document } from '../convex/_generated/dataModel'
 import type { Task } from '../convex/getTask'
 
 export function Sidebar({
-  onClose,
+  onDismiss,
   children,
-}: PropsWithChildren<{ onClose: MouseEventHandler }>) {
+}: PropsWithChildren<{ onDismiss: MouseEventHandler }>) {
   return (
     <aside id="sidebar" role="dialog" aria-label="Task details">
       {children}
@@ -20,7 +20,7 @@ export function Sidebar({
         className="icon-button"
         aria-label="Close task details"
         href="/"
-        onClick={onClose}
+        onClick={onDismiss}
       >
         <CircledX />
       </Link>
@@ -31,14 +31,14 @@ export function Sidebar({
 export function TaskDetailSidebar({
   task,
   user,
-  setSelectedTask,
+  onDismiss,
 }: {
-  setSelectedTask: React.Dispatch<React.SetStateAction<number | null>>
+  onDismiss: MouseEventHandler
   task?: Task | null
   user?: Document<'users'> | null
 }) {
   return (
-    <Sidebar onClose={() => setSelectedTask(null)}>
+    <Sidebar onDismiss={onDismiss}>
       <TaskDetails task={task} user={user} />
     </Sidebar>
   )
@@ -46,9 +46,11 @@ export function TaskDetailSidebar({
 
 export function NewTaskSidebar({
   user,
-  setSelectedTask,
+  onDismiss,
+  onSave,
 }: {
-  setSelectedTask: React.Dispatch<React.SetStateAction<number | null>>
+  onDismiss: MouseEventHandler
+  onSave: (taskID: number) => void
   user?: Document<'users'> | null
 }) {
   if (!user) throw new Error('You must be logged in to create a task')
@@ -59,12 +61,12 @@ export function NewTaskSidebar({
   } as Partial<Document<'tasks'>>
 
   return (
-    <Sidebar onClose={() => setSelectedTask(null)}>
+    <Sidebar onDismiss={onDismiss}>
       <EditableTaskDetails
         user={user}
         initialTaskInfo={newTaskInfo}
         mutationName="createTask"
-        setSelectedTask={setSelectedTask}
+        onSave={onSave}
       />
     </Sidebar>
   )

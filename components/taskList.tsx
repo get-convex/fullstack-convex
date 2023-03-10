@@ -5,12 +5,15 @@ import { Avatar } from './login'
 import { StatusPill } from './status'
 import { PaperClip, TextBubble } from './icons'
 import type { ListedTask } from '../convex/listTasks'
+import type { Document } from '../convex/_generated/dataModel'
 
 function TaskListing({
+  user,
   task,
   selectedTask,
   handleSelectTask,
 }: {
+  user?: Document<'users'> | null
   task: ListedTask
   selectedTask: number | null
   handleSelectTask: MouseEventHandler
@@ -27,7 +30,10 @@ function TaskListing({
       <div className="task-listing-number">{task.number}</div>
       <div className="task-listing-title">{task.title}</div>
       <div className="task-listing-status">
-        <StatusPill value={task.status} />
+        <StatusPill
+          value={task.status}
+          editable={!!user && user._id.equals(task.ownerId)}
+        />
       </div>
       <div className="task-listing-owner">
         {task.owner && <Avatar user={task.owner} size={23} withName={true} />}
@@ -46,38 +52,27 @@ export function TaskListingsGhost() {
   return (
     <>
       {[0, 1, 2, 3, 4].map((key) => (
-        <tr key={key}>
-          <td>
-            <p className="ghost">00</p>
-          </td>
-          <td>
-            <p className="ghost">..................................</p>
-          </td>
-          <td>
-            <div
-              className="ghost avatar-ghost"
-              style={{ margin: '0px auto' }}
-            />
-          </td>
-          <td>
-            <p className="ghost">private</p>
-          </td>
-          <td>
-            <p className="ghost">0</p>
-          </td>
-        </tr>
+        <div key={key}>
+          <p className="ghost">00</p>
+          <p className="ghost">..................................</p>
+          <div className="ghost avatar-ghost" style={{ margin: '0px auto' }} />
+          {/* <p className="ghost">private</p>
+            <p className="ghost">0</p> */}
+        </div>
       ))}
     </>
   )
 }
 
 export function TaskList({
+  user,
   tasks,
   isLoading,
   handleChangeSort,
   selectedTask,
   setSelectedTask,
 }: {
+  user?: Document<'users'> | null
   tasks: ListedTask[]
   isLoading: boolean
   handleChangeSort: MouseEventHandler
@@ -119,6 +114,7 @@ export function TaskList({
           tasks.map((task) => (
             <TaskListing
               key={task.number}
+              user={user}
               task={task}
               selectedTask={selectedTask}
               handleSelectTask={() => setSelectedTask(task.number)}

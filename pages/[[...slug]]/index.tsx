@@ -156,6 +156,7 @@ export default function App({
           />
         </Header>
         <TaskList
+          user={user}
           tasks={loadedTasks}
           isLoading={loadStatus === 'LoadingMore'}
           handleChangeSort={handleChangeSort}

@@ -51,13 +51,14 @@ function TaskListing({
 export function TaskListingsGhost() {
   return (
     <>
-      {[0, 1, 2, 3, 4].map((key) => (
-        <div key={key}>
-          <p className="ghost">00</p>
-          <p className="ghost">..................................</p>
-          <div className="ghost avatar-ghost" style={{ margin: '0px auto' }} />
-          {/* <p className="ghost">private</p>
-            <p className="ghost">0</p> */}
+      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((key) => (
+        <div className="task-listing" key={key}>
+          <div className="task-listing-number ghost">..</div>
+          <div className="task-listing-title ghost">......</div>
+          <div className="task-listing-status ghost">......</div>
+          <div className="task-listing-owner ghost">.....</div>
+          <div className="task-listing-files ghost">..</div>
+          <div className="task-listing-comments ghost">..</div>
         </div>
       ))}
     </>

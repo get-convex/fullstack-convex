@@ -4,7 +4,7 @@ import { CaretDown } from './icons'
 
 export function StatusPill({
   value,
-  height = 23,
+  height = 20,
   editable = false,
 }: {
   value: Status

@@ -52,65 +52,58 @@ export function TaskDetails({
   return (
     <>
       <div id="task-details">
-        <div id="task-header">
-          <h2>
-            <span id="task-number">{task.number}</span>
-            {task.title}
-          </h2>
-          {/* <div>
-          <Link href={`/task/${task.number}/edit`}>
-            <button
-              className="pill-button"
-              title={
-                isOwner
-                  ? 'Edit task details'
-                  : 'Only the task owner can edit this task'
-              }
-              disabled={!isOwner}
-            >
-              Edit task
-            </button>
-          </Link>
-        </div> */}
-        </div>
-
-        <p id="task-description">{task.description}</p>
-        <div id="task-info">
-          <h4>Owner</h4>
-          <div className="owner-details">
-            {task.owner && <Avatar user={task.owner} withName={true} />}
-            {canChangeOwner && (
-              <button
-                className="icon-button"
-                title={`${
-                  isOwner ? 'Remove yourself as' : 'Make yourself'
-                } the owner of this task`}
-                onClick={isOwner ? handleUnclaimTask : handleClaimTask}
-              >
-                <CaretDown />
-              </button>
-            )}
+        <div>
+          <div id="task-header">
+            <h2>
+              <span id="task-number">{task.number}</span>
+              {task.title}
+            </h2>
           </div>
 
-          <h4>Status</h4>
-          <p>
-            <StatusPill value={task.status} height={30} editable={isOwner} />
-          </p>
+          <p id="task-description">{task.description}</p>
+          <div id="task-info">
+            <h4>Owner</h4>
+            <div className="owner-details">
+              {task.owner && <Avatar user={task.owner} withName={true} />}
+              {canChangeOwner && (
+                <button
+                  className="icon-button"
+                  title={`${
+                    //TODO this should be a drop down
+                    isOwner ? 'Remove yourself as' : 'Make yourself'
+                  } the owner of this task`}
+                  onClick={isOwner ? handleUnclaimTask : handleClaimTask}
+                >
+                  <CaretDown />
+                </button>
+              )}
+            </div>
 
-          <h4>Visibility</h4>
-          <p>{task.visibility}</p>
+            <h4>Status</h4>
+            <div>
+              <StatusPill value={task.status} height={30} editable={isOwner} />
+            </div>
 
-          <h4>Created</h4>
-          <p>
-            <Calendar />
-            {new Date(task._creationTime).toDateString()}
-          </p>
+            <h4>Visibility</h4>
+            <div>{task.visibility}</div>
+
+            <h4>Created</h4>
+            <div>
+              <Calendar />
+              {new Date(task._creationTime).toDateString()}
+            </div>
+          </div>
         </div>
-        <h4>Comments</h4>
-        {task && <Comments user={user} taskId={task._id} />}
 
-        <h4>Files</h4>
-        {task && <Files user={user} taskId={task._id} />}
+        <div>
+          <h4>Comments</h4>
+          {task && <Comments user={user} taskId={task._id} />}
+        </div>
+
+        <div>
+          <h4>Files</h4>
+          {task && <Files user={user} taskId={task._id} />}
+        </div>
       </div>
     </>
   )

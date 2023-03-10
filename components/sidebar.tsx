@@ -1,7 +1,6 @@
 import React from 'react'
 import type { PropsWithChildren, MouseEventHandler } from 'react'
 import Link from 'next/link'
-import Head from 'next/head'
 import { CircledX } from './icons'
 import { EditableTaskDetails, TaskDetails } from './taskDetails'
 import { Status, Visibility } from '../convex/schema'

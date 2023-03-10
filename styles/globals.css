@@ -42,11 +42,12 @@ body {
 
 /* Main layout & sidebar */
 .grid {
+  height: calc(100vh);
+  width: 100%;
   display: grid;
-  grid-template-rows: 70px calc(100vh - 70px);
-  gap: 30px;
-  margin-left: 30px;
-  overflow-x: scroll;
+  grid-template-rows: 70px 1fr;
+  margin: 0px;
+  overflow: scroll;
 }
 
 .with-sidebar {
@@ -61,15 +62,16 @@ body {
     'head'
     'main';
   grid-template-columns: 1fr;
-  margin-right: 30px;
 }
 
 aside {
   grid-area: side;
   background-color: var(--color-light);
-  padding: 30px 20px;
+  padding: 33px 30px 30px 30px;
   border-left: 1px solid var(--color-light-grey);
   position: relative;
+  height: 100vh;
+  overflow: scroll;
 }
 
 #close-sidebar {
@@ -97,14 +99,18 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
-  top: 33px;
-  left: 0px;
+  margin-top: 33px;
 }
 
 header a {
   color: unset;
   text-decoration: none;
+}
+
+header,
+main {
+  margin-left: 30px;
+  margin-right: 30px;
 }
 
 /* Buttons */
@@ -153,6 +159,7 @@ button:hover {
   align-items: center;
   gap: 24px;
   flex-grow: 1;
+  z-index: 1;
 }
 
 #controls > div {
@@ -194,6 +201,14 @@ button:hover {
 /* Task list */
 .task-list {
   grid-area: main;
+  overflow: scroll;
+}
+
+.task-list-header {
+  position: sticky;
+  top: 0px;
+  left: 0px;
+  background-color: var(--color-light);
 }
 
 .task-list-header,
@@ -269,6 +284,7 @@ button:hover {
   position: relative;
   top: 0px;
   margin-bottom: 28px;
+  margin-right: 30px;
 }
 
 #task-number {

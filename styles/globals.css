@@ -10,7 +10,9 @@
 :root {
   --color-black: #000000;
   --color-off-white: #f5f5f5;
+  --color-lightest-grey: #f9f9f9;
   --color-light-grey: #d7d7d7;
+  --color-grey: #797979;
   --color-dark-grey: #6e6e6e;
   --color-darkest-grey: #3f3f3f;
   --color-white: #ffffff;
@@ -342,6 +344,69 @@ button:hover {
   font-size: 18px;
   line-height: 30px;
   margin-bottom: 35px;
+}
+
+/* Comments */
+
+#task-comments,
+#comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.comment-listing,
+#new-comment {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.comment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 14px;
+  line-height: 17px;
+  max-width: calc(100% - 40px);
+}
+
+.comment-info span {
+  color: var(--color-grey);
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+.comment-info p {
+  word-wrap: break-word;
+}
+
+#new-comment {
+  color: var(--color-grey);
+}
+
+#new-comment-text {
+  font-family: inherit;
+  background-color: var(--color-lightest-grey);
+  flex-grow: 2;
+  padding: 11px 17px;
+  border: 1px solid var(--color-light-grey);
+  border-radius: 6px;
+}
+
+#more-comments {
+  color: var(--color-dark);
+  font-size: 14px;
+  line-height: 17px;
+}
+
+#more-comments > button {
+  background-color: var(--color-light);
+  border: 1px solid var(--color-light-grey);
+  height: 24px;
+  padding: 2px 11px;
 }
 
 /* Loading ghosts */

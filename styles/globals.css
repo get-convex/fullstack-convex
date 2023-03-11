@@ -381,6 +381,7 @@ button:hover {
 
 .comment-info p {
   word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 #new-comment {
@@ -394,6 +395,7 @@ button:hover {
   padding: 11px 17px;
   border: 1px solid var(--color-light-grey);
   border-radius: 6px;
+  resize: none;
 }
 
 #more-comments {

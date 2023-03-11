@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
-import type { FormEvent } from 'react'
+import type { FormEventHandler, KeyboardEventHandler } from 'react'
 import { Avatar } from './login'
 import { ArrowUp } from './icons'
 import type { Document } from '../convex/_generated/dataModel'
@@ -74,14 +74,22 @@ export function Comments({
   const saveComment = useMutation('saveComment')
   const [newComment, setNewComment] = useState('')
   const [savingText, setSavingText] = useState('')
+  const trimmed = newComment.trim()
 
-  async function handleAddComment(event: FormEvent) {
+  const submitComment = async function (event) {
     event.preventDefault()
-    setSavingText(newComment)
+    setSavingText(trimmed)
     setNewComment('')
-    await saveComment(task._id, newComment.trim())
+    await saveComment(task._id, trimmed)
     setSavingText('')
-  }
+  } as FormEventHandler
+
+  const handleKeyUp = function (event) {
+    if (!trimmed) return
+    if (event.key === 'Enter' && !event.shiftKey) {
+      submitComment(event)
+    }
+  } as KeyboardEventHandler
 
   return (
     <div id="task-comments">
@@ -100,23 +108,23 @@ export function Comments({
               }
             />
           )}
-          <form id="new-comment" onSubmit={handleAddComment}>
+          <form id="new-comment" onSubmit={submitComment}>
             <Avatar user={user} size={30} />
-            {/* <textarea
-            rows={4}
-            value={newComment}
-            onChange={(event) => setNewComment(event.target.value)}
-            placeholder="Post a comment…"
-            required={true}
-            
-          /> */}
-            <input
+            <textarea
               id="new-comment-text"
-              type="text"
+              rows={4}
               value={newComment}
-              onChange={(event) => setNewComment(event.target.value)}
+              onKeyUp={handleKeyUp}
+              onChange={(event) =>
+                setNewComment(event.target.value.trimStart())
+              }
+              placeholder="Post a comment…"
+              title={
+                !newComment || trimmed
+                  ? 'Enter to submit, Shift+Enter for newline'
+                  : 'Comment cannot be empty'
+              }
               required
-              placeholder="Post a comment..."
             />
           </form>
         </>

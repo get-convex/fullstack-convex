@@ -51,7 +51,7 @@ function CommentList({ comments }: { comments: Comment[] }) {
     <div id="comment-list">
       {moreComments > 0 && (
         <div id="more-comments">
-          <button onClick={() => setVisibleIndex(0)}>
+          <button className="more-button" onClick={() => setVisibleIndex(0)}>
             <ArrowUp />
             {moreComments} more comment{moreComments === 1 ? '' : 's'}
           </button>
@@ -92,7 +92,7 @@ export function Comments({
   } as KeyboardEventHandler
 
   return (
-    <div id="task-comments">
+    <div id="comments">
       {task.comments && <CommentList comments={task.comments} />}
       {user && (
         <>

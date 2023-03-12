@@ -1,5 +1,6 @@
 module.exports = {
   images: {
+    dangerouslyAllowSVG: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -13,6 +14,7 @@ module.exports = {
         protocol: 'https',
         hostname: '**.googleusercontent.com',
       },
+      { protocol: 'https', hostname: '**.convex.cloud' },
     ],
   },
 }

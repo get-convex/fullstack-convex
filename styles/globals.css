@@ -323,7 +323,7 @@ button:hover {
   grid-gap: 24px;
 }
 
-#task-info h4 {
+#task-details h4 {
   font-weight: 400;
   font-size: 17px;
   line-height: 26px;
@@ -346,9 +346,71 @@ button:hover {
   margin-bottom: 35px;
 }
 
+/* Files */
+
+#files {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#files-header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+#file-upload {
+  font-size: 18px;
+  line-height: 30px;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  border: 1px solid var(--color-light-grey);
+}
+
+#file-previews {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.file-preview {
+  position: relative;
+  width: 30%;
+  height: 115px;
+  flex-grow: 0;
+}
+
+.file-preview:nth-child(-n + 2) {
+  width: 40%;
+  flex-grow: 1;
+}
+
+.file-preview:nth-child(2n + 4) {
+  flex-grow: 1;
+}
+
+.file-preview:last-child {
+  flex-grow: 1;
+}
+
+.file-preview > * {
+  border-radius: 8px;
+  border: 1px solid var(--color-light-grey);
+}
+
+#files input {
+  position: fixed;
+  opacity: 0;
+}
+
 /* Comments */
 
-#task-comments,
+#comments,
 #comment-list {
   display: flex;
   flex-direction: column;
@@ -398,13 +460,10 @@ button:hover {
   resize: none;
 }
 
-#more-comments {
+.more-button {
   color: var(--color-dark);
   font-size: 14px;
   line-height: 17px;
-}
-
-#more-comments > button {
   background-color: var(--color-light);
   border: 1px solid var(--color-light-grey);
   height: 24px;

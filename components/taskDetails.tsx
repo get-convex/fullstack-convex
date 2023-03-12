@@ -98,12 +98,9 @@ export function TaskDetails({
           </div>
         </div>
 
-        {task && <Comments user={user} task={task} />}
+        {task && <Files user={user} task={task} />}
 
-        <div>
-          <h4>Files</h4>
-          {task && <Files user={user} task={task} />}
-        </div>
+        {task && <Comments user={user} task={task} />}
       </div>
     </>
   )

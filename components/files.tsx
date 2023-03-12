@@ -6,6 +6,8 @@ import { showTimeAgo } from './comments'
 import type { FormEvent } from 'react'
 import { Id, type Document } from '../convex/_generated/dataModel'
 import type { Task, File } from '../convex/getTask'
+import { Upload } from './icons'
+import Image from 'next/image'
 
 function showFileSize(size: number) {
   if (size < 1024) return `${Math.round(size)} B`
@@ -80,6 +82,26 @@ function FileListing({
       </span>
       <span title={created.toLocaleString()}>{showTimeAgo(created)}</span>
     </li>
+  )
+}
+
+function FilePreviews({
+  files,
+  user,
+}: {
+  files: File[]
+  user?: Document<'users'> | null
+}) {
+  return (
+    <div className="flex-col">
+      <div id="file-previews">
+        {files.map((f, i) => (
+          <div key={i} className="file-preview">
+            <Image src={f.url} alt={f.name} fill />
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -164,49 +186,49 @@ export function Files({
     setUploading({ name: '', type: '' })
   }
 
+  // TODO temporary fix for only displaying image files, although other files can be uploaded
+  const imageFiles = task.files?.filter((f) => f.type.startsWith('image'))
+  const [visibleIndex, setVisibleIndex] = useState(5)
+  const visibleFiles = imageFiles.slice(0, visibleIndex)
+  const moreFiles = imageFiles?.length - visibleFiles.length
+
   return (
-    <div>
-      <ul className="files">
-        {task.files &&
-          task.files.map((file, i) => (
-            <FileListing
-              key={i}
-              file={file}
-              user={user}
-              handleDeleteFile={handleDeleteFile}
-            />
-          ))}
-        {user && uploading.name && (
-          <FileUploading
-            fileName={uploading.name}
-            fileType={uploading.type}
-            author={user}
-          />
-        )}
-      </ul>
-      {user && (
-        <form
-          style={{
-            display: 'flex',
-            justifyContent: 'left',
-            margin: '8px 16px',
-          }}
-        >
-          <label
-            htmlFor="upload"
-            className="pill-button"
-            style={{ height: '1.5em' }}
+    <div id="files">
+      <div id="files-header">
+        <h4>Files ({imageFiles?.length || 0})</h4>
+        <button id="file-upload">
+          {/* TODO open upload modal */}
+          <Upload /> Upload
+        </button>
+        {/* {user && (
+          <form
+            style={{
+              display: 'flex',
+              justifyContent: 'left',
+              margin: '8px 16px',
+            }}
           >
-            + Upload file
-          </label>
-          <input
-            id="upload"
-            type="file"
-            style={{ opacity: 0 }}
-            onChange={handleUploadFile}
-            ref={fileInput}
-          />
-        </form>
+            <label htmlFor="upload">+ Upload file</label>
+            <input
+              id="upload"
+              type="file"
+              style={{ opacity: 0 }}
+              onChange={handleUploadFile}
+              ref={fileInput}
+            />
+          </form>
+        )} */}
+      </div>
+      {visibleFiles && <FilePreviews files={visibleFiles} user={user} />}
+      {moreFiles > 0 && (
+        <div id="more-files">
+          <button
+            className="more-button"
+            onClick={() => setVisibleIndex(task.files.length)}
+          >
+            + {moreFiles} more
+          </button>
+        </div>
       )}
     </div>
   )

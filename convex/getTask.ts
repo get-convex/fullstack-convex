@@ -14,8 +14,8 @@ export interface File extends Document<'files'> {
 
 export interface Task extends Document<'tasks'> {
   owner: Document<'users'> | null
-  commentList: Comment[]
-  fileList: File[]
+  comments: Comment[]
+  files: File[]
 }
 
 // Expose this as its own function for reusability in other queries
@@ -48,9 +48,9 @@ export default query(
     }
 
     // Join with comments table
-    const comments = await findByTask(db, task._id, 'comments').collect()
-    const commentList = (await Promise.all(
-      comments.map(async (c) => {
+    const commentsByTask = await findByTask(db, task._id, 'comments').collect()
+    const comments = (await Promise.all(
+      commentsByTask.map(async (c) => {
         const author = await db.get(c.userId)
         if (!author) throw new Error('Comment author not found')
         return { ...c, author }
@@ -58,9 +58,9 @@ export default query(
     )) as Comment[]
 
     // Join with files table
-    const files = await findByTask(db, task._id, 'files').collect()
-    const fileList = (await Promise.all(
-      files.map(async (f) => {
+    const filesByTask = await findByTask(db, task._id, 'files').collect()
+    const files = (await Promise.all(
+      filesByTask.map(async (f) => {
         const author = await db.get(f.userId)
         if (!author) throw new Error('File author not found')
 
@@ -79,6 +79,6 @@ export default query(
       })
     )) as File[]
 
-    return { ...task, owner, commentList, fileList }
+    return { ...task, owner, comments, files }
   }
 )

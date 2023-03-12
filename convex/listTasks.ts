@@ -4,10 +4,6 @@ import type { Document } from './_generated/dataModel'
 import { Visibility } from './schema'
 import { Status, SortKey, SortOrder } from './schema'
 
-export interface ListedTask extends Document<'tasks'> {
-  comments: number
-}
-
 export interface ListTasksOptions {
   statusFilter?: Status[]
   sortKey?: SortKey

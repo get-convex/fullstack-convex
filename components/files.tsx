@@ -167,8 +167,8 @@ export function Files({
   return (
     <div>
       <ul className="files">
-        {task.fileList &&
-          task.fileList.map((file, i) => (
+        {task.files &&
+          task.files.map((file, i) => (
             <FileListing
               key={i}
               file={file}

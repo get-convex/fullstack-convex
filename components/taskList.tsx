@@ -4,7 +4,6 @@ import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'
 import { StatusPill } from './status'
 import { PaperClip, TextBubble } from './icons'
-import type { ListedTask } from '../convex/listTasks'
 import type { Document } from '../convex/_generated/dataModel'
 
 function TaskListing({
@@ -14,7 +13,7 @@ function TaskListing({
   handleSelectTask,
 }: {
   user?: Document<'users'> | null
-  task: ListedTask
+  task: Document<'tasks'>
   selectedTask: number | null
   handleSelectTask: MouseEventHandler
 }) {
@@ -38,11 +37,11 @@ function TaskListing({
       <div className="task-listing-owner">
         {task.owner && <Avatar user={task.owner} size={23} withName={true} />}
       </div>
-      <div className="task-listing-files">
-        <PaperClip /> 0{/*TODO */}
+      <div className="task-listing-fileCount">
+        <PaperClip /> {task.fileCount}
       </div>
-      <div className="task-listing-comments">
-        <TextBubble /> {task.comments}
+      <div className="task-listing-commentCount">
+        <TextBubble /> {task.commentCount}
       </div>
     </Link>
   )
@@ -74,7 +73,7 @@ export function TaskList({
   setSelectedTask,
 }: {
   user?: Document<'users'> | null
-  tasks: ListedTask[]
+  tasks: Document<'tasks'>[]
   isLoading: boolean
   handleChangeSort: MouseEventHandler
   selectedTask: number | null
@@ -101,12 +100,10 @@ export function TaskList({
         <div id="owner" onClick={sortHandler}>
           Owner
         </div>
-        <div id="files">
-          {' '}
-          {/*TODO support sorting*/}
+        <div id="fileCount" onClick={sortHandler}>
           Files
         </div>
-        <div id="comments" onClick={sortHandler}>
+        <div id="commentCount" onClick={sortHandler}>
           Comments
         </div>
       </div>

@@ -93,7 +93,7 @@ export function Comments({
 
   return (
     <div id="task-comments">
-      {task.commentList && <CommentList comments={task.commentList} />}
+      {task.comments && <CommentList comments={task.comments} />}
       {user && (
         <>
           {savingText && (

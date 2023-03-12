@@ -18,8 +18,8 @@ export default mutation(
 
     // Update the denormalized comment count in the tasks table
     // (used for indexing to support ordering by comment count)
-    const comments = await countResults(findByTask(db, taskId, 'comments'))
+    const commentCount = await countResults(findByTask(db, taskId, 'comments'))
 
-    await db.patch(taskId, { comments })
+    await db.patch(taskId, { commentCount })
   }
 )

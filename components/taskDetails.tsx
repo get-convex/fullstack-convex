@@ -44,8 +44,8 @@ export function TaskDetails({
   function saveChanges(taskInfo: Partial<Task>) {
     // Un-join data from users, comments, & files tables
     delete taskInfo.owner
-    delete taskInfo.commentList
-    delete taskInfo.fileList
+    delete taskInfo.comments
+    delete taskInfo.files
     updateTask(taskInfo)
   }
 

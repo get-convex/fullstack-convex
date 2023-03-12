@@ -26,7 +26,8 @@ export enum SortKey {
   TITLE = 'title',
   OWNER = 'owner',
   STATUS = 'status',
-  COMMENTS = 'comments',
+  COMMENTS = 'commentCount',
+  FILES = 'fileCount',
 }
 export enum SortOrder {
   ASC = 'asc',
@@ -51,14 +52,16 @@ export default defineSchema(
         s.literal(Visibility.PUBLIC),
         s.literal(Visibility.PRIVATE)
       ),
-      comments: s.number(),
+      commentCount: s.number(),
+      fileCount: s.number(),
     })
       .index('by_number', ['number'])
       .index('by_ownerId', ['ownerId'])
       .index('by_owner', ['ownerName'])
       .index('by_status', ['status'])
       .index('by_title', ['title'])
-      .index('by_comments', ['comments']),
+      .index('by_commentCount', ['commentCount'])
+      .index('by_fileCount', ['fileCount']),
 
     users: defineTable({
       email: s.string(),

@@ -20,6 +20,7 @@ export default function App({
 }: {
   taskNumber: number | 'new' | null
 }) {
+  console.log(taskNumber)
   // Check if the user is logged in with Auth0 for full write access
   // If user is not logged in, they can still read some data
   const { user: auth0User } = useAuth0()
@@ -163,20 +164,21 @@ export default function App({
           selectedTask={selectedTask}
           setSelectedTask={setSelectedTask}
         />
-        {isSidebarOpen &&
-          (taskNumber === 'new' ? (
-            <NewTaskSidebar
-              user={user}
-              onDismiss={() => setSelectedTask(null)}
-              onSave={(taskNumber) => setSelectedTask(taskNumber)}
-            />
-          ) : (
+        {taskNumber === 'new' ? (
+          <NewTaskSidebar
+            user={user}
+            onDismiss={() => setSelectedTask(null)}
+            onSave={(taskNumber) => setSelectedTask(taskNumber)}
+          />
+        ) : (
+          isSidebarOpen && (
             <TaskDetailSidebar
               user={user}
               task={task}
               onDismiss={() => setSelectedTask(null)}
             />
-          ))}
+          )
+        )}
       </div>
       <div ref={bottom} />
     </>
@@ -189,8 +191,14 @@ export async function getServerSideProps({
   params: { slug?: string[] }
 }) {
   // Capture the dynamic route segment [taskNumber] (trickier to do client side)
-  const [, taskNumber] = params.slug || []
+  const [, slug] = params.slug || []
+  let taskNumber = slug as number | 'new' | null
+  if (!Number.isNaN(+slug)) {
+    taskNumber = +slug
+  } else if (!slug) {
+    taskNumber = null
+  }
   return {
-    props: { taskNumber: +taskNumber || null },
+    props: { taskNumber },
   }
 }

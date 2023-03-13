@@ -302,6 +302,15 @@ button:hover {
   padding-right: 30px;
 }
 
+#task-details input {
+  display: inline;
+  background-color: var(--color-lightest-grey);
+  border: 1px solid var(--color-light-grey);
+  border-radius: 6px;
+  font-size: 29px;
+  line-height: 35px;
+}
+
 #task-number {
   margin-right: 24px;
 }
@@ -316,21 +325,32 @@ button:hover {
 }
 
 #task-info {
-  display: grid;
+  /* display: grid;
   grid-template-columns: 20% 1fr;
-  padding-top: 24px;
+  grid-gap: 24px; */
   padding-bottom: 24px;
-  grid-gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 #task-details h4 {
   font-weight: 400;
   font-size: 17px;
   line-height: 26px;
-  align-self: center;
+  width: 100px;
 }
 
-#task-info > div {
+.task-info-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  gap: 24px;
+  height: 38px;
+}
+
+.task-info-row > div {
   display: flex;
   flex-direction: row;
   justify-content: left;
@@ -339,11 +359,31 @@ button:hover {
 }
 
 #task-description {
+  margin-bottom: 19px;
+}
+
+#task-description,
+#task-description textarea {
   font-style: normal;
   font-weight: 400;
   font-size: 18px;
   line-height: 30px;
-  margin-bottom: 35px;
+}
+
+#task-description span {
+  font-style: italic;
+  color: var(--color-grey);
+}
+
+#task-description textarea {
+  font-family: inherit;
+  background-color: var(--color-lightest-grey);
+  border: 1px solid var(--color-light-grey);
+  border-radius: 6px;
+  resize: none;
+  padding: 6px 19px 14px 10px;
+  width: calc(100% - 19px);
+  margin-right: 19px;
 }
 
 /* Files */

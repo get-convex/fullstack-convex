@@ -187,10 +187,12 @@ export function Files({
   }
 
   // TODO temporary fix for only displaying image files, although other files can be uploaded
-  const imageFiles = task.files?.filter((f) => f.type.startsWith('image'))
+  const imageFiles = task?.files?.filter((f) => f.type.startsWith('image'))
   const [visibleIndex, setVisibleIndex] = useState(5)
-  const visibleFiles = imageFiles.slice(0, visibleIndex)
-  const moreFiles = imageFiles?.length - visibleFiles.length
+  const visibleFiles = imageFiles?.slice(0, visibleIndex)
+  const moreFiles = imageFiles?.length - visibleFiles?.length
+
+  if (!task) return null
 
   return (
     <div id="files">

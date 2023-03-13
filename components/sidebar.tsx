@@ -2,7 +2,7 @@ import React from 'react'
 import type { PropsWithChildren, MouseEventHandler } from 'react'
 import Link from 'next/link'
 import { CircledX } from './icons'
-import { EditableTaskDetails, TaskDetails } from './taskDetails'
+import { TaskDetails } from './taskDetails'
 import { Status, Visibility } from '../convex/schema'
 import type { Document } from '../convex/_generated/dataModel'
 import type { Task } from '../convex/getTask'
@@ -55,19 +55,15 @@ export function NewTaskSidebar({
 }) {
   if (!user) throw new Error('You must be logged in to create a task')
   const newTaskInfo = {
+    title: 'New task title',
     status: Status.New,
     visibility: Visibility.PUBLIC,
-    ownerId: null,
+    ownerId: user._id,
   } as Partial<Document<'tasks'>>
 
   return (
     <Sidebar onDismiss={onDismiss}>
-      <EditableTaskDetails
-        user={user}
-        initialTaskInfo={newTaskInfo}
-        mutationName="createTask"
-        onSave={onSave}
-      />
+      <TaskDetails task={newTaskInfo as Task} user={user} />
     </Sidebar>
   )
 }

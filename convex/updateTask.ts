@@ -1,9 +1,12 @@
 import { findUser } from './getCurrentUser'
 import { mutation } from './_generated/server'
-import type { Task } from './getTask'
 import { Visibility } from './schema'
+import { getTaskDetails } from './getTask'
+import type { Task } from './getTask'
 
-export default mutation(async ({ db, auth }, taskInfo: Partial<Task>) => {
+export default mutation(async (ctx, taskInfo: Partial<Task>) => {
+  const { db, auth } = ctx
+
   const user = await findUser(db, auth)
 
   if (!user) {
@@ -23,5 +26,6 @@ export default mutation(async ({ db, auth }, taskInfo: Partial<Task>) => {
   await db.patch(taskId, taskInfo)
   const task = await db.get(taskId)
   if (!task) throw new Error('Task not found') // Should never happen, here to appease TS
-  return task
+  const taskDetails = await getTaskDetails(ctx, task)
+  return taskDetails
 })

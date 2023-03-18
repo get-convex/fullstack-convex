@@ -1,8 +1,10 @@
 import { findUser } from './getCurrentUser'
 import { mutation } from './_generated/server'
+import { getTaskDetails } from './getTask'
 import type { Task } from './getTask'
 
-export default mutation(async ({ db, auth }, taskInfo: Task) => {
+export default mutation(async (ctx, taskInfo: Task) => {
+  const { db, auth } = ctx
   const user = await findUser(db, auth)
 
   if (!user) {
@@ -32,5 +34,6 @@ export default mutation(async ({ db, auth }, taskInfo: Task) => {
 
   const task = await db.get(taskId)
   if (!task) throw new Error('Task not found') // Should never happen, here to appease TS
-  return task
+  const taskDetails = await getTaskDetails(ctx, task)
+  return taskDetails
 })

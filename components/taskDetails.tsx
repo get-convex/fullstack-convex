@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import Error from 'next/error'
-import { useMutation } from '../convex/_generated/react'
 import { Avatar } from './login'
 import { Comments } from './comments'
 import { Files } from './files'
@@ -14,19 +13,21 @@ import type { Document } from '../convex/_generated/dataModel'
 function EditableTitle({
   task,
   saveChanges,
+  editing = false,
 }: {
   task: Task
   saveChanges: (taskInfo: Partial<Task>) => void
+  editing?: boolean
 }) {
-  const [editingTitle, setEditingTitle] = useState(false)
-  const [newTitle, setNewTitle] = useState(task.title)
+  const [editingTitle, setEditingTitle] = useState(editing)
+  const [newTitle, setNewTitle] = useState(task.title ?? '')
 
   function handleUpdateTitle() {
     setEditingTitle(false)
-    saveChanges({ _id: task?._id, title: newTitle })
+    saveChanges({ ...task, title: newTitle })
   }
 
-  const handleKeyUp = function (event) {
+  const handleKeyDown = function (event) {
     if (event.key === 'Escape') {
       event.preventDefault()
       setEditingTitle(false)
@@ -34,17 +35,15 @@ function EditableTitle({
   } as KeyboardEventHandler
 
   return (
-    <h2
-      title="Double click to edit title"
-      onDoubleClick={() => setEditingTitle(true)}
-    >
+    <h2 title="Click to edit" onClick={() => setEditingTitle(true)}>
       {editingTitle ? (
-        <form onSubmit={handleUpdateTitle}>
+        <form onSubmit={handleUpdateTitle} onBlur={handleUpdateTitle}>
           <input
             type="text"
             value={newTitle}
+            placeholder="Add task title"
             onChange={(e) => setNewTitle(e.target.value)}
-            onKeyUp={handleKeyUp}
+            onKeyDown={handleKeyDown}
             autoFocus
           />
         </form>
@@ -61,23 +60,25 @@ function EditableTitle({
 function EditableDescription({
   task,
   saveChanges,
+  editing = false,
 }: {
   task: Task
   saveChanges: (taskInfo: Partial<Task>) => void
+  editing?: boolean
 }) {
-  const [editingDescription, setEditingDescription] = useState(false)
-  const [newDescription, setNewDescription] = useState(task.description)
+  const [editingDescription, setEditingDescription] = useState(editing)
+  const [newDescription, setNewDescription] = useState(task.description ?? '')
 
   function handleUpdateDescription() {
     setEditingDescription(false)
-    saveChanges({ _id: task?._id, description: newDescription })
+    saveChanges({ ...task, description: newDescription })
   }
 
   return (
     <div
       id="task-description"
-      title="Double click to edit description"
-      onDoubleClick={() => setEditingDescription(true)}
+      title="Click to edit"
+      onClick={() => setEditingDescription(true)}
     >
       {editingDescription ? (
         <TextareaInput
@@ -87,11 +88,10 @@ function EditableDescription({
           onCancel={() => setEditingDescription(false)}
           required={false}
           placeholder="Add task description..."
+          autoFocus={!editing}
         />
       ) : (
-        <p>
-          {task.description || <span>Double click to add description</span>}
-        </p>
+        <p>{task.description || <span>Click to add description</span>}</p>
       )}
     </div>
   )
@@ -104,33 +104,35 @@ function TextareaInput({
   onCancel,
   required,
   placeholder,
+  autoFocus,
 }: {
-  value: any
-  setValue: any
-  onSubmit: () => any
-  onCancel: () => any
+  value?: string
+  setValue: (newValue: string) => void
+  onSubmit: FormEventHandler
+  onCancel: () => void
   required: boolean
   placeholder: string
+  autoFocus: boolean
 }) {
   const handleKeyDown = function (event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-    }
-  } as KeyboardEventHandler
-
-  const handleKeyUp = function (event) {
     if (event.key === 'Escape') {
       event.preventDefault()
       onCancel()
     }
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
-      onSubmit()
+    }
+  } as KeyboardEventHandler
+
+  const handleKeyUp = function (event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      onSubmit(event)
     }
   } as KeyboardEventHandler
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} onBlur={onSubmit}>
       <textarea
         value={value}
         onKeyDown={handleKeyDown}
@@ -142,20 +144,24 @@ function TextareaInput({
           (required && !value ? '\nField cannot be empty' : ' ')
         }
         required={required}
-        autoFocus
+        autoFocus={autoFocus}
       />
     </form>
   )
 }
 
-export function TaskDetails({
+function TaskMetadata({
   task,
   user,
+  saveChanges,
 }: {
-  task?: Task | null
-  user?: Document<'users'> | null
+  task: Document<'tasks'>
+  user: Document<'users'> | null
+  saveChanges: (taskInfo: Partial<Task>) => void
 }) {
-  const updateTask = useMutation('updateTask')
+  const isPublic = task?.visibility === Visibility.PUBLIC
+  const canChangeOwner = user && isPublic
+  const isOwner = user ? user._id.equals(task?.ownerId) : false
 
   function handleClaimTask() {
     const taskInfo = {
@@ -171,100 +177,123 @@ export function TaskDetails({
     saveChanges(taskInfo)
   }
 
-  function saveChanges(taskInfo: Partial<Task>) {
-    // Un-join data from users, comments, & files tables
-    delete taskInfo.owner
-    delete taskInfo.comments
-    delete taskInfo.files
-    updateTask(taskInfo)
-  }
+  return (
+    <div id="task-meta">
+      <div className="task-meta-row">
+        <h4>Owner</h4>
+        <div className="owner-details">
+          {task.owner ? (
+            <Avatar user={task.owner} withName={true} />
+          ) : (
+            <div></div>
+          )}
+          {canChangeOwner && (
+            <button
+              className="icon-button"
+              title={`${
+                //TODO this should be a drop down
+                isOwner ? 'Remove yourself as' : 'Make yourself'
+              } the owner of this task`}
+              onClick={isOwner ? handleUnclaimTask : handleClaimTask}
+            >
+              <CaretDown />
+            </button>
+          )}
+        </div>
+      </div>
 
-  const isPublic = task?.visibility === Visibility.PUBLIC
+      <div className="task-meta-row">
+        <h4>Status</h4>
+        <div>
+          <StatusPill value={task.status} height={30} editable={isOwner} />
+        </div>
+      </div>
+
+      <div className="task-meta-row">
+        <h4>Created</h4>
+        <div>
+          <Calendar />
+          {new Date(task._creationTime).toDateString()}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TaskInfo({
+  task,
+  user,
+  onSave,
+  newTask,
+}: {
+  onSave: (taskInfo: Partial<Task>) => void
+  task: Task
+  user: Document<'users'> | null
+  newTask?: boolean
+}) {
   const isOwner = user ? user._id.equals(task?.ownerId) : false
-  const canChangeOwner = user && isPublic
 
-  if (task === undefined) return <TaskDetailsGhost />
+  return (
+    <div>
+      <div id="task-header">
+        {isOwner ? (
+          <EditableTitle task={task} saveChanges={onSave} editing={newTask} />
+        ) : (
+          <h2>
+            <span id="task-number">{task.number}</span>
+            {task.title}
+          </h2>
+        )}
+      </div>
+
+      {isOwner ? (
+        <EditableDescription
+          task={task}
+          saveChanges={onSave}
+          editing={newTask}
+        />
+      ) : (
+        task.description && <p>{task.description}</p>
+      )}
+
+      <TaskMetadata task={task} user={user} saveChanges={onSave} />
+    </div>
+  )
+}
+
+export function TaskDetails({
+  task,
+  user,
+  onSave,
+  newTask = false,
+}: {
+  onSave: (taskInfo: Partial<Task>) => void
+  task?: Task | null
+  user?: Document<'users'> | null
+  newTask?: boolean
+}) {
+  if (task === undefined || user === undefined) return <TaskDetailsGhost />
   if (task === null)
     return (
       <Error statusCode={404} title="Task not found" withDarkMode={false} />
     )
+  if (user === null)
+    return (
+      <Error
+        statusCode={403}
+        title="You must be logged in to create a task"
+        withDarkMode={false}
+      />
+    )
 
   return (
-    <>
-      <div id="task-details">
-        <div>
-          <div id="task-header">
-            {isOwner ? (
-              <EditableTitle task={task} saveChanges={saveChanges} />
-            ) : (
-              <h2>
-                <span id="task-number">{task.number}</span>
-                {task.title}
-              </h2>
-            )}
-          </div>
+    <div id="task-details">
+      {<TaskInfo task={task} user={user} onSave={onSave} newTask={newTask} />}
 
-          {isOwner ? (
-            <EditableDescription task={task} saveChanges={saveChanges} />
-          ) : (
-            task.description && <p>{task.description}</p>
-          )}
+      {task && !newTask && <Files user={user} task={task} />}
 
-          <div id="task-info">
-            <div className="task-info-row">
-              <h4>Owner</h4>
-              <div className="owner-details">
-                {task.owner ? (
-                  <Avatar user={task.owner} withName={true} />
-                ) : (
-                  <div></div>
-                )}
-                {canChangeOwner && (
-                  <button
-                    className="icon-button"
-                    title={`${
-                      //TODO this should be a drop down
-                      isOwner ? 'Remove yourself as' : 'Make yourself'
-                    } the owner of this task`}
-                    onClick={isOwner ? handleUnclaimTask : handleClaimTask}
-                  >
-                    <CaretDown />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="task-info-row">
-              <h4>Status</h4>
-              <div>
-                <StatusPill
-                  value={task.status}
-                  height={30}
-                  editable={isOwner}
-                />
-              </div>
-            </div>
-
-            {/* <div className="task-info-row">
-              <h4>Visibility</h4>
-              <div>{task.visibility}</div>
-            </div> */}
-
-            <div className="task-info-row">
-              <h4>Created</h4>
-              <div>
-                <Calendar />
-                {new Date(task._creationTime).toDateString()}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {task && <Files user={user} task={task} />}
-
-        {task && <Comments user={user} task={task} />}
-      </div>
-    </>
+      {task && !newTask && <Comments user={user} task={task} />}
+    </div>
   )
 }
 

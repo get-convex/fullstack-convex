@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useMutation, useQuery } from '../../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
+import Head from 'next/head'
+import { useRouter } from 'next/router'
 import {
   useStableQuery,
   useStablePaginatedQuery,
@@ -11,7 +13,10 @@ import { Status, STATUS_VALUES, SortKey, SortOrder } from '../../convex/schema'
 import { TaskList } from '../../components/taskList'
 import { NewTaskSidebar, TaskDetailSidebar } from '../../components/sidebar'
 import type { ChangeEventHandler, MouseEventHandler } from 'react'
-import Head from 'next/head'
+import type { Task } from '../../convex/getTask'
+import type { ReactMutation } from 'convex/react'
+import type { API } from '../../convex/_generated/api'
+import { s } from 'convex/schema'
 
 const PAGE_SIZE = 10
 
@@ -20,7 +25,6 @@ export default function App({
 }: {
   taskNumber: number | 'new' | null
 }) {
-  console.log(taskNumber)
   // Check if the user is logged in with Auth0 for full write access
   // If user is not logged in, they can still read some data
   const { user: auth0User } = useAuth0()
@@ -42,10 +46,12 @@ export default function App({
     createUser().catch(console.error)
   }, [saveUser, auth0User])
 
-  // Set up sidebar to show selected task details
+  // Set up sidebar to view & edit selected task
+  const router = useRouter()
   const [selectedTask, setSelectedTask] = useState(
     typeof taskNumber === 'number' ? taskNumber : null
   )
+  console.log(selectedTask, router.asPath)
   const task = useQuery('getTask', selectedTask)
   const isSidebarOpen = !!taskNumber
 
@@ -55,6 +61,33 @@ export default function App({
       : selectedTask && task
       ? task.title
       : 'Fullstack Task Manager'
+
+  const updateTask = useMutation('updateTask')
+  const createTask = useMutation('createTask')
+
+  async function saveTask(
+    taskInfo: Partial<Task>,
+    mutation: ReactMutation<API, 'createTask' | 'updateTask'>
+  ) {
+    // Un-join data from users, comments, & files tables
+    delete taskInfo.owner
+    delete taskInfo.comments
+    delete taskInfo.files
+    const savedTask = await mutation(taskInfo)
+    return savedTask
+  }
+
+  async function onUpdate(taskInfo: Partial<Task>) {
+    return await saveTask(taskInfo, updateTask)
+  }
+
+  async function onCreate(taskInfo: Partial<Task>) {
+    const newTask = await saveTask(taskInfo, createTask)
+    console.log(newTask)
+    router.push(`/task/${newTask.number}`)
+    setSelectedTask(newTask.number)
+    return newTask
+  }
 
   // Set up state & handler for filtering by status values
   const [statusFilter, setStatusFilter] = useState([
@@ -168,7 +201,7 @@ export default function App({
           <NewTaskSidebar
             user={user}
             onDismiss={() => setSelectedTask(null)}
-            onSave={(taskNumber) => setSelectedTask(taskNumber)}
+            onSave={async (taskInfo) => await onCreate(taskInfo)}
           />
         ) : (
           isSidebarOpen && (
@@ -176,6 +209,7 @@ export default function App({
               user={user}
               task={task}
               onDismiss={() => setSelectedTask(null)}
+              onSave={async (taskInfo) => await onUpdate(taskInfo)}
             />
           )
         )}

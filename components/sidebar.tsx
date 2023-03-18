@@ -1,9 +1,9 @@
 import React from 'react'
-import type { PropsWithChildren, MouseEventHandler } from 'react'
 import Link from 'next/link'
 import { CircledX } from './icons'
 import { TaskDetails } from './taskDetails'
 import { Status, Visibility } from '../convex/schema'
+import type { PropsWithChildren, MouseEventHandler } from 'react'
 import type { Document } from '../convex/_generated/dataModel'
 import type { Task } from '../convex/getTask'
 
@@ -32,14 +32,16 @@ export function TaskDetailSidebar({
   task,
   user,
   onDismiss,
+  onSave,
 }: {
-  onDismiss: MouseEventHandler
   task?: Task | null
   user?: Document<'users'> | null
+  onDismiss: MouseEventHandler
+  onSave: (taskInfo: Partial<Task>) => void
 }) {
   return (
     <Sidebar onDismiss={onDismiss}>
-      <TaskDetails task={task} user={user} />
+      <TaskDetails task={task} user={user} onSave={onSave} />
     </Sidebar>
   )
 }
@@ -49,21 +51,24 @@ export function NewTaskSidebar({
   onDismiss,
   onSave,
 }: {
-  onDismiss: MouseEventHandler
-  onSave: (taskID: number) => void
   user?: Document<'users'> | null
+  onDismiss: MouseEventHandler
+  onSave: (taskInfo: Partial<Task>) => void
 }) {
-  if (!user) throw new Error('You must be logged in to create a task')
   const newTaskInfo = {
-    title: 'New task title',
     status: Status.New,
     visibility: Visibility.PUBLIC,
-    ownerId: user._id,
+    ownerId: user?._id,
   } as Partial<Document<'tasks'>>
 
   return (
     <Sidebar onDismiss={onDismiss}>
-      <TaskDetails task={newTaskInfo as Task} user={user} />
+      <TaskDetails
+        task={newTaskInfo as Task}
+        user={user}
+        newTask={true}
+        onSave={onSave}
+      />
     </Sidebar>
   )
 }

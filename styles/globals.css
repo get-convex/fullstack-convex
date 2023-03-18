@@ -129,6 +129,11 @@ button:hover {
   cursor: pointer;
 }
 
+button:disabled {
+  background-color: var(--color-grey);
+  cursor: unset;
+}
+
 .icon-button {
   padding: 0px;
   margin: 0px;
@@ -324,7 +329,7 @@ button:hover {
   font-size: 29px;
 }
 
-#task-info {
+#task-meta {
   /* display: grid;
   grid-template-columns: 20% 1fr;
   grid-gap: 24px; */
@@ -341,7 +346,7 @@ button:hover {
   width: 100px;
 }
 
-.task-info-row {
+.task-meta-row {
   display: flex;
   flex-direction: row;
   justify-content: left;
@@ -350,12 +355,17 @@ button:hover {
   height: 38px;
 }
 
-.task-info-row > div {
+.task-meta-row > div {
   display: flex;
   flex-direction: row;
   justify-content: left;
   align-items: center;
   gap: 10px;
+}
+
+#task-header,
+#task-description {
+  cursor: pointer;
 }
 
 #task-description {

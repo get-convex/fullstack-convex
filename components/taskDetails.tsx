@@ -4,7 +4,7 @@ import { Avatar } from './login'
 import { Comments } from './comments'
 import { Files } from './files'
 import { StatusPill } from './status'
-import { Visibility } from '../convex/schema'
+import { Status, Visibility } from '../convex/schema'
 import { Calendar, CaretDown } from './icons'
 import type { KeyboardEventHandler, FormEventHandler } from 'react'
 import type { Task } from '../convex/getTask'
@@ -41,7 +41,7 @@ function EditableTitle({
           <input
             type="text"
             value={newTitle}
-            placeholder="Add task title"
+            placeholder="Task title"
             onChange={(e) => setNewTitle(e.target.value)}
             onKeyDown={handleKeyDown}
             autoFocus
@@ -83,11 +83,11 @@ function EditableDescription({
       {editingDescription ? (
         <TextareaInput
           value={newDescription}
-          setValue={setNewDescription}
+          onChange={setNewDescription}
           onSubmit={handleUpdateDescription}
           onCancel={() => setEditingDescription(false)}
           required={false}
-          placeholder="Add task description..."
+          placeholder="Task description (optional)"
           autoFocus={!editing}
         />
       ) : (
@@ -99,7 +99,7 @@ function EditableDescription({
 
 function TextareaInput({
   value,
-  setValue,
+  onChange,
   onSubmit,
   onCancel,
   required,
@@ -107,7 +107,7 @@ function TextareaInput({
   autoFocus,
 }: {
   value?: string
-  setValue: (newValue: string) => void
+  onChange: (newValue: string) => void
   onSubmit: FormEventHandler
   onCancel: () => void
   required: boolean
@@ -137,7 +137,7 @@ function TextareaInput({
         value={value}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
-        onChange={(event) => setValue(event.target.value.trimStart())}
+        onChange={(event) => onChange(event.target.value.trimStart())}
         placeholder={placeholder}
         title={
           'Enter to submit, Shift+Enter for newline, Esc to cancel editing' +
@@ -261,22 +261,25 @@ function TaskInfo({
   )
 }
 
-export function TaskDetails({
-  task,
+export function NewTaskDetails({
   user,
   onSave,
-  newTask = false,
 }: {
-  onSave: (taskInfo: Partial<Task>) => void
-  task?: Task | null
   user?: Document<'users'> | null
-  newTask?: boolean
+  onSave: (taskInfo: Partial<Task>) => void
 }) {
-  if (task === undefined || user === undefined) return <TaskDetailsGhost />
-  if (task === null)
-    return (
-      <Error statusCode={404} title="Task not found" withDarkMode={false} />
-    )
+  const [title, setTitle] = useState<string | undefined>('')
+  const [description, setDescription] = useState<string | undefined>('')
+
+  const newTask = {
+    title,
+    description,
+    status: Status.New,
+    visibility: Visibility.PUBLIC,
+    ownerId: user?._id,
+  } as Partial<Task>
+
+  if (user === undefined) return <TaskDetailsGhost />
   if (user === null)
     return (
       <Error
@@ -285,14 +288,66 @@ export function TaskDetails({
         withDarkMode={false}
       />
     )
+  return (
+    <div id="task-details">
+      <div>
+        <div id="task-header">
+          <input
+            type="text"
+            value={title}
+            placeholder="Task title"
+            onChange={(e) => setTitle(e.target.value)}
+            autoFocus
+          />
+        </div>
+        <div id="task-description">
+          <TextareaInput
+            value={description}
+            onChange={
+              setDescription //TODO make this a proper handler
+            }
+            onSubmit={() => null}
+            onCancel={() => null}
+            required={false}
+            placeholder="Task description (optional)"
+            autoFocus={false}
+          />
+        </div>
+        <button
+          className="dark"
+          title={newTask.title ? 'Save task' : 'Task must have a title'}
+          disabled={!newTask.title}
+          onClick={() => onSave(newTask)}
+        >
+          Save task
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export function TaskDetails({
+  task,
+  user,
+  onSave,
+}: {
+  onSave: (taskInfo: Partial<Task>) => void
+  task?: Task | null
+  user?: Document<'users'> | null
+}) {
+  if (task === undefined || user === undefined) return <TaskDetailsGhost />
+  if (task === null)
+    return (
+      <Error statusCode={404} title="Task not found" withDarkMode={false} />
+    )
 
   return (
     <div id="task-details">
-      {<TaskInfo task={task} user={user} onSave={onSave} newTask={newTask} />}
+      {<TaskInfo task={task} user={user} onSave={onSave} />}
 
-      {task && !newTask && <Files user={user} task={task} />}
+      {task && <Files user={user} task={task} />}
 
-      {task && !newTask && <Comments user={user} task={task} />}
+      {task && <Comments user={user} task={task} />}
     </div>
   )
 }

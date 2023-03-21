@@ -16,7 +16,6 @@ import type { ChangeEventHandler, MouseEventHandler } from 'react'
 import type { Task } from '../../convex/getTask'
 import type { ReactMutation } from 'convex/react'
 import type { API } from '../../convex/_generated/api'
-import { s } from 'convex/schema'
 
 const PAGE_SIZE = 10
 
@@ -195,7 +194,9 @@ export default function App({
           isLoading={loadStatus === 'LoadingMore'}
           handleChangeSort={handleChangeSort}
           selectedTask={selectedTask}
-          setSelectedTask={setSelectedTask}
+          setSelectedTask={
+            setSelectedTask // TODO make this a proper handler
+          }
         />
         {taskNumber === 'new' ? (
           <NewTaskSidebar

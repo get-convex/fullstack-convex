@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { CircledX } from './icons'
-import { TaskDetails } from './taskDetails'
+import { TaskDetails, NewTaskDetails } from './taskDetails'
 import { Status, Visibility } from '../convex/schema'
 import type { PropsWithChildren, MouseEventHandler } from 'react'
 import type { Document } from '../convex/_generated/dataModel'
@@ -55,20 +55,9 @@ export function NewTaskSidebar({
   onDismiss: MouseEventHandler
   onSave: (taskInfo: Partial<Task>) => void
 }) {
-  const newTaskInfo = {
-    status: Status.New,
-    visibility: Visibility.PUBLIC,
-    ownerId: user?._id,
-  } as Partial<Document<'tasks'>>
-
   return (
     <Sidebar onDismiss={onDismiss}>
-      <TaskDetails
-        task={newTaskInfo as Task}
-        user={user}
-        newTask={true}
-        onSave={onSave}
-      />
+      <NewTaskDetails user={user} onSave={onSave} />
     </Sidebar>
   )
 }

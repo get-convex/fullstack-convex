@@ -280,11 +280,12 @@ export function NewTaskDetails({
 }) {
   const [title, setTitle] = useState<string | undefined>('')
   const [description, setDescription] = useState<string | undefined>('')
+  const [status, setStatus] = useState(Status.New)
 
   const newTask = {
     title,
     description,
-    status: Status.New,
+    status,
     visibility: Visibility.PUBLIC,
     ownerId: user?._id,
   } as Partial<Task>
@@ -323,6 +324,21 @@ export function NewTaskDetails({
             autoFocus={false}
           />
         </div>
+        <div className="task-meta">
+          <div className="task-meta-row">
+            <h4>Status</h4>
+            <div>
+              <StatusPill
+                value={status}
+                height={30}
+                editable={true}
+                onChange={setStatus}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
         <button
           className="dark"
           title={newTask.title ? 'Save task' : 'Task must have a title'}

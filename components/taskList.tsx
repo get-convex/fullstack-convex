@@ -68,22 +68,22 @@ export function TaskList({
   user,
   tasks,
   isLoading,
-  handleChangeSort,
+  onChangeSort,
   selectedTask,
-  setSelectedTask,
+  onChangeSelected,
 }: {
   user?: Document<'users'> | null
   tasks: Document<'tasks'>[]
   isLoading: boolean
-  handleChangeSort: MouseEventHandler
+  onChangeSort: MouseEventHandler
   selectedTask: number | null
-  setSelectedTask: React.Dispatch<React.SetStateAction<number | null>>
+  onChangeSelected: (taskNumber: number) => void
 }) {
   if (!tasks.length && !isLoading) {
     return <p>No matching tasks found</p>
   }
 
-  const sortHandler = isLoading ? () => ({}) : handleChangeSort
+  const sortHandler = isLoading ? () => ({}) : onChangeSort
 
   return (
     <main className="task-list">
@@ -115,7 +115,7 @@ export function TaskList({
               user={user}
               task={task}
               selectedTask={selectedTask}
-              handleSelectTask={() => setSelectedTask(task.number)}
+              handleSelectTask={() => onChangeSelected(task.number)}
             />
           ))}
         {isLoading && <TaskListingsGhost />}

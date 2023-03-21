@@ -192,11 +192,9 @@ export default function App({
           user={user}
           tasks={loadedTasks}
           isLoading={loadStatus === 'LoadingMore'}
-          handleChangeSort={handleChangeSort}
+          onChangeSort={handleChangeSort}
           selectedTask={selectedTask}
-          setSelectedTask={
-            setSelectedTask // TODO make this a proper handler
-          }
+          onChangeSelected={setSelectedTask}
         />
         {taskNumber === 'new' ? (
           <NewTaskSidebar

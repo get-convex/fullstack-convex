@@ -29,7 +29,7 @@ export function Select({
   const [showOptions, setShowOptions] = useState(false)
   const optionLabels = labels || options
   return (
-    <div id={id} className="select">
+    <div id={id} className="select" tabIndex={0} role="button">
       {
         <div
           className="select-legend"

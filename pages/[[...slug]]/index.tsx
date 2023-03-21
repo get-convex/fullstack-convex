@@ -50,7 +50,6 @@ export default function App({
   const [selectedTask, setSelectedTask] = useState(
     typeof taskNumber === 'number' ? taskNumber : null
   )
-  console.log(selectedTask, router.asPath)
   const task = useQuery('getTask', selectedTask)
   const isSidebarOpen = !!taskNumber
 
@@ -76,13 +75,12 @@ export default function App({
     return savedTask
   }
 
-  async function onUpdate(taskInfo: Partial<Task>) {
+  async function onUpdateTask(taskInfo: Partial<Task>) {
     return await saveTask(taskInfo, updateTask)
   }
 
-  async function onCreate(taskInfo: Partial<Task>) {
+  async function onCreateTask(taskInfo: Partial<Task>) {
     const newTask = await saveTask(taskInfo, createTask)
-    console.log(newTask)
     router.push(`/task/${newTask.number}`)
     setSelectedTask(newTask.number)
     return newTask
@@ -93,7 +91,7 @@ export default function App({
     Status.New,
     Status['In Progress'],
   ])
-  const handleChangeStatus: ChangeEventHandler = (event) => {
+  const onChangeStatusFilter: ChangeEventHandler = (event) => {
     // Process a checkbox change event affecting the status filter
     const target = event.target as HTMLInputElement
     const { value, checked } = target
@@ -107,7 +105,7 @@ export default function App({
 
   // Set up state & handler for filtering by owner
   const [ownerFilter, setOwnerFilter] = useState(['anyone'])
-  const handleChangeOwner: ChangeEventHandler = (event) => {
+  const onChangeOwnerFilter: ChangeEventHandler = (event) => {
     const target = event.target as HTMLInputElement
     const { value, checked } = target
     if (checked) {
@@ -180,10 +178,13 @@ export default function App({
           <Controls
             user={user}
             filters={{
-              status: { selected: statusFilter, onChange: handleChangeStatus },
+              status: {
+                selected: statusFilter,
+                onChange: onChangeStatusFilter,
+              },
               owner: {
                 selected: ownerFilter,
-                onChange: handleChangeOwner,
+                onChange: onChangeOwnerFilter,
               },
             }}
           />
@@ -195,12 +196,13 @@ export default function App({
           onChangeSort={handleChangeSort}
           selectedTask={selectedTask}
           onChangeSelected={setSelectedTask}
+          onUpdateTask={async (taskInfo) => await onUpdateTask(taskInfo)}
         />
         {taskNumber === 'new' ? (
           <NewTaskSidebar
             user={user}
             onDismiss={() => setSelectedTask(null)}
-            onSave={async (taskInfo) => await onCreate(taskInfo)}
+            onSave={async (taskInfo) => await onCreateTask(taskInfo)}
           />
         ) : (
           isSidebarOpen && (
@@ -208,7 +210,7 @@ export default function App({
               user={user}
               task={task}
               onDismiss={() => setSelectedTask(null)}
-              onSave={async (taskInfo) => await onUpdate(taskInfo)}
+              onSave={async (taskInfo) => await onUpdateTask(taskInfo)}
             />
           )
         )}

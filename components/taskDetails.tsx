@@ -177,6 +177,11 @@ function TaskMetadata({
     saveChanges(taskInfo)
   }
 
+  function handleChangeStatus(status: Status) {
+    const taskInfo = { ...task, status }
+    saveChanges(taskInfo)
+  }
+
   return (
     <div id="task-meta">
       <div className="task-meta-row">
@@ -205,7 +210,12 @@ function TaskMetadata({
       <div className="task-meta-row">
         <h4>Status</h4>
         <div>
-          <StatusPill value={task.status} height={30} editable={isOwner} />
+          <StatusPill
+            value={task.status}
+            height={30}
+            editable={isOwner}
+            onChange={handleChangeStatus}
+          />
         </div>
       </div>
 

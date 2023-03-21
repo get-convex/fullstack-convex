@@ -5,26 +5,28 @@ import { Avatar } from './login'
 import { StatusPill } from './status'
 import { PaperClip, TextBubble } from './icons'
 import type { Document } from '../convex/_generated/dataModel'
+import type { Task } from '../convex/getTask'
 
 function TaskListing({
   user,
   task,
-  selectedTask,
-  handleSelectTask,
+  selected = false,
+  onSelect,
+  onUpdate,
 }: {
   user?: Document<'users'> | null
   task: Document<'tasks'>
-  selectedTask: number | null
-  handleSelectTask: MouseEventHandler
+  selected: boolean
+  onSelect: MouseEventHandler
+  onUpdate: (task: Partial<Task>) => void
 }) {
   return (
     <Link
       href={`/task/${task.number}`}
-      className={`task-listing${
-        task.number === selectedTask ? ` selected-task` : ''
-      }`}
+      className={`task-listing${selected ? ` selected-task` : ''}`}
       key={task.number}
-      onClick={handleSelectTask}
+      onClick={onSelect}
+      tabIndex={0}
     >
       <div className="task-listing-number">{task.number}</div>
       <div className="task-listing-title">{task.title}</div>
@@ -32,6 +34,7 @@ function TaskListing({
         <StatusPill
           value={task.status}
           editable={!!user && user._id.equals(task.ownerId)}
+          onChange={(status) => onUpdate({ ...task, status })}
         />
       </div>
       <div className="task-listing-owner">
@@ -71,6 +74,7 @@ export function TaskList({
   onChangeSort,
   selectedTask,
   onChangeSelected,
+  onUpdateTask,
 }: {
   user?: Document<'users'> | null
   tasks: Document<'tasks'>[]
@@ -78,6 +82,7 @@ export function TaskList({
   onChangeSort: MouseEventHandler
   selectedTask: number | null
   onChangeSelected: (taskNumber: number) => void
+  onUpdateTask: (taskInfo: Partial<Task>) => void
 }) {
   if (!tasks.length && !isLoading) {
     return <p>No matching tasks found</p>
@@ -88,22 +93,22 @@ export function TaskList({
   return (
     <main className="task-list">
       <div className="task-list-header">
-        <div id="number" onClick={sortHandler}>
+        <div id="number" onClick={sortHandler} tabIndex={0}>
           #
         </div>
-        <div id="title" onClick={sortHandler}>
+        <div id="title" onClick={sortHandler} tabIndex={0}>
           Task
         </div>
-        <div id="status" onClick={sortHandler}>
+        <div id="status" onClick={sortHandler} tabIndex={0}>
           Status
         </div>
-        <div id="owner" onClick={sortHandler}>
+        <div id="owner" onClick={sortHandler} tabIndex={0}>
           Owner
         </div>
-        <div id="fileCount" onClick={sortHandler}>
+        <div id="fileCount" onClick={sortHandler} tabIndex={0}>
           Files
         </div>
-        <div id="commentCount" onClick={sortHandler}>
+        <div id="commentCount" onClick={sortHandler} tabIndex={0}>
           Comments
         </div>
       </div>
@@ -114,8 +119,9 @@ export function TaskList({
               key={task.number}
               user={user}
               task={task}
-              selectedTask={selectedTask}
-              handleSelectTask={() => onChangeSelected(task.number)}
+              selected={task.number === selectedTask}
+              onSelect={() => onChangeSelected(task.number)}
+              onUpdate={onUpdateTask}
             />
           ))}
         {isLoading && <TaskListingsGhost />}

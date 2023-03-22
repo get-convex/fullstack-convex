@@ -101,6 +101,7 @@ header {
   justify-content: space-between;
   align-items: center;
   margin-top: 33px;
+  z-index: 1;
 }
 
 header a {
@@ -422,8 +423,7 @@ button:disabled {
   z-index: 3;
 }
 
-.status-pill-editable > input,
-.status-pill-editable > input:checked {
+.status-pill-editable > input {
   opacity: 0;
   position: absolute;
 }

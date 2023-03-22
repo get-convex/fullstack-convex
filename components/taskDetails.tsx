@@ -155,16 +155,16 @@ function OwnerSelect({
   user,
   saveChanges,
 }: {
-  task: Document<'tasks'>
+  task: Task
   user?: Document<'users'> | null
   saveChanges: (taskInfo: Partial<Task>) => void
 }) {
+  const nullUser = { name: 'No one', _id: null }
   const isPublic = task?.visibility === Visibility.PUBLIC
   const canChangeOwner = user && isPublic
-  const [editing, setEditing] = useState(false)
   const isOwner = user ? user._id.equals(task?.ownerId) : false
 
-  const nullUser = { name: 'No one' }
+  const [editing, setEditing] = useState(false)
 
   function handleClaimTask() {
     const taskInfo = {
@@ -185,39 +185,43 @@ function OwnerSelect({
     <>
       {canChangeOwner && editing ? (
         <div id="owner-select">
-          <div>
-            {[task.owner || nullUser, isOwner ? nullUser : user].map((u, i) => (
-              <div className="owner-option" key={i}>
+          {[task.owner || nullUser, isOwner ? nullUser : user].map((u, i) => {
+            const isCurrentOwner =
+              u._id?.equals(task?.ownerId) || (!u._id && !task.ownerId)
+            return (
+              <label
+                className="owner-option"
+                key={i}
+                tabIndex={0}
+                htmlFor={`owner-select-${i}`}
+              >
                 <input
                   type="radio"
                   name="owner-select"
                   id={`owner-select-${i}`}
-                  value={u.name}
+                  value={u._id?.toString()}
+                  tabIndex={-1}
                   onChange={() => {
-                    if (!u._id?.equals(task?.ownerId)) {
+                    if (!isCurrentOwner) {
                       u.name === 'No one'
                         ? handleUnclaimTask()
                         : handleClaimTask()
                     }
                     setEditing(false)
                   }}
+                  checked={isCurrentOwner}
                 />
-                <label htmlFor={`owner-select-${i}`}>
-                  {u.pictureUrl ? (
-                    <Avatar user={u} withName={true} />
-                  ) : (
-                    <NullAvatar />
-                  )}
-                </label>
-              </div>
-            ))}
-          </div>
+                {u._id ? <Avatar user={u} withName={true} /> : <NullAvatar />}
+              </label>
+            )
+          })}
         </div>
       ) : (
         <button
           id="owner-button"
           onClick={() => (canChangeOwner ? setEditing(!editing) : null)}
-          title={`Change task owner`}
+          title={canChangeOwner ? 'Change task owner' : 'Task owner'}
+          tabIndex={0}
         >
           {task.owner ? (
             <Avatar user={task.owner} withName={true} />
@@ -236,7 +240,7 @@ function TaskMetadata({
   user,
   saveChanges,
 }: {
-  task: Document<'tasks'>
+  task: Task
   user: Document<'users'> | null
   saveChanges: (taskInfo: Partial<Task>) => void
 }) {

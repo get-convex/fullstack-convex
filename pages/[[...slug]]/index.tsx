@@ -1,12 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { useMutation, useQuery } from '../../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import {
-  useStableQuery,
-  useStablePaginatedQuery,
-} from '../../hooks/useStableQuery'
+import { useStablePaginatedQuery } from '../../hooks/useStableQuery'
 import { Header } from '../../components/login'
 import { Controls } from '../../components/controls'
 import { Status, STATUS_VALUES, SortKey, SortOrder } from '../../convex/schema'
@@ -96,26 +93,33 @@ export default function App({
     const target = event.target as HTMLInputElement
     const { value, checked } = target
     const newFilter = checked
-      ? // A formerly unchecked status filter is now checked; add value to filter
+      ? // A formerly unchecked option is now checked; add value to filter
         STATUS_VALUES.filter((s) => statusFilter.includes(s) || s === +value)
-      : // A formerly checked status filter is now unchecked; remove value from filter
+      : // A formerly checked option is now unchecked; remove value from filter
         statusFilter.filter((s) => s !== +value)
     setStatusFilter(newFilter)
   }
 
   // Set up state & handler for filtering by owner
-  const [ownerFilter, setOwnerFilter] = useState(['anyone'])
+  const OWNER_VALUES = useMemo(
+    () => (user ? ['Me', 'Others', 'Nobody'] : ['Others', 'Nobody']),
+    [user]
+  )
+  const [ownerFilter, setOwnerFilter] = useState(OWNER_VALUES)
+  useEffect(() => {
+    setOwnerFilter(OWNER_VALUES)
+  }, [OWNER_VALUES])
   const onChangeOwnerFilter: ChangeEventHandler = (event) => {
     const target = event.target as HTMLInputElement
     const { value, checked } = target
-    if (checked) {
-      setOwnerFilter([value])
-    }
+    console.log('change owner', value)
+    const newFilter = checked
+      ? // A formerly unchecked option is now checked; add value to filter
+        OWNER_VALUES.filter((o) => ownerFilter.includes(o) || o === value)
+      : // A formerly checked option is now unchecked; remove value from filter
+        ownerFilter.filter((s) => s !== value)
+    setOwnerFilter(newFilter)
   }
-
-  // Get the total number of tasks in the db that match the filters,
-  // even if all haven't been loaded on the page yet
-  const matching = useStableQuery('countTasks', statusFilter)
 
   // Set up state & handler for sorting by a given key (column)
   const [sortKey, setSortKey] = useState(SortKey.NUMBER)
@@ -142,7 +146,7 @@ export default function App({
   } = useStablePaginatedQuery(
     'listTasks',
     { initialNumItems: PAGE_SIZE },
-    { statusFilter, sortKey, sortOrder }
+    { statusFilter, ownerFilter, sortKey, sortOrder }
   )
 
   // We use an IntersectionObserver to notice user has reached bottom of list
@@ -179,10 +183,13 @@ export default function App({
             user={user}
             filters={{
               status: {
+                options: STATUS_VALUES,
+                labels: STATUS_VALUES.map((v) => Status[v]),
                 selected: statusFilter,
                 onChange: onChangeStatusFilter,
               },
               owner: {
+                options: OWNER_VALUES,
                 selected: ownerFilter,
                 onChange: onChangeOwnerFilter,
               },

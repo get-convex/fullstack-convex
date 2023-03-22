@@ -218,6 +218,10 @@ button:disabled {
   background-color: var(--color-light);
 }
 
+#task-list-body > p {
+  padding-top: 20px;
+}
+
 .task-list-header,
 .task-listing {
   display: grid;

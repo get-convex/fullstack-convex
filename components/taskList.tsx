@@ -85,7 +85,13 @@ export function TaskList({
   onUpdateTask: (taskInfo: Partial<Task>) => void
 }) {
   if (!tasks.length && !isLoading) {
-    return <p>No matching tasks found</p>
+    return (
+      <main className="task-list">
+        <div id="task-list-body">
+          <p>No matching tasks found</p>
+        </div>
+      </main>
+    )
   }
 
   const sortHandler = isLoading ? () => ({}) : onChangeSort

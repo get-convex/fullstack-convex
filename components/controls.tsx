@@ -7,6 +7,9 @@ import type { Document } from '../convex/_generated/dataModel'
 type Value = string | number | Status
 
 interface FilterControl {
+  options: Value[]
+  labels?: string[]
+  user?: Document<'users'> | null
   selected: Value[]
   onChange: ChangeEventHandler
 }
@@ -35,7 +38,10 @@ export function Select({
           className="select-legend"
           onClick={() => setShowOptions(!showOptions)}
         >
-          {name} {showOptions ? <CaretUp /> : <CaretDown />}
+          <p>
+            <span>{name}</span> ({selectedValues.length})
+          </p>
+          {showOptions ? <CaretUp /> : <CaretDown />}
         </div>
       }
       {showOptions &&
@@ -48,6 +54,7 @@ export function Select({
               value={v}
               checked={isSelected(v)}
               onChange={onChange}
+              disabled={isSelected(v) && selectedValues.length === 1}
             />
             <label htmlFor={`option-${v}`}>{optionLabels[i]}</label>
           </div>
@@ -56,25 +63,37 @@ export function Select({
   )
 }
 
-export function StatusControl({ selected, onChange }: FilterControl) {
+export function StatusControl({
+  options,
+  labels,
+  selected,
+  onChange,
+}: FilterControl) {
   return (
     <Select
       name="Status"
-      options={STATUS_VALUES}
+      options={options}
       selectedValues={selected}
       onChange={onChange}
-      labels={STATUS_VALUES.map((v) => Status[v])}
+      labels={labels}
     />
   )
 }
 
-export function OwnerControl({ selected, onChange }: FilterControl) {
+export function OwnerControl({
+  options,
+  labels,
+  user,
+  selected,
+  onChange,
+}: FilterControl) {
   return (
     <Select
       name="Owner"
-      options={['me', 'nobody', 'anyone']}
+      options={options} //['me', 'nobody', 'anyone']}
       selectedValues={selected}
       onChange={onChange}
+      labels={labels || options.map((o) => o.toString())}
     />
   )
 }
@@ -123,10 +142,15 @@ export function Controls({
     <div id="controls">
       <div>
         <StatusControl
+          options={filters.status.options}
+          labels={filters.status.labels}
           selected={filters.status.selected}
           onChange={filters.status.onChange}
         />
         <OwnerControl
+          user={user}
+          options={filters.owner.options}
+          labels={filters.owner.labels}
           selected={filters.owner.selected}
           onChange={filters.owner.onChange}
         />

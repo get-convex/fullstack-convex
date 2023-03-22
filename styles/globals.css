@@ -385,12 +385,14 @@ button:disabled {
 }
 
 .owner-option {
-  background-color: var(--color-light);
+  background-color: var(--color-lightest-grey);
   display: flex;
   align-items: center;
   padding: 3px 12px;
   position: relative;
   top: 0;
+  border: 2px solid var(--color-white);
+  border-radius: 40px;
 }
 
 .owner-option input {

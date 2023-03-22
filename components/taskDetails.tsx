@@ -171,6 +171,7 @@ function OwnerSelect({
       ...task,
       ownerId: user?._id,
       ownerName: user?.name,
+      owner: user,
     } as Partial<Task>
     saveChanges(taskInfo)
   }
@@ -331,13 +332,16 @@ export function NewTaskDetails({
   const [title, setTitle] = useState<string | undefined>('')
   const [description, setDescription] = useState<string | undefined>('')
   const [status, setStatus] = useState(Status.New)
+  const [owner, setOwner] = useState(user || null)
 
   const newTask = {
     title,
     description,
     status,
     visibility: Visibility.PUBLIC,
-    ownerId: user?._id,
+    ownerId: owner?._id,
+    ownerName: owner?.name,
+    owner,
   } as Partial<Task>
 
   if (user === undefined) return <TaskDetailsGhost />
@@ -374,7 +378,19 @@ export function NewTaskDetails({
             autoFocus={false}
           />
         </div>
-        <div className="task-meta">
+        <div id="task-meta">
+          <div className="task-meta-row">
+            <h4>Owner</h4>
+            <div>
+              <OwnerSelect
+                task={newTask as Task}
+                user={user}
+                saveChanges={({ owner }) => {
+                  setOwner(owner || null)
+                }}
+              />
+            </div>
+          </div>
           <div className="task-meta-row">
             <h4>Status</h4>
             <div>

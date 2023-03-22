@@ -194,9 +194,11 @@ function OwnerSelect({
                   id={`owner-select-${i}`}
                   value={u.name}
                   onChange={() => {
-                    u.name === 'No one'
-                      ? handleUnclaimTask()
-                      : handleClaimTask()
+                    if (!u._id?.equals(task?.ownerId)) {
+                      u.name === 'No one'
+                        ? handleUnclaimTask()
+                        : handleClaimTask()
+                    }
                     setEditing(false)
                   }}
                 />

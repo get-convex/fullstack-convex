@@ -96,7 +96,7 @@ function StatusSelect({
   }
 
   return (
-    <div>
+    <div id="status-select">
       {STATUS_VALUES.map((s) => (
         <div
           key={s}

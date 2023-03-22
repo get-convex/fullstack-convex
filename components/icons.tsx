@@ -1,12 +1,4 @@
-import React, { type PropsWithChildren } from 'react'
-
-function Icon({ name, children }: PropsWithChildren<{ name: string }>) {
-  return (
-    <div role="image" aria-label={`${name} icon`}>
-      {children}
-    </div>
-  )
-}
+import React from 'react'
 
 export function CaretDown() {
   return (

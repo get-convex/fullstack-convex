@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Error from 'next/error'
-import { Avatar } from './login'
+import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
 import { Files } from './files'
 import { StatusPill } from './status'
@@ -150,18 +150,21 @@ function TextareaInput({
   )
 }
 
-function TaskMetadata({
+function OwnerSelect({
   task,
   user,
   saveChanges,
 }: {
   task: Document<'tasks'>
-  user: Document<'users'> | null
+  user?: Document<'users'> | null
   saveChanges: (taskInfo: Partial<Task>) => void
 }) {
   const isPublic = task?.visibility === Visibility.PUBLIC
   const canChangeOwner = user && isPublic
+  const [editing, setEditing] = useState(false)
   const isOwner = user ? user._id.equals(task?.ownerId) : false
+
+  const nullUser = { name: 'No one' }
 
   function handleClaimTask() {
     const taskInfo = {
@@ -177,6 +180,65 @@ function TaskMetadata({
     saveChanges(taskInfo)
   }
 
+  return (
+    <>
+      {canChangeOwner && editing ? (
+        <div id="owner-select">
+          <div>
+            {[task.owner || nullUser, isOwner ? nullUser : user].map((u, i) => (
+              <div className="owner-option" key={i}>
+                <input
+                  type="radio"
+                  name="owner-select"
+                  id={`owner-select-${i}`}
+                  value={u.name}
+                  onChange={() => {
+                    u.name === 'No one'
+                      ? handleUnclaimTask()
+                      : handleClaimTask()
+                    setEditing(false)
+                  }}
+                />
+                <label htmlFor={`owner-select-${i}`}>
+                  {u.pictureUrl ? (
+                    <Avatar user={u} withName={true} />
+                  ) : (
+                    <NullAvatar />
+                  )}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <button
+          id="owner-button"
+          onClick={() => (canChangeOwner ? setEditing(!editing) : null)}
+          title={`Change task owner`}
+        >
+          {task.owner ? (
+            <Avatar user={task.owner} withName={true} />
+          ) : (
+            <NullAvatar />
+          )}
+          {canChangeOwner && <CaretDown />}
+        </button>
+      )}
+    </>
+  )
+}
+
+function TaskMetadata({
+  task,
+  user,
+  saveChanges,
+}: {
+  task: Document<'tasks'>
+  user: Document<'users'> | null
+  saveChanges: (taskInfo: Partial<Task>) => void
+}) {
+  const isOwner = user ? user._id.equals(task?.ownerId) : false
+
   function handleChangeStatus(status: Status) {
     const taskInfo = { ...task, status }
     saveChanges(taskInfo)
@@ -186,24 +248,8 @@ function TaskMetadata({
     <div id="task-meta">
       <div className="task-meta-row">
         <h4>Owner</h4>
-        <div className="owner-details">
-          {task.owner ? (
-            <Avatar user={task.owner} withName={true} />
-          ) : (
-            <div></div>
-          )}
-          {canChangeOwner && (
-            <button
-              className="icon-button"
-              title={`${
-                //TODO this should be a drop down
-                isOwner ? 'Remove yourself as' : 'Make yourself'
-              } the owner of this task`}
-              onClick={isOwner ? handleUnclaimTask : handleClaimTask}
-            >
-              <CaretDown />
-            </button>
-          )}
+        <div>
+          <OwnerSelect task={task} user={user} saveChanges={saveChanges} />
         </div>
       </div>
 
@@ -221,7 +267,7 @@ function TaskMetadata({
 
       <div className="task-meta-row">
         <h4>Created</h4>
-        <div>
+        <div id="task-detail-created">
           <Calendar />
           {new Date(task._creationTime).toDateString()}
         </div>
@@ -263,7 +309,11 @@ function TaskInfo({
           editing={newTask}
         />
       ) : (
-        task.description && <p>{task.description}</p>
+        task.description && (
+          <div id="task-description">
+            <p>{task.description}</p>
+          </div>
+        )
       )}
 
       <TaskMetadata task={task} user={user} saveChanges={onSave} />

@@ -253,48 +253,6 @@ button:disabled {
   overflow-x: hidden;
 }
 
-/* Task status */
-.status-pill {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 12px;
-  border: 2px solid var(--color-white);
-  border-radius: 40px;
-  flex-grow: 0;
-}
-
-.status-pill-editable {
-  position: relative;
-  z-index: 2;
-}
-
-.status-pill-editable:hover {
-  cursor: pointer;
-}
-
-.status-pill-editable > input,
-.status-pill-editable > input:checked {
-  opacity: 0;
-  position: absolute;
-}
-
-.status-pill-0 {
-  background-color: var(--color-purple);
-}
-
-.status-pill-1 {
-  background-color: var(--color-yellow);
-}
-
-.status-pill-2 {
-  background-color: var(--color-green);
-}
-
-.status-pill-3 {
-  background-color: var(--color-light-red);
-}
-
 /* Task details in sidebar */
 
 #task-details {
@@ -369,6 +327,7 @@ button:disabled {
   justify-content: left;
   align-items: center;
   gap: 10px;
+  position: relative;
 }
 
 #task-header,
@@ -402,6 +361,85 @@ button:disabled {
   padding: 6px 19px 14px 10px;
   width: calc(100% - 19px);
   margin-right: 19px;
+}
+
+/* Task owner & status */
+
+#owner-select,
+#status-select {
+  position: relative;
+  z-index: 3;
+}
+
+#owner-select > div {
+  display: flex;
+  flex-direction: column;
+}
+
+#owner-button {
+  display: flex;
+  gap: 10px;
+  justify-content: left;
+  font-size: inherit;
+  background-color: var(--color-light);
+}
+
+.owner-option {
+  background-color: var(--color-light);
+  display: flex;
+  align-items: center;
+  padding: 3px 12px;
+  position: relative;
+  top: 0;
+}
+
+.owner-option input {
+  position: absolute;
+  opacity: 0;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 12px;
+  border: 2px solid var(--color-white);
+  border-radius: 40px;
+  flex-grow: 0;
+}
+
+.status-pill-editable {
+  z-index: 2;
+}
+
+.status-pill-editable:hover {
+  cursor: pointer;
+}
+
+.status-pill-editable > input {
+  z-index: 3;
+}
+
+.status-pill-editable > input,
+.status-pill-editable > input:checked {
+  opacity: 0;
+  position: absolute;
+}
+
+.status-pill-0 {
+  background-color: var(--color-purple);
+}
+
+.status-pill-1 {
+  background-color: var(--color-yellow);
+}
+
+.status-pill-2 {
+  background-color: var(--color-green);
+}
+
+.status-pill-3 {
+  background-color: var(--color-light-red);
 }
 
 /* Files */
@@ -540,6 +578,10 @@ button:disabled {
   width: 30px;
   height: 30px;
   border-radius: 100%;
+}
+
+.null-avatar > div {
+  background-color: var(--color-light-grey);
 }
 
 /* TODO cleanup after redesign

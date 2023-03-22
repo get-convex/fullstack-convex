@@ -69,6 +69,17 @@ export function Avatar({
   )
 }
 
+export function NullAvatar() {
+  return (
+    <div className="avatar null-avatar">
+      <div className="avatar-ghost"></div>
+      <span className="avatar-name" title="No one">
+        No one
+      </span>
+    </div>
+  )
+}
+
 export function Login({ user }: { user?: Document<'users'> | null }) {
   return (
     <div style={{ display: 'flex', gap: 10 }}>

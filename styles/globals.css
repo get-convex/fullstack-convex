@@ -173,6 +173,7 @@ button:disabled {
   height: 38px;
   display: flex;
   gap: 10px;
+  flex-grow: 2;
 }
 
 .select {
@@ -182,20 +183,20 @@ button:disabled {
   cursor: pointer;
 }
 
-.select-legend,
-.select-option {
-  height: 30px;
+.control {
   padding: 4px 10px;
   display: flex;
   gap: 1em;
   align-items: center;
   background-color: var(--color-white);
   border: 1px solid var(--color-light-grey);
-  border-bottom: 0px;
+  border-radius: 6px;
 }
 .select-legend,
 .select-option {
   color: var(--color-dark);
+  border-bottom: 0px;
+  border-radius: 0px;
 }
 
 .select-legend {
@@ -217,6 +218,22 @@ button:disabled {
   border-bottom: 1px solid var(--color-light-grey);
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
+}
+
+#search {
+  flex-grow: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#search > input {
+  flex-grow: 2;
+  font-size: inherit;
+}
+
+#search > button {
+  height: 20px;
 }
 
 /* Task list */

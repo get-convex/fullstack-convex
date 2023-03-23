@@ -1,7 +1,8 @@
-import React, { useState, type ChangeEventHandler } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { Status, STATUS_VALUES } from '../convex/schema'
-import { CaretDown, CaretUp, Plus } from './icons'
+import { Status } from '../convex/schema'
+import { CaretDown, CaretUp, Plus, Search } from './icons'
+import type { ChangeEventHandler, KeyboardEventHandler } from 'react'
 import type { Document } from '../convex/_generated/dataModel'
 
 type Value = string | number | Status
@@ -43,7 +44,7 @@ export function Select({
     <div id={id} className="select" tabIndex={0} role="button">
       {
         <div
-          className="select-legend"
+          className="control select-legend"
           onClick={() => setShowOptions(!showOptions)}
           title={`Filter tasks by ${name}`}
         >
@@ -70,7 +71,7 @@ export function Select({
               isSelected(v) && selectedValues.length === 1
           return (
             <label
-              className={`select-option ${
+              className={`control select-option ${
                 isDisabled ? 'select-option-disabled' : ''
               }`}
               key={i}
@@ -176,9 +177,11 @@ export function AddTaskButton({ user }: { user?: Document<'users'> | null }) {
 export function Controls({
   user,
   filters,
+  search,
 }: {
   user: Document<'users'> | null | undefined
   filters: { status: FilterControl; owner: FilterControl }
+  search: { term: string; onSubmit: (term: string) => void }
 }) {
   return (
     <div id="controls">
@@ -200,6 +203,7 @@ export function Controls({
           selected={filters.owner.selected}
           onChange={filters.owner.onChange}
         />
+        <SearchControl searchTerm={search.term} onSubmit={search.onSubmit} />
       </div>
       <AddTaskButton user={user} />
     </div>
@@ -228,10 +232,38 @@ function ShowingCount({
   )
 }
 
-function SearchControl() {
+function SearchControl({
+  searchTerm = '',
+  onSubmit,
+}: {
+  onSubmit: (term: string) => void
+  searchTerm?: string
+}) {
+  const [term, setTerm] = useState(searchTerm || '')
+  const onSearch = onSubmit || ((term: string) => console.log(term.trim()))
+
+  const onKeyUp = function (e) {
+    if (e.key === 'Enter') onSearch(term)
+  } as KeyboardEventHandler
+
   return (
-    <div id="search">
-      <input value="" onChange={() => null} placeholder="Search will be here" />
+    <div id="search" className="control">
+      <input
+        type="search"
+        value={term}
+        onChange={(e) => setTerm(e.target.value)}
+        onKeyUp={onKeyUp}
+        placeholder="Search task titles, descriptions & comments"
+        tabIndex={0}
+      />
+      <button
+        type="submit"
+        className="icon-button"
+        title="Click to search"
+        onClick={() => onSubmit(term)}
+      >
+        <Search />
+      </button>
     </div>
   )
 }

@@ -175,6 +175,10 @@ export default function App({
         <Header user={user}>
           <Controls
             user={user}
+            search={{
+              term: '',
+              onSubmit: (term) => console.log('You searched for:', term),
+            }}
             filters={{
               status: {
                 options: STATUS_VALUES,

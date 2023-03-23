@@ -195,3 +195,22 @@ export function Upload() {
     </svg>
   )
 }
+
+export function Search() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8.23.917a7.312 7.312 0 10-.002 14.625 7.28 7.28 0 004.614-1.639l4.627 4.627a.749.749 0 101.06-1.06l-4.627-4.627A7.313 7.313 0 008.228.917zM2.416 8.229a5.813 5.813 0 1111.625.001A5.813 5.813 0 012.416 8.23z"
+        fill="#292929"
+      ></path>
+    </svg>
+  )
+}

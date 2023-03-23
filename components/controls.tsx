@@ -12,6 +12,8 @@ interface FilterControl {
   user?: Document<'users'> | null
   selected: Value[]
   onChange: ChangeEventHandler
+  titles?: string[]
+  disabled?: boolean[]
 }
 
 export function Select({
@@ -20,45 +22,82 @@ export function Select({
   selectedValues,
   onChange,
   labels,
+  titles,
+  disabled,
 }: {
   name: string
   options: Value[]
   selectedValues: Value[]
   onChange: ChangeEventHandler
   labels?: string[]
+  titles?: string[]
+  disabled?: boolean[]
 }) {
   const id = `select-${name}`
   const isSelected = (value: Value) => selectedValues.includes(value)
   const [showOptions, setShowOptions] = useState(false)
   const optionLabels = labels || options
+  const numSelected = selectedValues.length
+
   return (
     <div id={id} className="select" tabIndex={0} role="button">
       {
         <div
           className="select-legend"
           onClick={() => setShowOptions(!showOptions)}
+          title={`Filter tasks by ${name}`}
         >
           <p>
-            <span>{name}</span> ({selectedValues.length})
+            {name}{' '}
+            <span
+              title={`${numSelected} value${
+                numSelected === 1 ? '' : 's'
+              } selected`}
+            >
+              ({numSelected})
+            </span>
           </p>
           {showOptions ? <CaretUp /> : <CaretDown />}
         </div>
       }
       {showOptions &&
-        options.map((v, i) => (
-          <div className="select-option" key={i}>
-            <input
-              type="checkbox"
-              id={`option-${v}`}
-              name={name}
-              value={v}
-              checked={isSelected(v)}
-              onChange={onChange}
-              disabled={isSelected(v) && selectedValues.length === 1}
-            />
-            <label htmlFor={`option-${v}`}>{optionLabels[i]}</label>
-          </div>
-        ))}
+        options.map((v, i) => {
+          const isDisabled = disabled
+            ? // If a value for disabled has been explicitly provided, use it
+              disabled[i]
+            : // To prevent de-selecting all values (resulting in empty task list),
+              // if there is only a single item selected, disable de-selecting it
+              isSelected(v) && selectedValues.length === 1
+          return (
+            <label
+              className={`select-option ${
+                isDisabled ? 'select-option-disabled' : ''
+              }`}
+              key={i}
+              title={titles ? titles[i].toString() : optionLabels[i].toString()}
+            >
+              <input
+                type="checkbox"
+                id={`option-${v}`}
+                name={name}
+                value={v}
+                checked={isSelected(v)}
+                onChange={onChange}
+                disabled={isDisabled}
+                title={
+                  isDisabled
+                    ? isSelected(v) && selectedValues.length === 1
+                      ? 'At least one value must be selected'
+                      : titles && titles[i]
+                    : isSelected(v)
+                    ? 'Uncheck to exclude these tasks'
+                    : 'Check to include these tasks'
+                }
+              />
+              {optionLabels[i]}
+            </label>
+          )
+        })}
     </div>
   )
 }
@@ -83,17 +122,20 @@ export function StatusControl({
 export function OwnerControl({
   options,
   labels,
-  user,
+  titles,
+  disabled,
   selected,
   onChange,
 }: FilterControl) {
   return (
     <Select
       name="Owner"
-      options={options} //['me', 'nobody', 'anyone']}
+      options={options}
       selectedValues={selected}
       onChange={onChange}
       labels={labels || options.map((o) => o.toString())}
+      titles={titles}
+      disabled={disabled}
     />
   )
 }
@@ -144,6 +186,8 @@ export function Controls({
         <StatusControl
           options={filters.status.options}
           labels={filters.status.labels}
+          titles={filters.status.titles}
+          disabled={filters.owner.disabled}
           selected={filters.status.selected}
           onChange={filters.status.onChange}
         />
@@ -151,6 +195,8 @@ export function Controls({
           user={user}
           options={filters.owner.options}
           labels={filters.owner.labels}
+          titles={filters.owner.titles}
+          disabled={filters.owner.disabled}
           selected={filters.owner.selected}
           onChange={filters.owner.onChange}
         />

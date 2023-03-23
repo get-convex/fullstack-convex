@@ -101,14 +101,8 @@ export default function App({
   }
 
   // Set up state & handler for filtering by owner
-  const OWNER_VALUES = useMemo(
-    () => (user ? ['Me', 'Others', 'Nobody'] : ['Others', 'Nobody']),
-    [user]
-  )
+  const OWNER_VALUES = ['Me', 'Others', 'Nobody']
   const [ownerFilter, setOwnerFilter] = useState(OWNER_VALUES)
-  useEffect(() => {
-    setOwnerFilter(OWNER_VALUES)
-  }, [OWNER_VALUES])
   const onChangeOwnerFilter: ChangeEventHandler = (event) => {
     const target = event.target as HTMLInputElement
     const { value, checked } = target
@@ -190,8 +184,18 @@ export default function App({
               },
               owner: {
                 options: OWNER_VALUES,
-                selected: ownerFilter,
+                selected: ownerFilter.filter((v) =>
+                  v === 'Me' ? !!user : true
+                ),
                 onChange: onChangeOwnerFilter,
+                titles: [
+                  user
+                    ? `Tasks owned by ${user.name}`
+                    : 'Log in to see your own tasks',
+                  'Tasks owned by other users',
+                  'Tasks not owned by any user',
+                ],
+                disabled: OWNER_VALUES.map((v) => (v === 'Me' ? !user : false)),
               },
             }}
           />

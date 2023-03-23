@@ -179,6 +179,7 @@ button:disabled {
   width: 153px;
   color: var(--color-dark-grey);
   background-color: var(--color-white);
+  cursor: pointer;
 }
 
 .select-legend,
@@ -192,6 +193,10 @@ button:disabled {
   border: 1px solid var(--color-light-grey);
   border-bottom: 0px;
 }
+.select-legend,
+.select-option {
+  color: var(--color-dark);
+}
 
 .select-legend {
   justify-content: space-between;
@@ -199,7 +204,16 @@ button:disabled {
   border-top-right-radius: 6px;
 }
 
-.select > div:not(.hidden):last-of-type {
+.select-legend + label {
+  border-bottom: 1px solid var(--color);
+}
+
+.select-legend span,
+.select-option-disabled {
+  color: var(--color-grey);
+}
+
+.select > :not(.hidden):last-child {
   border-bottom: 1px solid var(--color-light-grey);
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;

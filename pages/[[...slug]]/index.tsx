@@ -106,7 +106,6 @@ export default function App({
   const onChangeOwnerFilter: ChangeEventHandler = (event) => {
     const target = event.target as HTMLInputElement
     const { value, checked } = target
-    console.log('change owner', value)
     const newFilter = checked
       ? // A formerly unchecked option is now checked; add value to filter
         OWNER_VALUES.filter((o) => ownerFilter.includes(o) || o === value)

@@ -67,7 +67,6 @@ export default query(
   async ({ db, auth }, paginationOptions, queryOptions: ListTasksOptions) => {
     // If logged in, fetch the stored user to get ID for filtering
     const user = await findUser(db, auth)
-    console.log(queryOptions)
 
     const { page, isDone, continueCursor } = await findMatchingTasks(
       db,

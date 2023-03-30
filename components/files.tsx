@@ -6,7 +6,7 @@ import { showTimeAgo } from './comments'
 import type { FormEvent } from 'react'
 import { Id, type Document } from '../convex/_generated/dataModel'
 import type { Task, File } from '../convex/getTask'
-import { Upload } from './icons'
+import { UploadIcon } from './icons'
 import Image from 'next/image'
 
 function showFileSize(size: number) {
@@ -200,7 +200,7 @@ export function Files({
         <h4>Files ({imageFiles?.length || 0})</h4>
         <button id="file-upload">
           {/* TODO open upload modal */}
-          <Upload /> Upload
+          <UploadIcon /> Upload
         </button>
         {/* {user && (
           <form

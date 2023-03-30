@@ -5,7 +5,7 @@ import { Comments } from './comments'
 import { Files } from './files'
 import { StatusPill } from './status'
 import { Status, Visibility } from '../convex/schema'
-import { Calendar, CaretDown } from './icons'
+import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEventHandler, FormEventHandler } from 'react'
 import type { Task } from '../convex/getTask'
 import type { Document } from '../convex/_generated/dataModel'
@@ -228,7 +228,7 @@ function OwnerSelect({
           ) : (
             <NullAvatar />
           )}
-          {canChangeOwner && <CaretDown />}
+          {canChangeOwner && <CaretDownIcon />}
         </button>
       )}
     </>
@@ -275,7 +275,7 @@ function TaskMetadata({
       <div className="task-meta-row">
         <h4>Created</h4>
         <div id="task-detail-created">
-          <Calendar />
+          <CalendarIcon />
           {new Date(task._creationTime).toDateString()}
         </div>
       </div>

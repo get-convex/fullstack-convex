@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { Status } from '../convex/schema'
-import { CaretDown, CaretUp, Plus, Search } from './icons'
+import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
 import type { ChangeEventHandler, KeyboardEventHandler } from 'react'
 import type { Document } from '../convex/_generated/dataModel'
 
@@ -58,7 +58,7 @@ export function Select({
               ({numSelected})
             </span>
           </p>
-          {showOptions ? <CaretUp /> : <CaretDown />}
+          {showOptions ? <CaretUpIcon /> : <CaretDownIcon />}
         </div>
       }
       {showOptions &&
@@ -145,7 +145,7 @@ export function AddTaskButton({ user }: { user?: Document<'users'> | null }) {
   if (user === undefined) {
     return (
       <button className="ghost" id="new" disabled>
-        <Plus />
+        <PlusIcon />
         Add Task
       </button>
     )
@@ -155,7 +155,7 @@ export function AddTaskButton({ user }: { user?: Document<'users'> | null }) {
       {user ? (
         <Link href="/task/new">
           <button className="dark" id="new" title="Create a new task">
-            <Plus />
+            <PlusIcon />
             Add Task
           </button>
         </Link>
@@ -166,7 +166,7 @@ export function AddTaskButton({ user }: { user?: Document<'users'> | null }) {
           title="Log in to create new tasks"
           disabled
         >
-          <Plus />
+          <PlusIcon />
           Add Task
         </button>
       )}
@@ -262,7 +262,7 @@ function SearchControl({
         title="Click to search"
         onClick={() => onSubmit(term)}
       >
-        <Search />
+        <SearchIcon />
       </button>
     </div>
   )

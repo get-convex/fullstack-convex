@@ -3,7 +3,7 @@ import Link from 'next/link'
 import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'
 import { StatusPill } from './status'
-import { PaperClip, TextBubble } from './icons'
+import { PaperClipIcon, TextBubbleIcon } from './icons'
 import type { Document } from '../convex/_generated/dataModel'
 import type { Task } from '../convex/getTask'
 
@@ -41,10 +41,10 @@ function TaskListing({
         {task.owner && <Avatar user={task.owner} size={23} withName={true} />}
       </div>
       <div className="task-listing-fileCount">
-        <PaperClip /> {task.fileCount}
+        <PaperClipIcon /> {task.fileCount}
       </div>
       <div className="task-listing-commentCount">
-        <TextBubble /> {task.commentCount}
+        <TextBubbleIcon /> {task.commentCount}
       </div>
     </Link>
   )

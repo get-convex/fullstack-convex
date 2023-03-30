@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useMutation } from '../convex/_generated/react'
 import type { FormEventHandler, KeyboardEventHandler } from 'react'
 import { Avatar } from './login'
-import { ArrowUp } from './icons'
+import { ArrowUpIcon } from './icons'
 import type { Document } from '../convex/_generated/dataModel'
 import type { Task, Comment } from '../convex/getTask'
 
@@ -52,7 +52,7 @@ function CommentList({ comments }: { comments: Comment[] }) {
       {moreComments > 0 && (
         <div id="more-comments">
           <button className="more-button" onClick={() => setVisibleIndex(0)}>
-            <ArrowUp />
+            <ArrowUpIcon />
             {moreComments} more comment{moreComments === 1 ? '' : 's'}
           </button>
         </div>

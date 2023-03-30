@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function CaretDown() {
+export function CaretDownIcon() {
   return (
     <svg
       width="10"
@@ -19,7 +19,7 @@ export function CaretDown() {
   )
 }
 
-export function CaretUp() {
+export function CaretUpIcon() {
   return (
     <svg
       width="10"
@@ -39,7 +39,7 @@ export function CaretUp() {
   )
 }
 
-export function PaperClip() {
+export function PaperClipIcon() {
   return (
     <svg
       width="16"
@@ -58,7 +58,7 @@ export function PaperClip() {
   )
 }
 
-export function Plus() {
+export function PlusIcon() {
   return (
     <svg
       width="15"
@@ -79,7 +79,7 @@ export function Plus() {
   )
 }
 
-export function TextBubble() {
+export function TextBubbleIcon() {
   return (
     <svg
       width="15"
@@ -100,7 +100,7 @@ export function TextBubble() {
   )
 }
 
-export function CircledX() {
+export function CircledXIcon() {
   return (
     <svg
       width="21"
@@ -121,7 +121,7 @@ export function CircledX() {
   )
 }
 
-export function Calendar() {
+export function CalendarIcon() {
   return (
     <svg
       width="30"
@@ -158,7 +158,7 @@ export function Calendar() {
   )
 }
 
-export function ArrowUp() {
+export function ArrowUpIcon() {
   return (
     <svg
       width="7"
@@ -166,6 +166,7 @@ export function ArrowUp() {
       viewBox="0 0 7 13"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-label="Arrow pointing up icon"
     >
       <path
         fillRule="evenodd"
@@ -177,7 +178,7 @@ export function ArrowUp() {
   )
 }
 
-export function Upload() {
+export function UploadIcon() {
   return (
     <svg
       width="11"
@@ -185,6 +186,7 @@ export function Upload() {
       viewBox="0 0 11 12"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-label="Upload icon"
     >
       <path
         fillRule="evenodd"
@@ -196,7 +198,7 @@ export function Upload() {
   )
 }
 
-export function Search() {
+export function SearchIcon() {
   return (
     <svg
       width="20"
@@ -204,6 +206,7 @@ export function Search() {
       viewBox="0 0 20 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-label="Search magnifying glass icon"
     >
       <path
         fillRule="evenodd"

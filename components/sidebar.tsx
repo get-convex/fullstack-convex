@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { CircledX } from './icons'
+import { CircledXIcon } from './icons'
 import { TaskDetails, NewTaskDetails } from './taskDetails'
 import type { PropsWithChildren, MouseEventHandler } from 'react'
 import type { Document } from '../convex/_generated/dataModel'
@@ -21,7 +21,7 @@ export function Sidebar({
         href="/"
         onClick={onDismiss}
       >
-        <CircledX />
+        <CircledXIcon />
       </Link>
     </aside>
   )

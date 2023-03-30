@@ -1,6 +1,6 @@
 import React, { useState, type KeyboardEventHandler } from 'react'
 import { Status, STATUS_VALUES } from '../convex/schema'
-import { CaretDown } from './icons'
+import { CaretDownIcon } from './icons'
 
 export function StatusPill({
   value,
@@ -62,7 +62,7 @@ export function StatusPill({
       onKeyUp={onKeyUp}
       tabIndex={0}
     >
-      {Status[value]} {editable && <CaretDown />}
+      {Status[value]} {editable && <CaretDownIcon />}
     </div>
   )
 }

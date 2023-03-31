@@ -80,8 +80,6 @@ aside {
   position: absolute;
   top: 20px;
   right: 20px;
-  width: 20px;
-  height: 20px;
 }
 
 /* Header toolbar */
@@ -141,6 +139,15 @@ button:disabled {
   border-radius: 100%;
   background-color: var(--color-light);
   color: var(--color-darkest-grey);
+  width: fit-content;
+  height: fit-content;
+}
+
+button.light {
+  line-height: 30px;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  border: 1px solid var(--color-light-grey);
 }
 
 /* Avatars */
@@ -496,14 +503,6 @@ button:disabled {
   margin-bottom: 15px;
 }
 
-#file-upload {
-  font-size: 18px;
-  line-height: 30px;
-  background-color: var(--color-light);
-  color: var(--color-dark);
-  border: 1px solid var(--color-light-grey);
-}
-
 #file-previews {
   display: flex;
   flex-direction: row;
@@ -523,7 +522,7 @@ button:disabled {
   flex-grow: 1;
 }
 
-.file-preview:nth-child(2n + 4) {
+.file-preview:nth-child(2n - 2) {
   flex-grow: 1;
 }
 
@@ -536,9 +535,83 @@ button:disabled {
   border: 1px solid var(--color-light-grey);
 }
 
+.file-preview img {
+  object-fit: cover;
+}
+
 #files input {
   position: fixed;
   opacity: 0;
+}
+
+#file-upload-modal {
+  width: 857px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#file-upload-modal > * {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+#file-upload-header {
+  padding-top: 30px;
+}
+
+#file-upload-form button {
+  font-size: 18px;
+  padding-left: 8px;
+}
+
+#file-upload-form {
+  padding: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--color-light-grey);
+}
+
+#file-upload-form > div {
+  display: flex;
+  gap: 8px;
+}
+
+#file-upload-form input {
+  opacity: 0;
+  position: absolute;
+}
+
+#safe-files {
+  display: flex;
+  flex-direction: row;
+  row-gap: 22px;
+  column-gap: 27px;
+  flex-wrap: wrap;
+}
+
+.safe-file {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 179px;
+}
+
+.safe-file .file-preview {
+  width: 179px;
+}
+
+.safe-file p {
+  font-size: 14px;
+  line-height: 16px;
+  padding: 0px;
+  margin: 0px;
+}
+
+.file-size {
+  color: var(--color-dark-grey);
 }
 
 /* Comments */
@@ -619,6 +692,36 @@ button:disabled {
 
 .null-avatar > div {
   background-color: var(--color-light-grey);
+}
+
+/* Modals */
+
+.modal-content {
+  width: 50vw;
+  height: 50vh;
+  position: absolute;
+  left: 25vw;
+  top: 25vh;
+  background-color: var(--color-light);
+  border-radius: 12px;
+}
+
+.modal-overlay {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 5;
+  padding: 0px;
+  margin: 0px;
+}
+
+.modal-content .close-button {
+  position: absolute;
+  right: 12px;
+  top: 12px;
 }
 
 /* TODO cleanup after redesign

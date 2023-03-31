@@ -14,6 +14,7 @@ import type * as countTasks from "../countTasks";
 import type * as createTask from "../createTask";
 import type * as deleteFile from "../deleteFile";
 import type * as getCurrentUser from "../getCurrentUser";
+import type * as getSafeFiles from "../getSafeFiles";
 import type * as getTask from "../getTask";
 import type * as listTasks from "../listTasks";
 import type * as listUsers from "../listUsers";
@@ -36,6 +37,7 @@ export type API = ApiFromModules<{
   createTask: typeof createTask;
   deleteFile: typeof deleteFile;
   getCurrentUser: typeof getCurrentUser;
+  getSafeFiles: typeof getSafeFiles;
   getTask: typeof getTask;
   listTasks: typeof listTasks;
   listUsers: typeof listUsers;

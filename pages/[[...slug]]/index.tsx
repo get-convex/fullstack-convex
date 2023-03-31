@@ -251,6 +251,7 @@ export async function getServerSideProps({
   } else if (!slug) {
     taskNumber = null
   }
+
   return {
     props: { taskNumber },
   }

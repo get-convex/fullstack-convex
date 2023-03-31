@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import Modal from 'react-modal'
 import NextError from 'next/error'
 import { useQuery, useMutation } from '../convex/_generated/react' //TODO refactor
-import { CircledXIcon, UploadIcon } from './icons'
+import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
 import Image from 'next/image'
 import { Id, type Document } from '../convex/_generated/dataModel'
 import type { FormEvent, MouseEvent, KeyboardEvent, EventHandler } from 'react'
@@ -113,9 +113,18 @@ function FileUploadModal({
             <div className="file-preview">
               <Image src={f.url} alt={f.name} fill />
             </div>
-            <p className="file-name">{f.name}</p>
-            <p className="file-size">{showFileSize(f.size)}</p>
-            {/* TODO download button */}
+            <div>
+              <div>
+                <p className="file-name">{f.name}</p>
+                <p className="file-size">{showFileSize(f.size)}</p>
+              </div>
+              <button
+                className="icon-button light"
+                title={`Download ${f.name}`}
+              >
+                <DownloadIcon />
+              </button>
+            </div>
           </div>
         ))}
       </div>

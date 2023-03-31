@@ -603,6 +603,19 @@ button.light {
   width: 179px;
 }
 
+.safe-file > div {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.safe-file button {
+  width: 21px;
+  height: 22px;
+  padding: 5px;
+  display: flex;
+}
+
 .safe-file p {
   font-size: 14px;
   line-height: 16px;

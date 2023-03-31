@@ -13,8 +13,10 @@ import type { ChangeEventHandler, MouseEventHandler } from 'react'
 import type { Task } from '../../convex/getTask'
 import type { ReactMutation } from 'convex/react'
 import type { API } from '../../convex/_generated/api'
+import { Inter } from 'next/font/google'
 
 const PAGE_SIZE = 10
+const FONT = Inter({ subsets: ['latin'] })
 
 export default function App({
   taskNumber,
@@ -167,6 +169,7 @@ export default function App({
     <>
       <Head>
         <title>{pageTitle}</title>
+        <style>{`html { font-family: ${FONT.style.fontFamily}; }`}</style>
       </Head>
       <div
         className={`grid ${isSidebarOpen ? 'with-sidebar' : 'without-sidebar'}`}

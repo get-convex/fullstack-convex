@@ -3,8 +3,7 @@ import Link from 'next/link'
 import { CircledX } from './icons'
 import { TaskDetails, NewTaskDetails } from './taskDetails'
 import type { PropsWithChildren, MouseEventHandler } from 'react'
-import type { Document } from '../convex/_generated/dataModel'
-import type { Task } from '../convex/getTask'
+import { Task, User } from './types'
 
 export function Sidebar({
   onDismiss,
@@ -31,16 +30,17 @@ export function TaskDetailSidebar({
   task,
   user,
   onDismiss,
-  onSave,
 }: {
   task?: Task | null
-  user?: Document<'users'> | null
+  user?: User | null
   onDismiss: MouseEventHandler
-  onSave: (taskInfo: Partial<Task>) => void
 }) {
   return (
     <Sidebar onDismiss={onDismiss}>
-      <TaskDetails task={task} user={user} onSave={onSave} />
+      <TaskDetails
+        task={task}
+        user={user}
+      />
     </Sidebar>
   )
 }
@@ -50,7 +50,7 @@ export function NewTaskSidebar({
   onDismiss,
   onSave,
 }: {
-  user?: Document<'users'> | null
+  user?: User | null
   onDismiss: MouseEventHandler
   onSave: (taskInfo: Partial<Task>) => void
 }) {

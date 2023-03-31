@@ -1,15 +1,14 @@
 import React, { useState, type ChangeEventHandler } from 'react'
 import Link from 'next/link'
-import { Status, STATUS_VALUES } from '../convex/schema'
 import { CaretDown, CaretUp, Plus } from './icons'
-import type { Document } from '../convex/_generated/dataModel'
+import { Status, User } from './types'
 
 type Value = string | number | Status
 
 interface FilterControl {
   options: Value[]
   labels?: string[]
-  user?: Document<'users'> | null
+  user?: User | null
   selected: Value[]
   onChange: ChangeEventHandler
 }
@@ -98,7 +97,7 @@ export function OwnerControl({
   )
 }
 
-export function AddTaskButton({ user }: { user?: Document<'users'> | null }) {
+export function AddTaskButton({ user }: { user?: User | null }) {
   if (user === undefined) {
     return (
       <button className="ghost" id="new" disabled>
@@ -135,7 +134,7 @@ export function Controls({
   user,
   filters,
 }: {
-  user: Document<'users'> | null | undefined
+  user: User | null | undefined
   filters: { status: FilterControl; owner: FilterControl }
 }) {
   return (

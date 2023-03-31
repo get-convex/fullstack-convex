@@ -1,6 +1,6 @@
 import React, { useState, type KeyboardEventHandler } from 'react'
-import { Status, STATUS_VALUES } from '../convex/schema'
 import { CaretDown } from './icons'
+import { STATUS_VALUES, Status } from './types'
 
 export function StatusPill({
   value,

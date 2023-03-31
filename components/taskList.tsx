@@ -4,8 +4,8 @@ import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'
 import { StatusPill } from './status'
 import { PaperClip, TextBubble } from './icons'
-import type { Document } from '../convex/_generated/dataModel'
-import type { Task } from '../convex/getTask'
+import { Task, User } from './types'
+import { userOwnsTask } from './helpers'
 
 function TaskListing({
   user,
@@ -14,8 +14,8 @@ function TaskListing({
   onSelect,
   onUpdate,
 }: {
-  user?: Document<'users'> | null
-  task: Document<'tasks'>
+  user?: User | null
+  task: Task
   selected: boolean
   onSelect: MouseEventHandler
   onUpdate: (task: Partial<Task>) => void
@@ -33,7 +33,7 @@ function TaskListing({
       <div className="task-listing-status">
         <StatusPill
           value={task.status}
-          editable={!!user && user._id.equals(task.ownerId)}
+          editable={userOwnsTask(task, user ?? null)}
           onChange={(status) => onUpdate({ ...task, status })}
         />
       </div>
@@ -41,10 +41,10 @@ function TaskListing({
         {task.owner && <Avatar user={task.owner} size={23} withName={true} />}
       </div>
       <div className="task-listing-fileCount">
-        <PaperClip /> {task.fileCount}
+        <PaperClip /> {task.files.length}
       </div>
       <div className="task-listing-commentCount">
-        <TextBubble /> {task.commentCount}
+        <TextBubble /> {task.comments.length}
       </div>
     </Link>
   )
@@ -76,8 +76,8 @@ export function TaskList({
   onChangeSelected,
   onUpdateTask,
 }: {
-  user?: Document<'users'> | null
-  tasks: Document<'tasks'>[]
+  user?: User | null
+  tasks: Task[]
   isLoading: boolean
   onChangeSort: MouseEventHandler
   selectedTask: number | null

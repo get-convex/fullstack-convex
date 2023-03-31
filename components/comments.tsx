@@ -1,10 +1,8 @@
-import React, { useState } from 'react'
-import { useMutation } from '../convex/_generated/react'
+import React, { useContext, useState } from 'react'
 import type { FormEventHandler, KeyboardEventHandler } from 'react'
 import { Avatar } from './login'
 import { ArrowUp } from './icons'
-import type { Document } from '../convex/_generated/dataModel'
-import type { Task, Comment } from '../convex/getTask'
+import { BackendContext, Comment, Task, User } from './types'
 
 export function showTimeAgo(created: Date) {
   const now = Date.now()
@@ -26,8 +24,8 @@ export function showTimeAgo(created: Date) {
 }
 
 function CommentListing({ comment }: { comment: Comment }) {
-  const { body, author, _creationTime } = comment
-  const created = new Date(_creationTime)
+  const { body, author, creationTime } = comment
+  const created = new Date(creationTime)
   return (
     <div className="comment-listing">
       <Avatar user={author} size={30} />
@@ -58,7 +56,7 @@ function CommentList({ comments }: { comments: Comment[] }) {
         </div>
       )}
       {visibleComments.map((c) => (
-        <CommentListing key={c._id.toString()} comment={c} />
+        <CommentListing key={c.id.toString()} comment={c} />
       ))}
     </div>
   )
@@ -68,10 +66,10 @@ export function Comments({
   user,
   task,
 }: {
-  user?: Document<'users'> | null
+  user?: User | null
   task: Task
 }) {
-  const saveComment = useMutation('saveComment')
+  const addCommentToBackend = useContext(BackendContext)!.taskManagement.addComment
   const [newComment, setNewComment] = useState('')
   const [savingText, setSavingText] = useState('')
   const trimmed = newComment.trim()
@@ -80,7 +78,7 @@ export function Comments({
     event.preventDefault()
     setSavingText(trimmed)
     setNewComment('')
-    await saveComment(task._id, trimmed)
+    await addCommentToBackend(task.id, trimmed)
     setSavingText('')
   } as FormEventHandler
 
@@ -103,7 +101,7 @@ export function Comments({
                 {
                   body: savingText,
                   author: user,
-                  _creationTime: Date.now(),
+                  creationTime: Date.now(),
                 } as Comment
               }
             />

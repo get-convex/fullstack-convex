@@ -1,11 +1,9 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useContext } from 'react'
 import Link from 'next/link'
-import { useMutation } from '../convex/_generated/react'
 import { Avatar } from './login'
 import { showTimeAgo } from './comments'
 import type { FormEvent } from 'react'
-import { Id, type Document } from '../convex/_generated/dataModel'
-import type { Task, File } from '../convex/getTask'
+import { Task, File, User, BackendContext } from './types'
 import { Upload } from './icons'
 import Image from 'next/image'
 
@@ -38,14 +36,14 @@ function FileListing({
   handleDeleteFile,
 }: {
   file: File
-  user?: Document<'users'> | null
-  handleDeleteFile: (id: Id<'files'>) => void
+  user?: User | null
+  handleDeleteFile: (id: string) => void
 }) {
-  const { _id, _creationTime, name, type, author, url, size } = file
-  const created = new Date(_creationTime)
-  const isFileAuthor = user && user._id.equals(author._id)
+  const { id, creationTime, name, type, author, url, size } = file
+  const created = new Date(creationTime)
+  const isFileAuthor = user && user.id == author.id
   return (
-    <li key={_id.toString()} className="file">
+    <li key={id.toString()} className="file">
       <div
         style={{
           width: '90%',
@@ -67,7 +65,7 @@ function FileListing({
             <button
               className="icon-button"
               title="Delete file"
-              onClick={() => handleDeleteFile(_id)}
+              onClick={() => handleDeleteFile(id)}
             >
               🗑️
             </button>
@@ -85,13 +83,7 @@ function FileListing({
   )
 }
 
-function FilePreviews({
-  files,
-  user,
-}: {
-  files: File[]
-  user?: Document<'users'> | null
-}) {
+function FilePreviews({ files, user }: { files: File[]; user?: User | null }) {
   return (
     <div className="flex-col">
       <div id="file-previews">
@@ -112,7 +104,7 @@ function FileUploading({
 }: {
   fileName: string
   fileType: string
-  author: Document<'users'>
+  author: User
 }) {
   return (
     <li key={fileName} className="file">
@@ -139,23 +131,19 @@ function FileUploading({
     </li>
   )
 }
-
 export function Files({
   user,
   task,
 }: {
-  user?: Document<'users'> | null
+  user?: User | null
   task: Task
 }) {
-  const generateUploadUrl = useMutation('saveFile:generateUploadUrl')
-  const saveFile = useMutation('saveFile')
-
+  const fileHandler = useContext(BackendContext)!.fileHandler;
   const [uploading, setUploading] = useState({ name: '', type: '' })
   const fileInput = useRef<HTMLInputElement>(null)
 
-  const deleteFile = useMutation('deleteFile')
-  const handleDeleteFile = async function (fileId: Id<'files'>) {
-    await deleteFile(fileId)
+  const handleDeleteFile = async function (fileId: string) {
+    await fileHandler.deleteFile(fileId)
   }
 
   async function handleUploadFile(event: FormEvent) {
@@ -170,20 +158,9 @@ export function Files({
     // we should never end up here, but just in case
     if (!newFile) throw new Error('No file selected for upload')
     setUploading({ name: newFile.name, type: newFile.type })
-
-    // Step 1: Get a short-lived upload URL
-    const postUrl = await generateUploadUrl()
-
-    // Step 2: POST the file to the URL
-    const result = await fetch(postUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': newFile.type },
-      body: newFile,
+    fileHandler.uploadFile(newFile).finally(() => {
+      setUploading({ name: '', type: '' })
     })
-    const { storageId } = await result.json()
-
-    await saveFile(task._id, storageId, newFile.name, newFile.type)
-    setUploading({ name: '', type: '' })
   }
 
   // TODO temporary fix for only displaying image files, although other files can be uploaded

@@ -1,20 +1,11 @@
 import React, { useState, useRef } from 'react'
 import Modal from 'react-modal'
-import Link from 'next/link'
 import NextError from 'next/error'
 import { useQuery, useMutation } from '../convex/_generated/react' //TODO refactor
-import { Avatar } from './login'
-import { showTimeAgo } from './comments'
 import { CircledXIcon, UploadIcon } from './icons'
 import Image from 'next/image'
 import { Id, type Document } from '../convex/_generated/dataModel'
-import type {
-  FormEvent,
-  FormEventHandler,
-  MouseEvent,
-  KeyboardEvent,
-  EventHandler,
-} from 'react'
+import type { FormEvent, MouseEvent, KeyboardEvent, EventHandler } from 'react'
 import type { Task, File } from '../convex/getTask'
 import type { SafeFile } from '../convex/getSafeFiles'
 
@@ -26,72 +17,6 @@ function showFileSize(size: number) {
   if (mb < 1024) return `${Math.round(mb)} MB`
   const gb = kb / 1024
   return `${Math.round(gb)} GB`
-}
-
-function showFileType(type: string) {
-  switch (type.split('/')[0]) {
-    case 'image':
-      return '🖼️'
-    case 'video':
-      return '📼'
-    case 'text':
-      return '📄'
-    default:
-      return '📎'
-  }
-}
-
-function FileListing({
-  file,
-  user,
-  handleDeleteFile,
-}: {
-  file: File
-  user?: Document<'users'> | null
-  handleDeleteFile: (id: Id<'files'>) => void
-}) {
-  const { _id, _creationTime, name, type, author, url, size } = file
-  const created = new Date(_creationTime)
-  const isFileAuthor = user && user._id.equals(author._id)
-  return (
-    <li key={_id.toString()} className="file">
-      <div
-        style={{
-          width: '90%',
-          marginRight: '16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          overflowWrap: 'anywhere',
-        }}
-      >
-        <div style={{ flexGrow: 2, marginRight: '16px' }}>
-          <span>{showFileType(type)}</span>
-          <Link href={url} target="_blank">
-            {name}
-          </Link>
-          <span> ({showFileSize(size)})</span>
-        </div>
-        <div style={{ flexShrink: 0 }}>
-          {isFileAuthor && (
-            <button
-              className="icon-button"
-              title="Delete file"
-              onClick={() => handleDeleteFile(_id)}
-            >
-              🗑️
-            </button>
-          )}
-          {/* <button className="icon-button" title="Download file">
-            ⬇️
-          </button> */}
-        </div>
-      </div>
-      <span>
-        <Avatar user={author} size={20} />
-      </span>
-      <span title={created.toLocaleString()}>{showTimeAgo(created)}</span>
-    </li>
-  )
 }
 
 function FilePreviews({
@@ -110,41 +35,6 @@ function FilePreviews({
         ))}
       </div>
     </div>
-  )
-}
-
-function FileUploading({
-  fileName,
-  fileType,
-  author,
-}: {
-  fileName: string
-  fileType: string
-  author: Document<'users'>
-}) {
-  return (
-    <li key={fileName} className="file">
-      <div
-        style={{
-          width: '90%',
-          marginRight: '16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          overflowWrap: 'anywhere',
-        }}
-      >
-        <div style={{ flexGrow: 2, marginRight: '16px' }}>
-          <span>{showFileType(fileType)}</span>
-          <Link href={'#'}>{fileName}</Link>
-          <span> (uploading...)</span>
-        </div>
-        <div style={{ flexShrink: 0 }}></div>
-      </div>
-      <span>
-        <Avatar user={author} size={20} />
-      </span>
-      <span>...</span>
-    </li>
   )
 }
 
@@ -225,6 +115,7 @@ function FileUploadModal({
             </div>
             <p className="file-name">{f.name}</p>
             <p className="file-size">{showFileSize(f.size)}</p>
+            {/* TODO download button */}
           </div>
         ))}
       </div>
@@ -266,6 +157,7 @@ export function Files({
 
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
+  // TODO delete files?
   const deleteFile = useMutation('deleteFile')
   const handleDeleteFile = async function (fileId: Id<'files'>) {
     await deleteFile(fileId)
@@ -338,7 +230,6 @@ export function Files({
           className="light"
           onClick={() => setUploadModalOpen(true)}
         >
-          {/* TODO open upload modal */}
           <UploadIcon /> Upload
         </button>
         <FileUploadModal
@@ -350,24 +241,6 @@ export function Files({
           }}
           onUpload={uploadFile}
         />
-        {/* {user && (
-          <form
-            style={{
-              display: 'flex',
-              justifyContent: 'left',
-              margin: '8px 16px',
-            }}
-          >
-            <label htmlFor="upload">+ Upload file</label>
-            <input
-              id="upload"
-              type="file"
-              style={{ opacity: 0 }}
-              onChange={handleUploadFile}
-              ref={fileInput}
-            />
-          </form>
-        )} */}
       </div>
       {visibleFiles && <FilePreviews files={visibleFiles} user={user} />}
       {moreFiles > 0 && (

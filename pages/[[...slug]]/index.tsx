@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useMutation, useQuery } from '../../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Head from 'next/head'
@@ -172,6 +172,7 @@ export default function App({
         <style>{`html { font-family: ${FONT.style.fontFamily}; }`}</style>
       </Head>
       <div
+        id="app"
         className={`grid ${isSidebarOpen ? 'with-sidebar' : 'without-sidebar'}`}
       >
         <Header user={user}>

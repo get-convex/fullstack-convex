@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react'
 import type { FormEventHandler, KeyboardEventHandler } from 'react'
 import { Avatar } from './login'
 import { ArrowUpIcon } from './icons'
-import { BackendContext, Comment, Task, User } from './types'
+import { BackendContext, Comment, Task, User } from '../types'
 
 export function showTimeAgo(created: Date) {
   const now = Date.now()

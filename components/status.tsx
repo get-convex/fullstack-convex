@@ -1,5 +1,5 @@
 import React, { useState, type KeyboardEventHandler } from 'react'
-import { Status, STATUS_VALUES } from './types'
+import { Status, STATUS_VALUES } from '../types'
 import { CaretDownIcon } from './icons'
 
 export function StatusPill({

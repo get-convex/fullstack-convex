@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Status, User } from './types'
+import { Status, User } from '../types'
 import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
 import type { ChangeEventHandler, KeyboardEventHandler } from 'react'
 

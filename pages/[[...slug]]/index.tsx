@@ -1,19 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useMutation, useQuery } from '../../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useStablePaginatedQuery } from '../../hooks/useStableQuery'
+import { useQuery, useMutation } from '../../convex/_generated/react'
 import { Header } from '../../components/login'
 import { Controls } from '../../components/controls'
-import { Status, STATUS_VALUES, SortKey, SortOrder } from '../../convex/schema'
 import { TaskList } from '../../components/taskList'
 import { NewTaskSidebar, TaskDetailSidebar } from '../../components/sidebar'
 import type { ChangeEventHandler, MouseEventHandler } from 'react'
-import type { Task } from '../../convex/getTask'
-import type { ReactMutation } from 'convex/react'
-import type { API } from '../../convex/_generated/api'
 import { Inter } from 'next/font/google'
+import { BackendContext } from '../../types'
+import type { BackendEnvironment, Task, User, File } from '../../types'
 
 const PAGE_SIZE = 10
 const FONT = Inter({ subsets: ['latin'] })
@@ -25,24 +22,49 @@ export default function App({
 }) {
   // Check if the user is logged in with Auth0 for full write access
   // If user is not logged in, they can still read some data
-  const { user: auth0User } = useAuth0()
+  const {
+    user: authenticatedUser,
+    isLoading,
+    loginWithRedirect: login,
+    logout,
+  } = useAuth0()
 
-  // Once this user's profile has been saved to Convex, this query will update
-  const user = useQuery('getCurrentUser')
+  const backend = {
+    authenticator: {
+      isLoading,
+      login,
+      logout,
+    },
+    userManagement: {
+      getCurrentUser: useQuery('getCurrentUser'),
+      saveUser: useMutation('saveUser'),
+    },
+    taskManagement: {
+      getTask: useMutation('getTask', taskNumber),
+      saveTask: useMutation('updateTask'),
+      createTask: useMutation('createTask'),
+      addComment: (taskId, body) => Promise.resolve(), //useMutation('saveComment'),
+    },
+    // fileHandler: {
+    //   uploadFile: (taskId: any, file: globalThis.File) =>
+    //     useMutation('saveFile', taskId, file),
+    //   deleteFile: (fileId: string) => useMutation('deleteFile', fileId),
+    // },
+  } as Partial<BackendEnvironment>
 
   // Call the `saveUser` mutation function to store/retrieve
-  // the current Auth0 user in the `users` table
-  const saveUser = useMutation('saveUser')
+  // the currently authenticated user (if any) in the `users` table
+  const saveUser = backend.userManagement.saveUser
   useEffect(() => {
-    if (!auth0User) return
+    if (!authenticatedUser) return
     // Save the user in the database (or get an existing user)
-    // Recall that `saveUser` gets the user information via the `auth`
-    // object on the server. You don't need to pass anything manually here.
+    // `saveUser` gets the user information from the server
+    // so we don't need to pass anything here
     async function createUser() {
       await saveUser()
     }
     createUser().catch(console.error)
-  }, [saveUser, auth0User])
+  }, [saveUser, authenticatedUser])
 
   // Set up sidebar to view & edit selected task
   const router = useRouter()
@@ -58,9 +80,6 @@ export default function App({
       : selectedTask && task
       ? task.title
       : 'Fullstack Task Manager'
-
-  const updateTask = useMutation('updateTask')
-  const createTask = useMutation('createTask')
 
   async function saveTask(
     taskInfo: Partial<Task>,
@@ -166,7 +185,7 @@ export default function App({
   }, [bottomElem, loadMore])
 
   return (
-    <>
+    <BackendContext.Provider value={{}}>
       <Head>
         <title>{pageTitle}</title>
         <style>{`html { font-family: ${FONT.style.fontFamily}; }`}</style>
@@ -234,7 +253,7 @@ export default function App({
         )}
       </div>
       <div ref={bottom} />
-    </>
+    </BackendContext.Provider>
   )
 }
 

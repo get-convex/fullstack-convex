@@ -33,6 +33,15 @@ export type Task = {
   status: Status
   owner: User | null
 }
+
+export type NewTaskInfo = {
+  title: string
+  description: string
+  visibility: Visibility
+  status: Status
+  owner: User | null
+}
+
 // Using a numeric rather than string enum for
 // ordinal (rather than alphabetical) sorting
 export enum Status {
@@ -69,17 +78,24 @@ export enum SortOrder {
 
 export type BackendEnvironment = {
   authenticator: {
+    user?: User
     isLoading: boolean
-    login: () => void
+    login: () => Promise<void>
     logout: ({ returnTo }: { returnTo: string }) => void
   }
-  fileHandler: {
-    uploadFile: (file: globalThis.File) => Promise<string>
-    deleteFile: (fileId: string) => Promise<void>
-  }
+  // fileHandler: {
+  //   uploadFile: (taskId: any, file: globalThis.File) => Promise<void>
+  //   deleteFile: (fileId: string) => Promise<void>
+  // }
   taskManagement: {
-    addComment: (taskId: any, body: string) => void
-    saveTask: (task: Partial<Task>) => void
+    getTask: (taskNumber: any) => Promise<Task | null>
+    addComment: (taskId: any, body: string) => Promise<void>
+    createTask: (task: Task) => Promise<Task>
+    saveTask: (task: Partial<Task>) => Promise<void>
+  }
+  userManagement: {
+    getCurrentUser: () => Promise<User | null>
+    saveUser: () => Promise<void>
   }
 }
 

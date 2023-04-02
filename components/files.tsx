@@ -2,7 +2,7 @@ import React, { useState, useRef, useContext } from 'react'
 import Modal from 'react-modal'
 import Image from 'next/image'
 import type { FormEvent, MouseEvent, KeyboardEvent, EventHandler } from 'react'
-import { Task, File, User, BackendContext } from './types'
+import { Task, File, User, BackendContext } from '../types'
 import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
 import type { SafeFile } from '../convex/getSafeFiles'
 

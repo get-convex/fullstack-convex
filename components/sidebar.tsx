@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { CircledXIcon } from './icons'
 import { TaskDetails, NewTaskDetails } from './taskDetails'
 import type { PropsWithChildren, MouseEventHandler } from 'react'
-import { Task, User } from './types'
+import { Task, User } from '../types'
 
 export function Sidebar({
   onDismiss,
@@ -37,10 +37,7 @@ export function TaskDetailSidebar({
 }) {
   return (
     <Sidebar onDismiss={onDismiss}>
-      <TaskDetails
-        task={task}
-        user={user}
-      />
+      <TaskDetails task={task} user={user} />
     </Sidebar>
   )
 }

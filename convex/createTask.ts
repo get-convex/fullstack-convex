@@ -1,15 +1,15 @@
 import { findUser } from './getCurrentUser'
 import { mutation } from './_generated/server'
-import type { Task } from './getTask'
+import type { NewTaskInfo } from '../types'
 
-export default mutation(async ({ db, auth }, taskInfo: Task) => {
+export default mutation(async ({ db, auth }, taskInfo: NewTaskInfo) => {
   const user = await findUser(db, auth)
 
   if (!user) {
     throw new Error('Error creating task: User identity not found')
   }
 
-  if (taskInfo.ownerId && !taskInfo.ownerId.equals(user._id)) {
+  if (taskInfo.owner?.id && taskInfo.owner.id !== user._id.toString()) {
     // Should never happen, but just to double check
     throw new Error(
       'Error creating task: Current user and task owner do not match'
@@ -24,13 +24,13 @@ export default mutation(async ({ db, auth }, taskInfo: Task) => {
   // Copy owner name (if any) and comment count (initally 0) into table
   // so that we can index on these to support ordering with pagination
   const taskId = await db.insert('tasks', {
-    ...taskInfo,
+    ownerId: taskInfo.owner ? user._id : null,
+    ownerName: taskInfo.owner ? user.name : null,
+    commentCount: 0,
+    fileCount: 0,
     number,
-    ownerName: taskInfo.ownerId ? user.name : null,
-    comments: 0,
+    ...taskInfo,
   })
 
-  const task = await db.get(taskId)
-  if (!task) throw new Error('Task not found') // Should never happen, here to appease TS
-  return task
+  return taskId.toString()
 })

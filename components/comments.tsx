@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import type { FormEventHandler, KeyboardEventHandler } from 'react'
 import { Avatar } from './login'
-import { ArrowUp } from './icons'
+import { ArrowUpIcon } from './icons'
 import { BackendContext, Comment, Task, User } from './types'
 
 export function showTimeAgo(created: Date) {
@@ -50,7 +50,7 @@ function CommentList({ comments }: { comments: Comment[] }) {
       {moreComments > 0 && (
         <div id="more-comments">
           <button className="more-button" onClick={() => setVisibleIndex(0)}>
-            <ArrowUp />
+            <ArrowUpIcon />
             {moreComments} more comment{moreComments === 1 ? '' : 's'}
           </button>
         </div>
@@ -62,14 +62,9 @@ function CommentList({ comments }: { comments: Comment[] }) {
   )
 }
 
-export function Comments({
-  user,
-  task,
-}: {
-  user?: User | null
-  task: Task
-}) {
-  const addCommentToBackend = useContext(BackendContext)!.taskManagement.addComment
+export function Comments({ user, task }: { user?: User | null; task: Task }) {
+  const addCommentToBackend =
+    useContext(BackendContext)!.taskManagement.addComment
   const [newComment, setNewComment] = useState('')
   const [savingText, setSavingText] = useState('')
   const trimmed = newComment.trim()

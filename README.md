@@ -12,12 +12,11 @@ The app is a very simple Asana-style task management app that allows users to cr
   - [x] Status (New | In Progress | Done | Cancelled)
   - [x] Comments
   - [x] File attachments (from a fixed collection to prevent abuse)
-- [ ] Task management, allowing users/task owner to:
+- [x] Task management, allowing users/task owner to:
   - [x] Add a comment
   - [x] Change status (owner only)
   - [x] Reassign ownership (owner only)
-- [ ] Optional email reminders, set by the owner to be sent at a certain interval
-- [ ] Filter tasks by ticket status, creator, or owner
+- [x] Filter tasks by ticket status or owner
 - [ ] Search tasks by title, description, or comments
 - [x] Infinite-scroll pagination to support very large task collections
 

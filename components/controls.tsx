@@ -1,7 +1,8 @@
-import React, { useState, type ChangeEventHandler } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { CaretDown, CaretUp, Plus } from './icons'
 import { Status, User } from './types'
+import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
+import type { ChangeEventHandler, KeyboardEventHandler } from 'react'
 
 type Value = string | number | Status
 
@@ -11,6 +12,8 @@ interface FilterControl {
   user?: User | null
   selected: Value[]
   onChange: ChangeEventHandler
+  titles?: string[]
+  disabled?: boolean[]
 }
 
 export function Select({
@@ -19,45 +22,82 @@ export function Select({
   selectedValues,
   onChange,
   labels,
+  titles,
+  disabled,
 }: {
   name: string
   options: Value[]
   selectedValues: Value[]
   onChange: ChangeEventHandler
   labels?: string[]
+  titles?: string[]
+  disabled?: boolean[]
 }) {
   const id = `select-${name}`
   const isSelected = (value: Value) => selectedValues.includes(value)
   const [showOptions, setShowOptions] = useState(false)
   const optionLabels = labels || options
+  const numSelected = selectedValues.length
+
   return (
     <div id={id} className="select" tabIndex={0} role="button">
       {
         <div
-          className="select-legend"
+          className="control select-legend"
           onClick={() => setShowOptions(!showOptions)}
+          title={`Filter tasks by ${name}`}
         >
           <p>
-            <span>{name}</span> ({selectedValues.length})
+            {name}{' '}
+            <span
+              title={`${numSelected} value${
+                numSelected === 1 ? '' : 's'
+              } selected`}
+            >
+              ({numSelected})
+            </span>
           </p>
-          {showOptions ? <CaretUp /> : <CaretDown />}
+          {showOptions ? <CaretUpIcon /> : <CaretDownIcon />}
         </div>
       }
       {showOptions &&
-        options.map((v, i) => (
-          <div className="select-option" key={i}>
-            <input
-              type="checkbox"
-              id={`option-${v}`}
-              name={name}
-              value={v}
-              checked={isSelected(v)}
-              onChange={onChange}
-              disabled={isSelected(v) && selectedValues.length === 1}
-            />
-            <label htmlFor={`option-${v}`}>{optionLabels[i]}</label>
-          </div>
-        ))}
+        options.map((v, i) => {
+          const isDisabled = disabled
+            ? // If a value for disabled has been explicitly provided, use it
+              disabled[i]
+            : // To prevent de-selecting all values (resulting in empty task list),
+              // if there is only a single item selected, disable de-selecting it
+              isSelected(v) && selectedValues.length === 1
+          return (
+            <label
+              className={`control select-option ${
+                isDisabled ? 'select-option-disabled' : ''
+              }`}
+              key={i}
+              title={titles ? titles[i].toString() : optionLabels[i].toString()}
+            >
+              <input
+                type="checkbox"
+                id={`option-${v}`}
+                name={name}
+                value={v}
+                checked={isSelected(v)}
+                onChange={onChange}
+                disabled={isDisabled}
+                title={
+                  isDisabled
+                    ? isSelected(v) && selectedValues.length === 1
+                      ? 'At least one value must be selected'
+                      : titles && titles[i]
+                    : isSelected(v)
+                    ? 'Uncheck to exclude these tasks'
+                    : 'Check to include these tasks'
+                }
+              />
+              {optionLabels[i]}
+            </label>
+          )
+        })}
     </div>
   )
 }
@@ -82,17 +122,20 @@ export function StatusControl({
 export function OwnerControl({
   options,
   labels,
-  user,
+  titles,
+  disabled,
   selected,
   onChange,
 }: FilterControl) {
   return (
     <Select
       name="Owner"
-      options={options} //['me', 'nobody', 'anyone']}
+      options={options}
       selectedValues={selected}
       onChange={onChange}
       labels={labels || options.map((o) => o.toString())}
+      titles={titles}
+      disabled={disabled}
     />
   )
 }
@@ -101,7 +144,7 @@ export function AddTaskButton({ user }: { user?: User | null }) {
   if (user === undefined) {
     return (
       <button className="ghost" id="new" disabled>
-        <Plus />
+        <PlusIcon />
         Add Task
       </button>
     )
@@ -111,7 +154,7 @@ export function AddTaskButton({ user }: { user?: User | null }) {
       {user ? (
         <Link href="/task/new">
           <button className="dark" id="new" title="Create a new task">
-            <Plus />
+            <PlusIcon />
             Add Task
           </button>
         </Link>
@@ -122,7 +165,7 @@ export function AddTaskButton({ user }: { user?: User | null }) {
           title="Log in to create new tasks"
           disabled
         >
-          <Plus />
+          <PlusIcon />
           Add Task
         </button>
       )}
@@ -133,9 +176,11 @@ export function AddTaskButton({ user }: { user?: User | null }) {
 export function Controls({
   user,
   filters,
+  search,
 }: {
   user: User | null | undefined
   filters: { status: FilterControl; owner: FilterControl }
+  search: { term: string; onSubmit: (term: string) => void }
 }) {
   return (
     <div id="controls">
@@ -143,6 +188,8 @@ export function Controls({
         <StatusControl
           options={filters.status.options}
           labels={filters.status.labels}
+          titles={filters.status.titles}
+          disabled={filters.owner.disabled}
           selected={filters.status.selected}
           onChange={filters.status.onChange}
         />
@@ -150,9 +197,12 @@ export function Controls({
           user={user}
           options={filters.owner.options}
           labels={filters.owner.labels}
+          titles={filters.owner.titles}
+          disabled={filters.owner.disabled}
           selected={filters.owner.selected}
           onChange={filters.owner.onChange}
         />
+        <SearchControl searchTerm={search.term} onSubmit={search.onSubmit} />
       </div>
       <AddTaskButton user={user} />
     </div>
@@ -181,10 +231,38 @@ function ShowingCount({
   )
 }
 
-function SearchControl() {
+function SearchControl({
+  searchTerm = '',
+  onSubmit,
+}: {
+  onSubmit: (term: string) => void
+  searchTerm?: string
+}) {
+  const [term, setTerm] = useState(searchTerm || '')
+  const onSearch = onSubmit || ((term: string) => console.log(term.trim()))
+
+  const onKeyUp = function (e) {
+    if (e.key === 'Enter') onSearch(term)
+  } as KeyboardEventHandler
+
   return (
-    <div id="search">
-      <input value="" onChange={() => null} placeholder="Search will be here" />
+    <div id="search" className="control">
+      <input
+        type="search"
+        value={term}
+        onChange={(e) => setTerm(e.target.value)}
+        onKeyUp={onKeyUp}
+        placeholder="Search task titles, descriptions & comments"
+        tabIndex={0}
+      />
+      <button
+        type="submit"
+        className="icon-button"
+        title="Click to search"
+        onClick={() => onSubmit(term)}
+      >
+        <SearchIcon />
+      </button>
     </div>
   )
 }

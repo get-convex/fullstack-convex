@@ -1,11 +1,10 @@
 import React, { useState, useRef, useContext } from 'react'
-import Link from 'next/link'
-import { Avatar } from './login'
-import { showTimeAgo } from './comments'
-import type { FormEvent } from 'react'
-import { Task, File, User, BackendContext } from './types'
-import { Upload } from './icons'
+import Modal from 'react-modal'
 import Image from 'next/image'
+import type { FormEvent, MouseEvent, KeyboardEvent, EventHandler } from 'react'
+import { Task, File, User, BackendContext } from './types'
+import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
+import type { SafeFile } from '../convex/getSafeFiles'
 
 function showFileSize(size: number) {
   if (size < 1024) return `${Math.round(size)} B`
@@ -17,73 +16,7 @@ function showFileSize(size: number) {
   return `${Math.round(gb)} GB`
 }
 
-function showFileType(type: string) {
-  switch (type.split('/')[0]) {
-    case 'image':
-      return '🖼️'
-    case 'video':
-      return '📼'
-    case 'text':
-      return '📄'
-    default:
-      return '📎'
-  }
-}
-
-function FileListing({
-  file,
-  user,
-  handleDeleteFile,
-}: {
-  file: File
-  user?: User | null
-  handleDeleteFile: (id: string) => void
-}) {
-  const { id, creationTime, name, type, author, url, size } = file
-  const created = new Date(creationTime)
-  const isFileAuthor = user && user.id == author.id
-  return (
-    <li key={id.toString()} className="file">
-      <div
-        style={{
-          width: '90%',
-          marginRight: '16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          overflowWrap: 'anywhere',
-        }}
-      >
-        <div style={{ flexGrow: 2, marginRight: '16px' }}>
-          <span>{showFileType(type)}</span>
-          <Link href={url} target="_blank">
-            {name}
-          </Link>
-          <span> ({showFileSize(size)})</span>
-        </div>
-        <div style={{ flexShrink: 0 }}>
-          {isFileAuthor && (
-            <button
-              className="icon-button"
-              title="Delete file"
-              onClick={() => handleDeleteFile(id)}
-            >
-              🗑️
-            </button>
-          )}
-          {/* <button className="icon-button" title="Download file">
-            ⬇️
-          </button> */}
-        </div>
-      </div>
-      <span>
-        <Avatar user={author} size={20} />
-      </span>
-      <span title={created.toLocaleString()}>{showTimeAgo(created)}</span>
-    </li>
-  )
-}
-
-function FilePreviews({ files, user }: { files: File[]; user?: User | null }) {
+function FilePreviews({ files }: { files: File[] }) {
   return (
     <div className="flex-col">
       <div id="file-previews">
@@ -97,70 +30,135 @@ function FilePreviews({ files, user }: { files: File[]; user?: User | null }) {
   )
 }
 
-function FileUploading({
-  fileName,
-  fileType,
-  author,
+function FileUploadModal({
+  files,
+  isOpen,
+  onDismiss,
+  onUpload,
 }: {
-  fileName: string
-  fileType: string
-  author: User
+  files: SafeFile[]
+  isOpen: boolean
+  onDismiss: EventHandler<MouseEvent | KeyboardEvent>
+  onUpload: (file: globalThis.File) => Promise<void>
 }) {
-  return (
-    <li key={fileName} className="file">
-      <div
-        style={{
-          width: '90%',
-          marginRight: '16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          overflowWrap: 'anywhere',
-        }}
-      >
-        <div style={{ flexGrow: 2, marginRight: '16px' }}>
-          <span>{showFileType(fileType)}</span>
-          <Link href={'#'}>{fileName}</Link>
-          <span> (uploading...)</span>
-        </div>
-        <div style={{ flexShrink: 0 }}></div>
-      </div>
-      <span>
-        <Avatar user={author} size={20} />
-      </span>
-      <span>...</span>
-    </li>
-  )
-}
-export function Files({
-  user,
-  task,
-}: {
-  user?: User | null
-  task: Task
-}) {
-  const fileHandler = useContext(BackendContext)!.fileHandler;
-  const [uploading, setUploading] = useState({ name: '', type: '' })
+  Modal.setAppElement('#app')
+
+  const [error, setError] = useState('')
+  const [selectedFile, setSelectedFile] = useState<globalThis.File | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
 
-  const handleDeleteFile = async function (fileId: string) {
-    await fileHandler.deleteFile(fileId)
-  }
-
-  async function handleUploadFile(event: FormEvent) {
-    event.preventDefault()
+  function validateFileInput(event: FormEvent) {
     const { files } = event.target as HTMLInputElement
+
+    // we should never end up here, but just in case
     if (!files || files.length !== 1)
-      throw new Error('Select exactly one file to upload')
+      throw new Error('Incorrect number of files selected')
 
     const newFile = files[0]
     if (fileInput.current) fileInput.current.value = ''
 
     // we should never end up here, but just in case
     if (!newFile) throw new Error('No file selected for upload')
-    setUploading({ name: newFile.name, type: newFile.type })
-    fileHandler.uploadFile(newFile).finally(() => {
-      setUploading({ name: '', type: '' })
-    })
+
+    return newFile
+  }
+
+  async function handleUploadFile(event: FormEvent) {
+    event.preventDefault()
+    const newFile = validateFileInput(event)
+    if (!newFile) return null
+
+    setSelectedFile(newFile)
+    try {
+      await onUpload(newFile)
+    } catch (error: any) {
+      setError(error && error.message)
+    }
+    setSelectedFile(null)
+  }
+
+  //TODO Keyboard handlers
+
+  function onClose(e: MouseEvent | KeyboardEvent) {
+    setSelectedFile(null)
+    onDismiss(e)
+  }
+
+  return (
+    <Modal
+      id="file-upload-modal"
+      isOpen={isOpen}
+      onRequestClose={onClose}
+      className="modal-content"
+      overlayClassName="modal-overlay"
+    >
+      <div id="file-upload-header">
+        <button className="close-button icon-button" onClick={onClose}>
+          <CircledXIcon />
+        </button>
+        <h2>Upload files</h2>
+        <p>You can only upload these predefined files for safety reasons</p>
+      </div>
+      <div id="safe-files">
+        {files.map((f, i) => (
+          <div key={i} className="safe-file">
+            <div className="file-preview">
+              <Image src={f.url} alt={f.name} fill />
+            </div>
+            <div>
+              <div>
+                <p className="file-name">{f.name}</p>
+                <p className="file-size">{showFileSize(f.size)}</p>
+              </div>
+              <button
+                className="icon-button light"
+                title={`Download ${f.name}`}
+              >
+                <DownloadIcon />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <form id="file-upload-form" onSubmit={(e) => e.preventDefault()}>
+        <div>
+          <label>
+            {error || (selectedFile && `Uploading ${selectedFile.name}...`)}
+          </label>
+          <input
+            id="upload"
+            type="file"
+            tabIndex={-1}
+            onChange={handleUploadFile}
+            ref={fileInput}
+          />
+        </div>
+        <div>
+          <button className="light" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="dark">
+            <label htmlFor="upload">Upload</label>
+          </button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+export function Files({ user, task }: { user?: User | null; task: Task }) {
+  const fileHandler = useContext(BackendContext)!.fileHandler
+
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
+
+  const fileInput = useRef<HTMLInputElement>(null)
+
+  const handleDeleteFile = async function (fileId: string) {
+    await fileHandler.deleteFile(fileId)
+  }
+
+  async function handleUploadFile(file: globalThis.File) {
+    await fileHandler.uploadFile(file)
+    setUploadModalOpen(false)
   }
 
   // TODO temporary fix for only displaying image files, although other files can be uploaded
@@ -175,30 +173,24 @@ export function Files({
     <div id="files">
       <div id="files-header">
         <h4>Files ({imageFiles?.length || 0})</h4>
-        <button id="file-upload">
-          {/* TODO open upload modal */}
-          <Upload /> Upload
+        <button
+          id="file-upload"
+          className="light"
+          onClick={() => setUploadModalOpen(true)}
+        >
+          <UploadIcon /> Upload
         </button>
-        {/* {user && (
-          <form
-            style={{
-              display: 'flex',
-              justifyContent: 'left',
-              margin: '8px 16px',
-            }}
-          >
-            <label htmlFor="upload">+ Upload file</label>
-            <input
-              id="upload"
-              type="file"
-              style={{ opacity: 0 }}
-              onChange={handleUploadFile}
-              ref={fileInput}
-            />
-          </form>
-        )} */}
+        <FileUploadModal
+          files={safeFiles}
+          isOpen={uploadModalOpen}
+          onDismiss={(e) => {
+            e.preventDefault()
+            setUploadModalOpen(false)
+          }}
+          onUpload={handleUploadFile}
+        />
       </div>
-      {visibleFiles && <FilePreviews files={visibleFiles} user={user} />}
+      {visibleFiles && <FilePreviews files={visibleFiles} />}
       {moreFiles > 0 && (
         <div id="more-files">
           <button

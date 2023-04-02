@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { CircledX } from './icons'
+import { CircledXIcon } from './icons'
 import { TaskDetails, NewTaskDetails } from './taskDetails'
 import type { PropsWithChildren, MouseEventHandler } from 'react'
 import { Task, User } from './types'
@@ -20,7 +20,7 @@ export function Sidebar({
         href="/"
         onClick={onDismiss}
       >
-        <CircledX />
+        <CircledXIcon />
       </Link>
     </aside>
   )

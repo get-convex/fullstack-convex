@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function CaretDown() {
+export function CaretDownIcon() {
   return (
     <svg
       width="10"
@@ -19,7 +19,7 @@ export function CaretDown() {
   )
 }
 
-export function CaretUp() {
+export function CaretUpIcon() {
   return (
     <svg
       width="10"
@@ -39,7 +39,7 @@ export function CaretUp() {
   )
 }
 
-export function PaperClip() {
+export function PaperClipIcon() {
   return (
     <svg
       width="16"
@@ -58,7 +58,7 @@ export function PaperClip() {
   )
 }
 
-export function Plus() {
+export function PlusIcon() {
   return (
     <svg
       width="15"
@@ -79,7 +79,7 @@ export function Plus() {
   )
 }
 
-export function TextBubble() {
+export function TextBubbleIcon() {
   return (
     <svg
       width="15"
@@ -100,7 +100,7 @@ export function TextBubble() {
   )
 }
 
-export function CircledX() {
+export function CircledXIcon() {
   return (
     <svg
       width="21"
@@ -121,7 +121,7 @@ export function CircledX() {
   )
 }
 
-export function Calendar() {
+export function CalendarIcon() {
   return (
     <svg
       width="30"
@@ -158,7 +158,7 @@ export function Calendar() {
   )
 }
 
-export function ArrowUp() {
+export function ArrowUpIcon() {
   return (
     <svg
       width="7"
@@ -166,6 +166,7 @@ export function ArrowUp() {
       viewBox="0 0 7 13"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-label="Arrow pointing up icon"
     >
       <path
         fillRule="evenodd"
@@ -177,7 +178,7 @@ export function ArrowUp() {
   )
 }
 
-export function Upload() {
+export function UploadIcon() {
   return (
     <svg
       width="11"
@@ -185,6 +186,7 @@ export function Upload() {
       viewBox="0 0 11 12"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-label="Upload icon"
     >
       <path
         fillRule="evenodd"
@@ -192,6 +194,47 @@ export function Upload() {
         d="M2.16732 6.2276C1.94157 6.45745 1.9449 6.82678 2.17475 7.05252C2.4046 7.27827 2.77393 7.27494 2.99967 7.04509L4.91683 5.09308L4.91683 11.25C4.91683 11.5721 5.178 11.8333 5.50016 11.8333C5.82233 11.8333 6.0835 11.5721 6.0835 11.25V5.09308L8.00065 7.04509C8.2264 7.27494 8.59573 7.27827 8.82558 7.05252C9.05542 6.82678 9.05875 6.45745 8.83301 6.2276L5.91634 3.2579C5.80666 3.14622 5.65669 3.08331 5.50016 3.08331C5.34363 3.08331 5.19367 3.14622 5.08398 3.2579L2.16732 6.2276ZM1.41683 1.33331C1.09466 1.33331 0.833496 1.07215 0.833496 0.74998C0.833496 0.427814 1.09466 0.166647 1.41683 0.166647H9.5835C9.90566 0.166647 10.1668 0.427814 10.1668 0.74998C10.1668 1.07215 9.90566 1.33331 9.5835 1.33331H1.41683Z"
         fill="#292929"
       />
+    </svg>
+  )
+}
+
+export function DownloadIcon() {
+  return (
+    <svg
+      width="11"
+      height="12"
+      viewBox="0 0 11 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="Download icon"
+      style={{ transform: 'rotate(180deg)' }}
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.16732 6.2276C1.94157 6.45745 1.9449 6.82678 2.17475 7.05252C2.4046 7.27827 2.77393 7.27494 2.99967 7.04509L4.91683 5.09308L4.91683 11.25C4.91683 11.5721 5.178 11.8333 5.50016 11.8333C5.82233 11.8333 6.0835 11.5721 6.0835 11.25V5.09308L8.00065 7.04509C8.2264 7.27494 8.59573 7.27827 8.82558 7.05252C9.05542 6.82678 9.05875 6.45745 8.83301 6.2276L5.91634 3.2579C5.80666 3.14622 5.65669 3.08331 5.50016 3.08331C5.34363 3.08331 5.19367 3.14622 5.08398 3.2579L2.16732 6.2276ZM1.41683 1.33331C1.09466 1.33331 0.833496 1.07215 0.833496 0.74998C0.833496 0.427814 1.09466 0.166647 1.41683 0.166647H9.5835C9.90566 0.166647 10.1668 0.427814 10.1668 0.74998C10.1668 1.07215 9.90566 1.33331 9.5835 1.33331H1.41683Z"
+        fill="#292929"
+      />
+    </svg>
+  )
+}
+
+export function SearchIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="Search magnifying glass icon"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8.23.917a7.312 7.312 0 10-.002 14.625 7.28 7.28 0 004.614-1.639l4.627 4.627a.749.749 0 101.06-1.06l-4.627-4.627A7.313 7.313 0 008.228.917zM2.416 8.229a5.813 5.813 0 1111.625.001A5.813 5.813 0 012.416 8.23z"
+        fill="#292929"
+      ></path>
     </svg>
   )
 }

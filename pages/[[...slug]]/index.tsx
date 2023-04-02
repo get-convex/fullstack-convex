@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useMutation, useQuery } from '../../convex/_generated/react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Head from 'next/head'
@@ -13,8 +13,10 @@ import type { ChangeEventHandler, MouseEventHandler } from 'react'
 import type { Task } from '../../convex/getTask'
 import type { ReactMutation } from 'convex/react'
 import type { API } from '../../convex/_generated/api'
+import { Inter } from 'next/font/google'
 
 const PAGE_SIZE = 10
+const FONT = Inter({ subsets: ['latin'] })
 
 export default function App({
   taskNumber,
@@ -101,18 +103,11 @@ export default function App({
   }
 
   // Set up state & handler for filtering by owner
-  const OWNER_VALUES = useMemo(
-    () => (user ? ['Me', 'Others', 'Nobody'] : ['Others', 'Nobody']),
-    [user]
-  )
+  const OWNER_VALUES = ['Me', 'Others', 'Nobody']
   const [ownerFilter, setOwnerFilter] = useState(OWNER_VALUES)
-  useEffect(() => {
-    setOwnerFilter(OWNER_VALUES)
-  }, [OWNER_VALUES])
   const onChangeOwnerFilter: ChangeEventHandler = (event) => {
     const target = event.target as HTMLInputElement
     const { value, checked } = target
-    console.log('change owner', value)
     const newFilter = checked
       ? // A formerly unchecked option is now checked; add value to filter
         OWNER_VALUES.filter((o) => ownerFilter.includes(o) || o === value)
@@ -174,13 +169,19 @@ export default function App({
     <>
       <Head>
         <title>{pageTitle}</title>
+        <style>{`html { font-family: ${FONT.style.fontFamily}; }`}</style>
       </Head>
       <div
+        id="app"
         className={`grid ${isSidebarOpen ? 'with-sidebar' : 'without-sidebar'}`}
       >
         <Header user={user}>
           <Controls
             user={user}
+            search={{
+              term: '',
+              onSubmit: (term) => console.log('You searched for:', term),
+            }}
             filters={{
               status: {
                 options: STATUS_VALUES,
@@ -190,8 +191,18 @@ export default function App({
               },
               owner: {
                 options: OWNER_VALUES,
-                selected: ownerFilter,
+                selected: ownerFilter.filter((v) =>
+                  v === 'Me' ? !!user : true
+                ),
                 onChange: onChangeOwnerFilter,
+                titles: [
+                  user
+                    ? `Tasks owned by ${user.name}`
+                    : 'Log in to see your own tasks',
+                  'Tasks owned by other users',
+                  'Tasks not owned by any user',
+                ],
+                disabled: OWNER_VALUES.map((v) => (v === 'Me' ? !user : false)),
               },
             }}
           />
@@ -240,6 +251,7 @@ export async function getServerSideProps({
   } else if (!slug) {
     taskNumber = null
   }
+
   return {
     props: { taskNumber },
   }

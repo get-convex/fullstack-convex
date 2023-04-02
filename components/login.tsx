@@ -1,4 +1,5 @@
-import React, { PropsWithChildren, useContext } from 'react'
+import React, { useContext, type PropsWithChildren } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { BackendContext, User } from './types'

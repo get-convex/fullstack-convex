@@ -5,7 +5,7 @@ import { Comments } from './comments'
 import { Files } from './files'
 import { StatusPill } from './status'
 import { BackendContext, Status, Task, User, Visibility } from './types'
-import { Calendar, CaretDown } from './icons'
+import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEventHandler, FormEventHandler } from 'react'
 import { userOwnsTask } from './helpers'
 
@@ -231,7 +231,7 @@ function OwnerSelect({
           ) : (
             <NullAvatar />
           )}
-          {canChangeOwner && <CaretDown />}
+          {canChangeOwner && <CaretDownIcon />}
         </button>
       )}
     </>
@@ -278,7 +278,7 @@ function TaskMetadata({
       <div className="task-meta-row">
         <h4>Created</h4>
         <div id="task-detail-created">
-          <Calendar />
+          <CalendarIcon />
           {new Date(task.creationTime).toDateString()}
         </div>
       </div>

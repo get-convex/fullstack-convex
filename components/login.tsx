@@ -1,15 +1,21 @@
-import React, { type PropsWithChildren } from 'react'
+import React, { useContext, type PropsWithChildren } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import type { Document } from '../convex/_generated/dataModel'
+import { BackendContext, User } from './types'
+
+type Authenticator = {
+  isLoading: boolean
+  login: () => void
+  logout: ({ returnTo }: { returnTo: string }) => void
+}
 
 function LogoutButton() {
-  const { logout } = useAuth0()
+  const auth = useContext(BackendContext)!.authenticator
   return (
     <button
       className="dark"
-      onClick={() => logout({ returnTo: window.location.origin })}
+      onClick={() => auth.logout({ returnTo: window.location.origin })}
     >
       Log out
     </button>
@@ -17,13 +23,13 @@ function LogoutButton() {
 }
 
 function LoginButton() {
-  const { isLoading, loginWithRedirect } = useAuth0()
+  const auth = useContext(BackendContext)!.authenticator
   return (
     <button
       className="dark"
       title="Log in"
-      disabled={isLoading}
-      onClick={loginWithRedirect}
+      disabled={auth.isLoading}
+      onClick={auth.login}
     >
       Log in
     </button>
@@ -43,7 +49,7 @@ export function Avatar({
   size = 30,
   withName = false,
 }: {
-  user: Document<'users'>
+  user: User
   size?: number
   withName?: boolean
 }) {
@@ -80,7 +86,7 @@ export function NullAvatar() {
   )
 }
 
-export function Login({ user }: { user?: Document<'users'> | null }) {
+export function Login({ user }: { user?: User | null }) {
   return (
     <div style={{ display: 'flex', gap: 10 }}>
       {user && <Avatar user={user} size={38} />}
@@ -98,7 +104,7 @@ export function Login({ user }: { user?: Document<'users'> | null }) {
 export function Header({
   user,
   children,
-}: PropsWithChildren<{ user?: Document<'users'> | null }>) {
+}: PropsWithChildren<{ user?: User | null }>) {
   return (
     <header>
       <Link href="/">

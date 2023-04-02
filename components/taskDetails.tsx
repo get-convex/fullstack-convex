@@ -1,14 +1,13 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Error from 'next/error'
 import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
 import { Files } from './files'
 import { StatusPill } from './status'
-import { Status, Visibility } from '../convex/schema'
+import { BackendContext, Status, Task, User, Visibility } from './types'
 import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEventHandler, FormEventHandler } from 'react'
-import type { Task } from '../convex/getTask'
-import type { Document } from '../convex/_generated/dataModel'
+import { userOwnsTask } from './helpers'
 
 function EditableTitle({
   task,
@@ -156,20 +155,25 @@ function OwnerSelect({
   saveChanges,
 }: {
   task: Task
-  user?: Document<'users'> | null
+  user?: User | null
   saveChanges: (taskInfo: Partial<Task>) => void
 }) {
-  const nullUser = { name: 'No one', _id: null }
+  const nullUser: User = {
+    name: 'No one',
+    id: '',
+    creationTime: 0,
+    pictureUrl: '',
+  }
   const isPublic = task?.visibility === Visibility.PUBLIC
   const canChangeOwner = user && isPublic
-  const isOwner = user ? user._id.equals(task?.ownerId) : false
+  const isOwner = user ? user.id === task?.owner?.id : false
 
   const [editing, setEditing] = useState(false)
 
   function handleClaimTask() {
     const taskInfo = {
       ...task,
-      ownerId: user?._id,
+      ownerId: user?.id,
       ownerName: user?.name,
       owner: user,
     } as Partial<Task>
@@ -186,8 +190,7 @@ function OwnerSelect({
       {canChangeOwner && editing ? (
         <div id="owner-select">
           {[task.owner || nullUser, isOwner ? nullUser : user].map((u, i) => {
-            const isCurrentOwner =
-              u._id?.equals(task?.ownerId) || (!u._id && !task.ownerId)
+            const isCurrentOwner = userOwnsTask(task, u)
             return (
               <label
                 className="owner-option"
@@ -199,7 +202,7 @@ function OwnerSelect({
                   type="radio"
                   name="owner-select"
                   id={`owner-select-${i}`}
-                  value={u._id?.toString()}
+                  value={u.id}
                   tabIndex={-1}
                   onChange={() => {
                     if (!isCurrentOwner) {
@@ -211,7 +214,7 @@ function OwnerSelect({
                   }}
                   checked={isCurrentOwner}
                 />
-                {u._id ? <Avatar user={u} withName={true} /> : <NullAvatar />}
+                {u.id ? <Avatar user={u} withName={true} /> : <NullAvatar />}
               </label>
             )
           })}
@@ -241,10 +244,10 @@ function TaskMetadata({
   saveChanges,
 }: {
   task: Task
-  user: Document<'users'> | null
+  user: User | null
   saveChanges: (taskInfo: Partial<Task>) => void
 }) {
-  const isOwner = user ? user._id.equals(task?.ownerId) : false
+  const isOwner = userOwnsTask(task, user)
 
   function handleChangeStatus(status: Status) {
     const taskInfo = { ...task, status }
@@ -276,7 +279,7 @@ function TaskMetadata({
         <h4>Created</h4>
         <div id="task-detail-created">
           <CalendarIcon />
-          {new Date(task._creationTime).toDateString()}
+          {new Date(task.creationTime).toDateString()}
         </div>
       </div>
     </div>
@@ -291,10 +294,10 @@ function TaskInfo({
 }: {
   onSave: (taskInfo: Partial<Task>) => void
   task: Task
-  user: Document<'users'> | null
+  user: User | null
   newTask?: boolean
 }) {
-  const isOwner = user ? user._id.equals(task?.ownerId) : false
+  const isOwner = userOwnsTask(task, user)
 
   return (
     <div>
@@ -332,7 +335,7 @@ export function NewTaskDetails({
   user,
   onSave,
 }: {
-  user?: Document<'users'> | null
+  user?: User | null
   onSave: (taskInfo: Partial<Task>) => void
 }) {
   const [title, setTitle] = useState<string | undefined>('')
@@ -345,7 +348,7 @@ export function NewTaskDetails({
     description,
     status,
     visibility: Visibility.PUBLIC,
-    ownerId: owner?._id,
+    ownerId: owner?.id,
     ownerName: owner?.name,
     owner,
   } as Partial<Task>
@@ -427,12 +430,11 @@ export function NewTaskDetails({
 export function TaskDetails({
   task,
   user,
-  onSave,
 }: {
-  onSave: (taskInfo: Partial<Task>) => void
   task?: Task | null
-  user?: Document<'users'> | null
+  user?: User | null
 }) {
+  const onSave = useContext(BackendContext)!.taskManagement.saveTask
   if (task === undefined || user === undefined) return <TaskDetailsGhost />
   if (task === null)
     return (

@@ -1,12 +1,9 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useContext } from 'react'
 import Modal from 'react-modal'
-import NextError from 'next/error'
-import { useQuery, useMutation } from '../convex/_generated/react' //TODO refactor
-import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
 import Image from 'next/image'
-import { Id, type Document } from '../convex/_generated/dataModel'
 import type { FormEvent, MouseEvent, KeyboardEvent, EventHandler } from 'react'
-import type { Task, File } from '../convex/getTask'
+import { Task, File, User, BackendContext } from './types'
+import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
 import type { SafeFile } from '../convex/getSafeFiles'
 
 function showFileSize(size: number) {
@@ -19,12 +16,7 @@ function showFileSize(size: number) {
   return `${Math.round(gb)} GB`
 }
 
-function FilePreviews({
-  files,
-}: {
-  files: File[]
-  user?: Document<'users'> | null
-}) {
+function FilePreviews({ files }: { files: File[] }) {
   return (
     <div className="flex-col">
       <div id="file-previews">
@@ -153,64 +145,19 @@ function FileUploadModal({
     </Modal>
   )
 }
-
-export function Files({
-  user,
-  task,
-}: {
-  user?: Document<'users'> | null
-  task: Task
-}) {
-  const generateUploadUrl = useMutation('saveFile:generateUploadUrl')
-  const saveFile = useMutation('saveFile')
+export function Files({ user, task }: { user?: User | null; task: Task }) {
+  const fileHandler = useContext(BackendContext)!.fileHandler
 
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
-  // TODO delete files?
-  const deleteFile = useMutation('deleteFile')
-  const handleDeleteFile = async function (fileId: Id<'files'>) {
-    await deleteFile(fileId)
+  const fileInput = useRef<HTMLInputElement>(null)
+
+  const handleDeleteFile = async function (fileId: string) {
+    await fileHandler.deleteFile(fileId)
   }
 
-  const safeFiles = useQuery('getSafeFiles')
-
-  async function getSHA(file: globalThis.File) {
-    // Compute SHA-256 hash ArrayBuffer
-    const hashBuffer = await crypto.subtle.digest(
-      'SHA-256',
-      await file.arrayBuffer()
-    )
-
-    // Convert buffer to hex string
-    const hashHex = Array.from(new Uint8Array(hashBuffer))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('')
-    return hashHex
-  }
-
-  async function uploadFile(file: globalThis.File) {
-    if (!safeFiles) throw new Error('Safe files not loaded')
-    const safeSHAs = safeFiles?.map((f) => f.sha256)
-
-    // Step 0: Verify that this is one of the known safe files (to prevent abuse)
-    const sha = await getSHA(file)
-    console.log(sha, typeof sha)
-    console.log(safeSHAs, typeof safeSHAs[0])
-    if (!safeSHAs.includes(sha))
-      throw new Error('Unsafe file: Only predefined assets can be uploaded')
-
-    // Step 1: Get a short-lived upload URL
-    const postUrl = await generateUploadUrl()
-
-    // Step 2: POST the file to the URL
-    const result = await fetch(postUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': file.type },
-      body: file,
-    })
-    const { storageId } = await result.json()
-
-    await saveFile(task._id, storageId, file.name, file.type)
+  async function handleUploadFile(file: globalThis.File) {
+    await fileHandler.uploadFile(file)
     setUploadModalOpen(false)
   }
 
@@ -221,14 +168,6 @@ export function Files({
   const moreFiles = imageFiles?.length - visibleFiles?.length
 
   if (!task) return null
-  if (!safeFiles)
-    return (
-      <NextError
-        statusCode={500}
-        title="Safe files not found; please report to the team"
-        withDarkMode={false}
-      />
-    )
 
   return (
     <div id="files">
@@ -248,10 +187,10 @@ export function Files({
             e.preventDefault()
             setUploadModalOpen(false)
           }}
-          onUpload={uploadFile}
+          onUpload={handleUploadFile}
         />
       </div>
-      {visibleFiles && <FilePreviews files={visibleFiles} user={user} />}
+      {visibleFiles && <FilePreviews files={visibleFiles} />}
       {moreFiles > 0 && (
         <div id="more-files">
           <button

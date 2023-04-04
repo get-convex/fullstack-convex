@@ -1,8 +1,10 @@
 import { findUser } from './getCurrentUser'
+import { getTaskFromDocument } from './getTask'
 import { mutation } from './_generated/server'
 import type { NewTaskInfo } from '../types'
 
-export default mutation(async ({ db, auth }, taskInfo: NewTaskInfo) => {
+export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {
+  const { db, auth } = queryCtx
   const user = await findUser(db, auth)
 
   if (!user) {
@@ -32,5 +34,12 @@ export default mutation(async ({ db, auth }, taskInfo: NewTaskInfo) => {
     ...taskInfo,
   })
 
-  return taskId.toString()
+  // Get the newly saved task document and convert to Task object
+  const newTask = await db.get(taskId)
+  if (!newTask) {
+    // Should not happen, but just in case/to appease TS
+    throw new Error('Unexpected error saving task')
+  }
+
+  return await getTaskFromDocument(queryCtx, newTask)
 })

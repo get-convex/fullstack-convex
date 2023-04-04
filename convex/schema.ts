@@ -1,38 +1,5 @@
 import { defineSchema, defineTable, s } from 'convex/schema'
-
-// Using a numeric rather than string enum for
-// ordinal (rather than alphabetical) sorting
-export enum Status {
-  // keys are the user-facing labels for each
-  New = 0,
-  'In Progress',
-  Done,
-  Cancelled,
-}
-// Numeric enums also have a reverse mapping from
-// numeric values to string labels, so separate
-// the labels and values for easier use
-export const STATUS_VALUES = Object.values(Status).filter(
-  (k) => typeof k === 'number'
-) as number[]
-
-// The rest are string enums for simplicity
-export enum Visibility {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
-}
-export enum SortKey {
-  NUMBER = 'number',
-  TITLE = 'title',
-  OWNER = 'owner',
-  STATUS = 'status',
-  COMMENTS = 'commentCount',
-  FILES = 'fileCount',
-}
-export enum SortOrder {
-  ASC = 'asc',
-  DESC = 'desc',
-}
+import { Status, Visibility } from '../types'
 
 export default defineSchema(
   {

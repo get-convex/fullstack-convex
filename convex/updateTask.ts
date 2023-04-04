@@ -1,27 +1,39 @@
 import { findUser } from './getCurrentUser'
 import { mutation } from './_generated/server'
-import { Visibility } from './schema'
-import type { Task } from './getTask'
+import { Id } from './_generated/dataModel'
+import { Visibility, type Task } from '../types'
+import { getTaskFromDocument } from './getTask'
 
-export default mutation(async ({ db, auth }, taskInfo: Partial<Task>) => {
-  const user = await findUser(db, auth)
-
-  if (!user) {
-    throw new Error('Error updating task: User identity not found')
+export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
+  const { db, auth } = queryCtx
+  if (!taskInfo.id) {
+    throw new Error('Error updating task: Task ID not found')
   }
-
-  const taskId = taskInfo._id
+  const taskId = new Id('tasks', taskInfo.id)
   if (!taskId) {
     throw new Error('Error updating task: Task ID not found')
   }
 
-  if (taskInfo.visibility === Visibility.PRIVATE && !taskInfo.ownerId) {
+  if (taskInfo.visibility === Visibility.PRIVATE && !taskInfo.owner?.id) {
     // Client side validation should prevent this combination, but double check just in case
     throw new Error('Error updating task: Private tasks must have an owner')
   }
 
+  const user = await findUser(db, auth)
+  if (!user) {
+    throw new Error('Error updating task: User identity not found')
+  }
+
+  // Un-join data from users, comments, & files tables
+  delete taskInfo.owner
+  delete taskInfo.comments
+  delete taskInfo.files
+
+  // Update this task in the db & retrieve the updated task document
   await db.patch(taskId, taskInfo)
-  const task = await db.get(taskId)
-  if (!task) throw new Error('Task not found') // Should never happen, here to appease TS
-  return task
+  const updatedDoc = await db.get(taskId)
+  if (!updatedDoc) throw new Error('Task not found') // Should never happen, here to appease TS
+
+  // Return updated Task object
+  return await getTaskFromDocument(queryCtx, updatedDoc)
 })

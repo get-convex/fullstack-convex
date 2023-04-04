@@ -2,6 +2,7 @@ import { query } from './_generated/server'
 import type { Document } from './_generated/dataModel'
 import type { DatabaseReader } from './_generated/server'
 import type { Auth } from 'convex/server'
+import type { User } from '../types'
 
 export async function findUser(
   db: DatabaseReader,
@@ -19,5 +20,13 @@ export async function findUser(
 }
 
 export default query(async ({ db, auth }) => {
-  return await findUser(db, auth)
+  const userDoc = await findUser(db, auth)
+  if (!userDoc) return Promise.resolve(null)
+
+  return Promise.resolve({
+    id: userDoc._id.toString(),
+    creationTime: userDoc._creationTime,
+    name: userDoc.name,
+    pictureUrl: userDoc.pictureUrl,
+  } as User)
 })

@@ -1,4 +1,10 @@
-import { Context, createContext } from 'react'
+import {
+  Context,
+  createContext,
+  MouseEventHandler,
+  type ChangeEventHandler,
+} from 'react'
+
 export type User = {
   id: string
   name: string
@@ -11,6 +17,7 @@ export type Comment = {
   author: User
   body: string
 }
+
 export type File = {
   id: string
   creationTime: number
@@ -51,6 +58,7 @@ export enum Status {
   Done,
   Cancelled,
 }
+
 // Numeric enums also have a reverse mapping from
 // numeric values to string labels, so separate
 // the labels and values for easier use
@@ -76,9 +84,30 @@ export enum SortOrder {
   DESC = 'desc',
 }
 
+// Owner filter options
+export const OWNER_VALUES = ['Me', 'Others', 'Nobody']
+
+export type Filter<T> = { selected: T[]; onChange: ChangeEventHandler }
+
+export type TaskListOptions = {
+  filter: {
+    status: Filter<Status>
+    owner: Filter<string>
+  }
+  sort: {
+    key: SortKey
+    order: SortOrder
+    onChange: MouseEventHandler
+  }
+  selectedTask: {
+    number?: number | null
+    onChange: (selected: number | null) => void
+  }
+}
+
+// Backend environment to be provided by the implementer
 export type BackendEnvironment = {
   authenticator: {
-    user?: User
     isLoading: boolean
     login: () => Promise<void>
     logout: ({ returnTo }: { returnTo: string }) => void
@@ -88,17 +117,27 @@ export type BackendEnvironment = {
   //   deleteFile: (fileId: string) => Promise<void>
   // }
   taskManagement: {
-    getTask: (taskNumber: any) => Promise<Task | null>
-    addComment: (taskId: any, body: string) => Promise<void>
-    createTask: (task: Task) => Promise<Task>
-    saveTask: (task: Partial<Task>) => Promise<void>
+    // getTask: (taskNumber: number | string) => Promise<Task | null>
+    // listTasks: (listOptions: ListTasksOptions) => {tasks: Promise<Task[]>, loading?: boolean}
+    createTask: (task: NewTaskInfo) => Promise<Task> // returns newly created Task object
+    updateTask: (task: Partial<Task>) => Promise<Task> // returns updated Task object
+    saveComment: (taskId: string, body: string) => Promise<Comment> // returns newly created Comment objects
   }
   userManagement: {
-    getCurrentUser: () => Promise<User | null>
-    saveUser: () => Promise<void>
+    // getCurrentUser: () => Promise<User | null>
+    saveUser: () => Promise<User> // returns newly created/updated User object
   }
 }
 
 export const BackendContext = createContext(
   null
 ) as Context<BackendEnvironment | null>
+
+export type AppData = {
+  user?: User | null
+  task?: Task | null
+  taskList?: Task[] | null
+  isLoading: boolean
+}
+
+export const DataContext = createContext(null) as Context<AppData | null>

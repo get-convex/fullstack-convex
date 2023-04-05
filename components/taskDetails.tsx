@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import Error from 'next/error'
+import NextError from 'next/error'
 import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
 import { Files } from './files'
@@ -16,6 +16,7 @@ import {
 import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEventHandler, FormEventHandler } from 'react'
 import { userOwnsTask } from './helpers'
+import { useRouter } from 'next/router'
 
 function EditableTitle({
   task,
@@ -339,6 +340,7 @@ function TaskInfo({
 }
 
 export function NewTaskDetails({ user }: { user?: User | null }) {
+  const router = useRouter()
   const backend = useContext(BackendContext) as BackendEnvironment
 
   const [title, setTitle] = useState<string | undefined>('')
@@ -356,10 +358,15 @@ export function NewTaskDetails({ user }: { user?: User | null }) {
     owner,
   } as NewTaskInfo
 
+  async function onCreateTask(taskInfo: NewTaskInfo) {
+    const newTask = await backend.taskManagement.createTask(taskInfo)
+    router.push(`/task/${newTask.number}`)
+  }
+
   if (user === undefined) return <TaskDetailsGhost />
   if (user === null)
     return (
-      <Error
+      <NextError
         statusCode={403}
         title="You must be logged in to create a task"
         withDarkMode={false}
@@ -421,7 +428,7 @@ export function NewTaskDetails({ user }: { user?: User | null }) {
           className="dark"
           title={newTask.title ? 'Save task' : 'Task must have a title'}
           disabled={!newTask.title}
-          onClick={() => backend.taskManagement.createTask(newTask)}
+          onClick={() => onCreateTask(newTask)}
         >
           Save task
         </button>
@@ -441,7 +448,7 @@ export function TaskDetails({
   if (task === undefined || user === undefined) return <TaskDetailsGhost />
   if (task === null)
     return (
-      <Error statusCode={404} title="Task not found" withDarkMode={false} />
+      <NextError statusCode={404} title="Task not found" withDarkMode={false} />
     )
 
   return (

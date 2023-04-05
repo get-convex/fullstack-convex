@@ -36,11 +36,9 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
       logout,
     },
     userManagement: {
-      // getCurrentUser: useQuery('getCurrentUser'),
       saveUser: useMutation('saveUser'),
     },
     taskManagement: {
-      // getTask: (taskNumber) => useQuery('getTask', taskNumber),
       updateTask: useMutation('updateTask'),
       createTask: useMutation('createTask'),
       saveComment: useMutation('saveComment'),
@@ -66,13 +64,11 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
     createUser().catch(console.error)
   }, [saveUser, user])
 
-  // Set up sidebar to view & edit selected task
-  const router = useRouter()
   const [taskNumber, setTaskNumber] = useState(
     typeof slug === 'number' ? slug : null
   )
 
-  const task = useQuery('getTask', taskNumber) // TODO
+  const task = useQuery('getTask', taskNumber)
 
   const filter = {
     status: useFilter<Status>(STATUS_VALUES, [
@@ -128,17 +124,6 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
       }
     }
   }, [bottomElem, loadMore])
-
-  // TODO where should this go?
-  async function onCreateTask(taskInfo: NewTaskInfo) {
-    if (!backend) {
-      throw new Error('Cannot create task: Missing backend context!')
-    }
-    const newTask = await backend.taskManagement.createTask(taskInfo)
-    router.push(`/task/${newTask.number}`)
-    setTaskNumber(newTask.number)
-    return newTask
-  }
 
   return (
     <BackendContext.Provider value={backend}>

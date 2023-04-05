@@ -84,7 +84,7 @@ export enum SortOrder {
   DESC = 'desc',
 }
 
-// Owner filter options
+// Owner filter options are just strings
 export const OWNER_VALUES = ['Me', 'Others', 'Nobody']
 
 export type Filter<T> = { selected: T[]; onChange: ChangeEventHandler }
@@ -105,7 +105,7 @@ export type TaskListOptions = {
   }
 }
 
-// Backend environment to be provided by the implementer
+// Backend environment to be provided by the implementer & set in index.tsx
 export type BackendEnvironment = {
   authenticator: {
     isLoading: boolean
@@ -117,27 +117,25 @@ export type BackendEnvironment = {
   //   deleteFile: (fileId: string) => Promise<void>
   // }
   taskManagement: {
-    // getTask: (taskNumber: number | string) => Promise<Task | null>
-    // listTasks: (listOptions: ListTasksOptions) => {tasks: Promise<Task[]>, loading?: boolean}
     createTask: (task: NewTaskInfo) => Promise<Task> // returns newly created Task object
     updateTask: (task: Partial<Task>) => Promise<Task> // returns updated Task object
     saveComment: (taskId: string, body: string) => Promise<Comment> // returns newly created Comment objects
   }
   userManagement: {
-    // getCurrentUser: () => Promise<User | null>
     saveUser: () => Promise<User> // returns newly created/updated User object
   }
 }
 
-export const BackendContext = createContext(
-  null
-) as Context<BackendEnvironment | null>
-
+// Loaded data on the client, to be provided by the implementer & set in index.tsx
 export type AppData = {
   user?: User | null
   task?: Task | null
   taskList?: Task[] | null
   isLoading: boolean
 }
+
+export const BackendContext = createContext(
+  null
+) as Context<BackendEnvironment | null>
 
 export const DataContext = createContext(null) as Context<AppData | null>

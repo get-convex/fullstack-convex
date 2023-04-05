@@ -5,7 +5,6 @@ import { Comments } from './comments'
 import { Files } from './files'
 import { StatusPill } from './status'
 import {
-  BackendContext,
   BackendEnvironment,
   NewTaskInfo,
   Status,
@@ -13,6 +12,7 @@ import {
   User,
   Visibility,
 } from '../types'
+import { BackendContext } from '../context'
 import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEventHandler, FormEventHandler } from 'react'
 import { userOwnsTask } from './helpers'
@@ -461,7 +461,7 @@ export function TaskDetails({
         />
       }
 
-      {task && <Files user={user} task={task} />}
+      {task && <Files />}
 
       {task && <Comments user={user} task={task} />}
     </div>

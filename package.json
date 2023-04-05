@@ -10,7 +10,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@auth0/auth0-react": "^1.12.0",
+    "@auth0/auth0-react": "^2.0.1",
     "convex": "latest",
     "next": "latest",
     "react": "^18.2.0",

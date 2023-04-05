@@ -4,13 +4,8 @@ import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'
 import { StatusPill } from './status'
 import { PaperClipIcon, TextBubbleIcon } from './icons'
-import {
-  BackendContext,
-  DataContext,
-  Task,
-  TaskListOptions,
-  User,
-} from '../types'
+import { Task, TaskListOptions, User } from '../types'
+import { BackendContext, DataContext } from '../context'
 import { userOwnsTask } from './helpers'
 
 function TaskListing({

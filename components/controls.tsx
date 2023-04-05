@@ -1,13 +1,8 @@
 import React, { useContext, useState } from 'react'
 import Link from 'next/link'
 import NextError from 'next/error'
-import {
-  Status,
-  STATUS_VALUES,
-  OWNER_VALUES,
-  User,
-  DataContext,
-} from '../types'
+import { Status, STATUS_VALUES, OWNER_VALUES, User } from '../types'
+import { DataContext } from '../context'
 import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
 import type { ChangeEventHandler, KeyboardEventHandler } from 'react'
 

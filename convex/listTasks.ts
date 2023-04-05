@@ -1,39 +1,30 @@
 import { query, type DatabaseReader } from './_generated/server'
 import { findUser } from './getCurrentUser'
-import { getTaskFromDocument } from './getTask'
-import {
-  Visibility,
-  Status,
-  SortKey,
-  SortOrder,
-  TaskListOptions,
-} from '../types'
-import type { Document } from './_generated/dataModel'
+import { getTaskFromDoc } from './getTask'
+import { Visibility, Status, SortKey, SortOrder, OWNER_VALUES } from '../types'
+import type { Doc } from './_generated/dataModel'
 import type { PaginationOptions } from 'convex/server'
+
+export type FindTasksOptions = {
+  statusFilter: Status[]
+  ownerFilter: string[]
+  sortKey: SortKey
+  sortOrder: SortOrder
+}
 
 // Expose this as its own function for reusability in other queries
 export function findMatchingTasks(
   db: DatabaseReader,
-  user: Document<'users'> | null,
-  {
-    filter = {
-      status: {
-        selected: [Status.New, Status['In Progress']],
-        onChange: () => null,
-      },
-      owner: { selected: ['Anyone'], onChange: () => null },
-    },
-    sort = {
-      key: SortKey.NUMBER,
-      order: SortOrder.ASC,
-      onChange: () => null,
-    },
-  }: TaskListOptions
+  user: Doc<'users'> | null,
+  options?: FindTasksOptions
 ) {
+  const statuses = options?.statusFilter || [Status.New, Status['In Progress']]
+  const owners = options?.ownerFilter || OWNER_VALUES
+
   return db
     .query('tasks')
-    .withIndex(`by_${sort.key}`)
-    .order(sort.order)
+    .withIndex(`by_${options?.sortKey || SortKey.NUMBER}`)
+    .order(options?.sortOrder || SortOrder.DESC)
     .filter((q) =>
       q.and(
         user
@@ -46,12 +37,10 @@ export function findMatchingTasks(
             q.eq(q.field('visibility'), Visibility.PUBLIC),
         q.or(
           // Match any of the given status values
-          ...filter.status.selected.map((status: number) =>
-            q.eq(q.field('status'), status)
-          )
+          ...statuses.map((status: number) => q.eq(q.field('status'), status))
         ),
         q.or(
-          ...filter.owner.selected.map((key: string) => {
+          ...owners.map((key: string) => {
             const ownerId = q.field('ownerId')
             const unowned = q.eq(ownerId, null)
             const mine = user ? q.eq(q.field('ownerId'), user._id) : false
@@ -75,7 +64,7 @@ export default query(
   async (
     queryCtx,
     paginationOptions: PaginationOptions,
-    queryOptions: TaskListOptions
+    queryOptions: FindTasksOptions
   ) => {
     const { db, auth } = queryCtx
     // If logged in, fetch the stored user to get ID for filtering
@@ -90,9 +79,7 @@ export default query(
     return {
       page: await Promise.all(
         // Join each task with owner details from users table
-        page.map(
-          async (taskDoc) => await getTaskFromDocument(queryCtx, taskDoc)
-        )
+        page.map(async (taskDoc) => await getTaskFromDoc(queryCtx, taskDoc))
       ),
       isDone,
       continueCursor,

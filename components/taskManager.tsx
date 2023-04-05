@@ -1,19 +1,11 @@
 import React, { useContext } from 'react'
-import Head from 'next/head'
 import NextError from 'next/error'
-import { Inter } from 'next/font/google'
 import { Header } from './login'
 import { Controls } from './controls'
 import { TaskList } from './taskList'
 import { NewTaskSidebar, TaskDetailSidebar } from './sidebar'
-import {
-  BackendContext,
-  DataContext,
-  NewTaskInfo,
-  TaskListOptions,
-} from '../types'
-
-const FONT = Inter({ subsets: ['latin'] })
+import { BackendContext, DataContext } from '../context'
+import { TaskListOptions } from '../types'
 
 export function TaskManager({
   slug,
@@ -47,40 +39,31 @@ export function TaskManager({
     )
   }
 
-  const pageTitle =
-    slug === 'new'
-      ? 'New Task'
-      : data.task
-      ? data.task.title
-      : 'Fullstack Task Manager'
-
   const isSidebarOpen = !!slug
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-        <style>{`html { font-family: ${FONT.style.fontFamily}; }`}</style>
-      </Head>
       <div
         id="app"
         className={`grid ${isSidebarOpen ? 'with-sidebar' : 'without-sidebar'}`}
       >
-        <Header>
-          <Controls
-            search={{
-              term: '',
-              onSubmit: (term) => console.log('You searched for:', term),
-            }}
-            status={options.filter.status}
-            owner={options.filter.owner}
-          />
-        </Header>
+        {
+          <Header>
+            <Controls
+              search={{
+                term: '',
+                onSubmit: (term) => console.log('You searched for:', term),
+              }}
+              status={options.filter.status}
+              owner={options.filter.owner}
+            />
+          </Header>
+        }
         <TaskList
           options={options}
           onUpdateTask={
             async (taskInfo) =>
-              await backend.taskManagement.updateTask(taskInfo) // TODO pull into component
+              await backend?.taskManagement.updateTask(taskInfo) // TODO pull into component
           }
         />
         {slug === 'new' ? (

@@ -1,5 +1,5 @@
 import { query } from './_generated/server'
-import type { Document } from './_generated/dataModel'
+import type { Doc } from './_generated/dataModel'
 import type { DatabaseReader } from './_generated/server'
 import type { Auth } from 'convex/server'
 import type { User } from '../types'
@@ -7,7 +7,7 @@ import type { User } from '../types'
 export async function findUser(
   db: DatabaseReader,
   auth: Auth
-): Promise<Document<'users'> | null> {
+): Promise<Doc<'users'> | null> {
   // Expose this as its own function for reusability in other queries/mutations
   const identity = await auth.getUserIdentity()
   if (!identity) return null

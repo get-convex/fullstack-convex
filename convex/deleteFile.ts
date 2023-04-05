@@ -16,4 +16,5 @@ export default mutation(async ({ db, auth, storage }, fileId: Id<'files'>) => {
 
   await storage.delete(file.storageId)
   await db.delete(fileId)
+  return null
 })

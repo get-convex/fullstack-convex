@@ -1,37 +1,43 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  MouseEventHandler,
+  ChangeEventHandler,
+} from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useRouter } from 'next/router'
 import { useQuery, useMutation } from '../../convex/_generated/react'
-import { useStablePaginatedQuery } from '../../hooks/useStableQuery'
 import {
-  BackendContext,
+  useStablePaginatedQuery,
+  useStableQuery,
+} from '../../hooks/useStableQuery'
+import {
   Status,
   STATUS_VALUES,
   OWNER_VALUES,
-  DataContext,
   AppData,
   TaskListOptions,
+  SortKey,
+  SortOrder,
 } from '../../types'
-import type { BackendEnvironment, NewTaskInfo } from '../../types'
-import { useFilter } from '../../hooks/useFilter'
-import { useSort } from '../../hooks/useSort'
+import { BackendContext, DataContext } from '../../context'
+import type { BackendEnvironment } from '../../types'
 import { TaskManager } from '../../components/taskManager'
+import { useConvexAuth } from 'convex/react'
+import Head from 'next/head'
+import { Inter } from 'next/font/google'
 
 const PAGE_SIZE = 10
+const FONT = Inter({ subsets: ['latin'] })
 
 export default function App({ slug }: { slug: number | 'new' | null }) {
-  // Check if the user is logged in with Auth0 for full write access
+  // Check if the user is logged in
   // If user is not logged in, they can still read some data
-  const {
-    user,
-    isLoading: isAuthLoading,
-    loginWithRedirect: login,
-    logout,
-  } = useAuth0()
-
+  const { loginWithRedirect: login, logout } = useAuth0()
+  const { isLoading, isAuthenticated } = useConvexAuth()
   const backend = {
     authenticator: {
-      isLoading: isAuthLoading,
+      isLoading,
       login,
       logout,
     },
@@ -43,46 +49,96 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
       createTask: useMutation('createTask'),
       saveComment: useMutation('saveComment'),
     },
-    // fileHandler: {
-    //   uploadFile: (taskId: any, file: globalThis.File) =>
-    //     useMutation('saveFile', taskId, file),
-    //   deleteFile: (fileId: string) => useMutation('deleteFile', fileId),
-    // },
+    fileHandler: {
+      uploadFile: useMutation('saveFile'),
+      deleteFile: useMutation('deleteFile'),
+    },
   } as BackendEnvironment
 
   // Call the `saveUser` mutation function to store/retrieve
   // the currently authenticated user (if any) in the `users` table
   const saveUser = backend.userManagement.saveUser
+
   useEffect(() => {
-    if (!user) return
     // Save the user in the database (or get an existing user)
     // `saveUser` gets the user information from the server
     // so we don't need to pass anything here
-    async function createUser() {
+    async function createOrUpdateUser() {
       await saveUser()
     }
-    createUser().catch(console.error)
-  }, [saveUser, user])
+    if (isAuthenticated) {
+      createOrUpdateUser().catch(console.error)
+    }
+  }, [saveUser, isAuthenticated])
+
+  const user = useQuery('getCurrentUser')
 
   const [taskNumber, setTaskNumber] = useState(
     typeof slug === 'number' ? slug : null
   )
 
-  const task = useQuery('getTask', taskNumber)
+  const [statusFilter, setStatusFilter] = useState([
+    Status.New,
+    Status['In Progress'],
+  ])
+  const onChangeStatus = ((event) => {
+    const target = event.target as HTMLInputElement
+    const { value, checked } = target
+    const newFilter = checked
+      ? // A formerly unchecked option is now checked; add value to filter
+        STATUS_VALUES.filter((s) => statusFilter.includes(s) || s === +value)
+      : // A formerly checked option is now unchecked; remove value from filter
+        statusFilter.filter((s) => s !== +value)
+    setStatusFilter(newFilter)
+    return null
+  }) as ChangeEventHandler
+
+  const [ownerFilter, setOwnerFilter] = useState(OWNER_VALUES)
+  const onChangeOwner = ((event) => {
+    const target = event.target as HTMLInputElement
+    const { value, checked } = target
+    const newFilter = checked
+      ? // A formerly unchecked option is now checked; add value to filter
+        OWNER_VALUES.filter((s) => ownerFilter.includes(s) || s === value)
+      : // A formerly checked option is now unchecked; remove value from filter
+        ownerFilter.filter((s) => s !== value)
+    setOwnerFilter(newFilter)
+    return null
+  }) as ChangeEventHandler
 
   const filter = {
-    status: useFilter<Status>(STATUS_VALUES, [
-      Status.New,
-      Status['In Progress'],
-    ]),
-    owner: useFilter<string>(OWNER_VALUES, OWNER_VALUES),
+    status: {
+      selected: statusFilter,
+      onChange: onChangeStatus,
+    },
+    owner: {
+      selected: ownerFilter,
+      onChange: onChangeOwner,
+    },
   }
-  const sort = useSort()
+
+  const [sortKey, setSortKey] = useState(SortKey.NUMBER)
+  const [sortOrder, setSortOrder] = useState(SortOrder.DESC)
+  const onChangeSort = ((event) => {
+    event.stopPropagation()
+    const target = event.target as HTMLElement
+    const key = target.id
+    if (sortKey === key) {
+      // We are already sorting by this key, so a click indicates an order reversal
+      setSortOrder(sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC)
+    } else {
+      setSortKey(key as SortKey)
+      setSortOrder(SortOrder.ASC)
+    }
+  }) as MouseEventHandler
 
   const listOptions = {
     filter,
-    sort,
-    selectedTask: { number: taskNumber, onChange: setTaskNumber },
+    sort: { key: sortKey, order: sortOrder, onChange: onChangeSort },
+    selectedTask: {
+      number: taskNumber,
+      onChange: setTaskNumber,
+    },
   } as TaskListOptions
 
   // Query the db for the given tasks in the given sort order (updates reactively)
@@ -94,15 +150,36 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
   } = useStablePaginatedQuery(
     'listTasks',
     { initialNumItems: PAGE_SIZE },
-    listOptions
+    { statusFilter, ownerFilter, sortKey, sortOrder }
   )
+
+  // If a task is selected, query the db for the task details
+  const task = useStableQuery('getTask', taskNumber)
+
+  // Get the set of safe files pre-approved for upload
+  const safeFiles = useQuery('getSafeFiles')
+
+  // When data is loading, Convex's useQuery hook returns undefined,
+  // and paginated queries get a specific loadStatus
+  // Check for these values to see if any data is still loading
+  const isDataLoading =
+    loadStatus === 'LoadingMore' ||
+    [user, task, safeFiles].some((data) => data === undefined)
 
   const data = {
     user,
     taskList,
     task,
-    isLoading: loadStatus === 'LoadingMore',
+    safeFiles,
+    isLoading: isDataLoading,
   } as AppData
+
+  const pageTitle =
+    slug === 'new'
+      ? 'New Task'
+      : data.task
+      ? data.task.title
+      : 'Fullstack Task Manager'
 
   // We use an IntersectionObserver to notice user has reached bottom of the page
   // Once they have scrolled to the bottom, load the next set of results
@@ -126,12 +203,20 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
   }, [bottomElem, loadMore])
 
   return (
-    <BackendContext.Provider value={backend}>
-      <DataContext.Provider value={data}>
-        <TaskManager slug={slug} options={listOptions} />
-        <div ref={bottom} />
-      </DataContext.Provider>
-    </BackendContext.Provider>
+    <>
+      <BackendContext.Provider value={backend}>
+        <DataContext.Provider value={data}>
+          <Head>
+            <title>{pageTitle}</title>
+            <style>{`html { font-family: ${FONT.style.fontFamily}; }`}</style>
+          </Head>
+          <div className={FONT.className}>
+            <TaskManager slug={slug} options={listOptions} />
+            <div ref={bottom} />
+          </div>
+        </DataContext.Provider>
+      </BackendContext.Provider>
+    </>
   )
 }
 
@@ -150,6 +235,6 @@ export async function getServerSideProps({
   }
 
   return {
-    props: { pageSlug },
+    props: { slug: pageSlug },
   }
 }

@@ -1,6 +1,6 @@
 import { query } from './_generated/server'
 import { Visibility, Comment, File } from '../types'
-import type { Id, Document } from './_generated/dataModel'
+import type { Id, Doc } from './_generated/dataModel'
 import type { QueryCtx, DatabaseReader } from './_generated/server'
 
 // Expose this as its own function for reusability in other queries
@@ -12,9 +12,9 @@ export function findByTask(
   return db.query(table).withIndex('by_task', (q) => q.eq('taskId', taskId))
 }
 
-export async function getCommentFromDocument(
+export async function getCommentFromDoc(
   { db }: QueryCtx,
-  c: Document<'comments'>
+  c: Doc<'comments'>
 ): Promise<Comment> {
   const authorDoc = await db.get(c.userId)
   if (!authorDoc) throw new Error('Comment author not found')
@@ -23,18 +23,18 @@ export async function getCommentFromDocument(
     id: c._id.toString(),
     creationTime: c._creationTime,
     body: c.body,
-    author: getUserFromDocument(authorDoc),
+    author: getUserFromDoc(authorDoc),
   }
 }
 
-export async function getFileFromDocument(
+export async function getFileFromDoc(
   { db, storage }: QueryCtx,
-  f: Document<'files'>
+  f: Doc<'files'>
 ): Promise<File> {
   const { name, type, storageId, userId } = f
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('File author not found')
-  const author = getUserFromDocument(authorDoc)
+  const author = getUserFromDoc(authorDoc)
   const url = await storage.getUrl(storageId)
   if (!url)
     throw new Error('Error loading file URL; does the file still exist?')
@@ -55,7 +55,7 @@ export async function getFileFromDocument(
   }
 }
 
-export function getUserFromDocument(authorDoc: Document<'users'>) {
+export function getUserFromDoc(authorDoc: Doc<'users'>) {
   return {
     id: authorDoc._id.toString(),
     name: authorDoc.name,
@@ -63,9 +63,9 @@ export function getUserFromDocument(authorDoc: Document<'users'>) {
   }
 }
 
-export async function getTaskFromDocument(
+export async function getTaskFromDoc(
   queryCtx: QueryCtx,
-  taskDoc: Document<'tasks'>
+  taskDoc: Doc<'tasks'>
 ) {
   const { db, auth } = queryCtx
 
@@ -107,9 +107,9 @@ export async function getTaskFromDocument(
     db,
     _id,
     'comments'
-  ).collect()) as Document<'comment'>[]
+  ).collect()) as Doc<'comment'>[]
   const comments = (await Promise.all(
-    commentsByTask.map(async (c) => await getCommentFromDocument(queryCtx, c))
+    commentsByTask.map(async (c) => await getCommentFromDoc(queryCtx, c))
   )) as Comment[]
 
   // Join with files table
@@ -117,9 +117,9 @@ export async function getTaskFromDocument(
     db,
     _id,
     'files'
-  ).collect()) as Document<'files'>[]
+  ).collect()) as Doc<'files'>[]
   const files = (await Promise.all(
-    filesByTask.map(async (f) => await getFileFromDocument(queryCtx, f))
+    filesByTask.map(async (f) => await getFileFromDoc(queryCtx, f))
   )) as File[]
 
   return { ...task, owner, comments, files }
@@ -135,5 +135,5 @@ export default query(async (queryCtx, taskNumber: number | 'new' | null) => {
     .unique()
   if (!taskDoc) return null
 
-  return await getTaskFromDocument(queryCtx, taskDoc)
+  return await getTaskFromDoc(queryCtx, taskDoc)
 })

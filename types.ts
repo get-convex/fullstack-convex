@@ -1,10 +1,3 @@
-import {
-  Context,
-  createContext,
-  MouseEventHandler,
-  type ChangeEventHandler,
-} from 'react'
-
 export type User = {
   id: string
   name: string
@@ -26,6 +19,7 @@ export type File = {
   url: string
   name: string
   type: string
+  sha256?: string //TODO
 }
 
 export type Task = {
@@ -87,7 +81,7 @@ export enum SortOrder {
 // Owner filter options are just strings
 export const OWNER_VALUES = ['Me', 'Others', 'Nobody']
 
-export type Filter<T> = { selected: T[]; onChange: ChangeEventHandler }
+export type Filter<T> = { selected: T[]; onChange: any }
 
 export type TaskListOptions = {
   filter: {
@@ -97,25 +91,27 @@ export type TaskListOptions = {
   sort: {
     key: SortKey
     order: SortOrder
-    onChange: MouseEventHandler
+    onChange: any
   }
   selectedTask: {
     number?: number | null
-    onChange: (selected: number | null) => void
+    onChange: any
   }
+}
+
+type Authenticator = {
+  isLoading: boolean
+  login: () => Promise<void>
+  logout: ({ returnTo }: { returnTo: string }) => void
 }
 
 // Backend environment to be provided by the implementer & set in index.tsx
 export type BackendEnvironment = {
-  authenticator: {
-    isLoading: boolean
-    login: () => Promise<void>
-    logout: ({ returnTo }: { returnTo: string }) => void
+  authenticator: Authenticator
+  fileHandler: {
+    uploadFile: (taskId: string, file: globalThis.File) => Promise<File>
+    // deleteFile: (fileId: string) => Promise<null>
   }
-  // fileHandler: {
-  //   uploadFile: (taskId: any, file: globalThis.File) => Promise<void>
-  //   deleteFile: (fileId: string) => Promise<void>
-  // }
   taskManagement: {
     createTask: (task: NewTaskInfo) => Promise<Task> // returns newly created Task object
     updateTask: (task: Partial<Task>) => Promise<Task> // returns updated Task object
@@ -131,11 +127,6 @@ export type AppData = {
   user?: User | null
   task?: Task | null
   taskList?: Task[] | null
+  safeFiles?: File[] | null
   isLoading: boolean
-}
-
-export const BackendContext = createContext(
-  null
-) as Context<BackendEnvironment | null>
-
-export const DataContext = createContext(null) as Context<AppData | null>
+} // TODO add a separate isLoading for each piece of data?

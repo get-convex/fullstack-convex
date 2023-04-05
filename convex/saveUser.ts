@@ -1,4 +1,4 @@
-import { getUserFromDocument } from './getTask'
+import { getUserFromDoc } from './getTask'
 import { mutation } from './_generated/server'
 
 // Insert or update the user in a Convex table.
@@ -65,6 +65,6 @@ export default mutation(async (queryCtx) => {
     // Should never happen, but just in case/to appease TS
     throw new Error('Unexpected error saving user')
   } else {
-    return getUserFromDocument(savedUser)
+    return getUserFromDoc(savedUser)
   }
 })

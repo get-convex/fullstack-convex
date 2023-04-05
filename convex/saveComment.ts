@@ -1,7 +1,7 @@
 import { Id } from './_generated/dataModel'
 import { mutation } from './_generated/server'
 import { findUser } from './getCurrentUser'
-import { findByTask, getCommentFromDocument } from './getTask'
+import { findByTask, getCommentFromDoc } from './getTask'
 import { countResults } from './countTasks'
 import type { Comment } from '../types'
 
@@ -36,6 +36,6 @@ export default mutation(
       // Should not happen, but just in case/to appease TS
       throw new Error('Unexpected error saving comment')
     }
-    return await getCommentFromDocument(queryCtx, commentDoc)
+    return await getCommentFromDoc(queryCtx, commentDoc)
   }
 )

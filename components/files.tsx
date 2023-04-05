@@ -2,7 +2,8 @@ import React, { useState, useRef, useContext } from 'react'
 import Modal from 'react-modal'
 import Image from 'next/image'
 import type { FormEvent, MouseEvent, KeyboardEvent, EventHandler } from 'react'
-import { Task, File, User, BackendContext } from '../types'
+import { Task, File, User, BackendEnvironment, AppData } from '../types'
+import { BackendContext, DataContext } from '../context'
 import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
 import type { SafeFile } from '../convex/getSafeFiles'
 
@@ -36,10 +37,10 @@ function FileUploadModal({
   onDismiss,
   onUpload,
 }: {
-  files: SafeFile[]
+  files: File[]
   isOpen: boolean
   onDismiss: EventHandler<MouseEvent | KeyboardEvent>
-  onUpload: (file: globalThis.File) => Promise<void>
+  onUpload: (file: globalThis.File) => Promise<File>
 }) {
   Modal.setAppElement('#app')
 
@@ -145,30 +146,41 @@ function FileUploadModal({
     </Modal>
   )
 }
-export function Files({ user, task }: { user?: User | null; task: Task }) {
-  const fileHandler = useContext(BackendContext)!.fileHandler
+export function Files() {
+  const backend = useContext(BackendContext) as BackendEnvironment
+  const { fileHandler } = backend
+
+  const data = useContext(DataContext) as AppData
+  const { safeFiles, task, user } = data
 
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
-  const fileInput = useRef<HTMLInputElement>(null)
-
-  const handleDeleteFile = async function (fileId: string) {
-    await fileHandler.deleteFile(fileId)
-  }
-
-  async function handleUploadFile(file: globalThis.File) {
-    await fileHandler.uploadFile(file)
-    setUploadModalOpen(false)
-  }
+  const fileInput = useRef<HTMLInputElement>(null) //TODO fix
 
   // TODO temporary fix for only displaying image files, although other files can be uploaded
-  const imageFiles = task?.files?.filter((f) => f.type.startsWith('image'))
+  const imageFiles =
+    task?.files?.filter((f) => f.type.startsWith('image')) || []
   const [visibleIndex, setVisibleIndex] = useState(5)
-  const visibleFiles = imageFiles?.slice(0, visibleIndex)
+  const visibleFiles = imageFiles?.slice(0, visibleIndex) || []
   const moreFiles = imageFiles?.length - visibleFiles?.length
 
-  if (!task) return null
+  if (!task) {
+    return null // TODO loading
+  }
 
+  // const handleDeleteFile = async function (fileId: string) {
+  //   await fileHandler.deleteFile(fileId)
+  // }
+
+  async function handleUploadFile(file: globalThis.File) {
+    if (!task || !user)
+      throw new Error(
+        'Error uploading file: missing task or authenticated user'
+      )
+    const newFile = await fileHandler.uploadFile(task.id.toString(), file)
+    setUploadModalOpen(false)
+    return newFile
+  }
   return (
     <div id="files">
       <div id="files-header">
@@ -181,7 +193,7 @@ export function Files({ user, task }: { user?: User | null; task: Task }) {
           <UploadIcon /> Upload
         </button>
         <FileUploadModal
-          files={safeFiles}
+          files={(safeFiles || []) as File[]}
           isOpen={uploadModalOpen}
           onDismiss={(e) => {
             e.preventDefault()

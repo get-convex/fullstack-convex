@@ -2,7 +2,8 @@ import React, { useContext, useState } from 'react'
 import type { FormEventHandler, KeyboardEventHandler } from 'react'
 import { Avatar } from './login'
 import { ArrowUpIcon } from './icons'
-import { BackendContext, Comment, Task, User } from '../types'
+import { BackendEnvironment, Comment, Task, User } from '../types'
+import { BackendContext } from '../context'
 
 export function showTimeAgo(created: Date) {
   const now = Date.now()
@@ -63,8 +64,8 @@ function CommentList({ comments }: { comments: Comment[] }) {
 }
 
 export function Comments({ user, task }: { user?: User | null; task: Task }) {
-  const addCommentToBackend =
-    useContext(BackendContext)!.taskManagement.addComment
+  const backend = useContext(BackendContext) as BackendEnvironment
+  const { saveComment } = backend.taskManagement
   const [newComment, setNewComment] = useState('')
   const [savingText, setSavingText] = useState('')
   const trimmed = newComment.trim()
@@ -73,7 +74,7 @@ export function Comments({ user, task }: { user?: User | null; task: Task }) {
     event.preventDefault()
     setSavingText(trimmed)
     setNewComment('')
-    await addCommentToBackend(task.id, trimmed)
+    await saveComment(task.id, trimmed)
     setSavingText('')
   } as FormEventHandler
 

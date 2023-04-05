@@ -1,17 +1,23 @@
 import React, { useContext, type PropsWithChildren } from 'react'
-import { useAuth0 } from '@auth0/auth0-react'
+import NextError from 'next/error'
 import Link from 'next/link'
 import Image from 'next/image'
-import { BackendContext, User } from '../types'
-
-type Authenticator = {
-  isLoading: boolean
-  login: () => void
-  logout: ({ returnTo }: { returnTo: string }) => void
-}
+import { BackendContext, DataContext } from '../context'
+import { AppData, BackendEnvironment, User } from '../types'
 
 function LogoutButton() {
-  const auth = useContext(BackendContext)!.authenticator
+  const backend = useContext(BackendContext) as BackendEnvironment
+  if (!backend) {
+    return (
+      <NextError
+        statusCode={500}
+        title="No backend context provided!"
+        withDarkMode={false}
+      />
+    )
+  }
+
+  const auth = backend.authenticator
   return (
     <button
       className="dark"
@@ -23,7 +29,17 @@ function LogoutButton() {
 }
 
 function LoginButton() {
-  const auth = useContext(BackendContext)!.authenticator
+  const backend = useContext(BackendContext) as BackendEnvironment
+  if (!backend) {
+    return (
+      <NextError
+        statusCode={500}
+        title="No backend context provided!"
+        withDarkMode={false}
+      />
+    )
+  }
+  const auth = backend.authenticator
   return (
     <button
       className="dark"
@@ -86,32 +102,31 @@ export function NullAvatar() {
   )
 }
 
-export function Login({ user }: { user?: User | null }) {
+export function Login() {
+  const data = useContext(DataContext) as AppData
+  const { user, isLoading } = data
   return (
     <div style={{ display: 'flex', gap: 10 }}>
       {user && <Avatar user={user} size={38} />}
-      {user === undefined ? (
+      {isLoading ? ( //TODO fix flashing
         <LoginGhost />
-      ) : user ? (
-        <LogoutButton />
-      ) : (
+      ) : user === null ? (
         <LoginButton />
+      ) : (
+        <LogoutButton />
       )}
     </div>
   )
 }
 
-export function Header({
-  user,
-  children,
-}: PropsWithChildren<{ user?: User | null }>) {
+export function Header({ children }: PropsWithChildren) {
   return (
     <header>
       <Link href="/">
         <h1>Tasks</h1>
       </Link>
       {children}
-      <Login user={user} />
+      <Login />
     </header>
   )
 }

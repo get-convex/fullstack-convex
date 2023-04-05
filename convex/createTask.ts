@@ -1,5 +1,5 @@
 import { findUser } from './getCurrentUser'
-import { getTaskFromDocument } from './getTask'
+import { getTaskFromDoc } from './getTask'
 import { mutation } from './_generated/server'
 import type { NewTaskInfo } from '../types'
 
@@ -41,5 +41,5 @@ export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {
     throw new Error('Unexpected error saving task')
   }
 
-  return await getTaskFromDocument(queryCtx, newTask)
+  return await getTaskFromDoc(queryCtx, newTask)
 })

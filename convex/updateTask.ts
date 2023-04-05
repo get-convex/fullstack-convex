@@ -2,7 +2,7 @@ import { findUser } from './getCurrentUser'
 import { mutation } from './_generated/server'
 import { Id } from './_generated/dataModel'
 import { Visibility, type Task } from '../types'
-import { getTaskFromDocument } from './getTask'
+import { getTaskFromDoc } from './getTask'
 
 export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
   const { db, auth } = queryCtx
@@ -35,5 +35,5 @@ export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
   if (!updatedDoc) throw new Error('Task not found') // Should never happen, here to appease TS
 
   // Return updated Task object
-  return await getTaskFromDocument(queryCtx, updatedDoc)
+  return await getTaskFromDoc(queryCtx, updatedDoc)
 })

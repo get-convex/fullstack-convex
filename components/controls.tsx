@@ -1,6 +1,13 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Link from 'next/link'
-import { Status, User } from '../types'
+import NextError from 'next/error'
+import {
+  Status,
+  STATUS_VALUES,
+  OWNER_VALUES,
+  User,
+  DataContext,
+} from '../types'
 import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
 import type { ChangeEventHandler, KeyboardEventHandler } from 'react'
 
@@ -8,10 +15,9 @@ type Value = string | number | Status
 
 interface FilterControl {
   options: Value[]
-  labels?: string[]
-  user?: User | null
   selected: Value[]
   onChange: ChangeEventHandler
+  labels?: string[]
   titles?: string[]
   disabled?: boolean[]
 }
@@ -174,14 +180,47 @@ export function AddTaskButton({ user }: { user?: User | null }) {
 }
 
 export function Controls({
-  user,
-  filters,
+  status,
+  owner,
   search,
 }: {
-  user: User | null | undefined
-  filters: { status: FilterControl; owner: FilterControl }
+  status: any // TODO
+  owner: any
   search: { term: string; onSubmit: (term: string) => void }
 }) {
+  const data = useContext(DataContext)
+  if (!data) {
+    return (
+      <NextError
+        statusCode={500}
+        title="No data context provided!"
+        withDarkMode={false}
+      />
+    )
+  }
+  const { user } = data
+
+  const filters = {
+    status: {
+      options: STATUS_VALUES,
+      labels: STATUS_VALUES.map((v) => Status[v]),
+      ...status,
+    },
+    owner: {
+      options: OWNER_VALUES,
+      selected: owner.selected.filter((v: string) =>
+        v === 'Me' ? !!user : true
+      ),
+      onChange: owner.onChange,
+      titles: [
+        user ? `Tasks owned by ${user.name}` : 'Log in to see your own tasks',
+        'Tasks owned by other users',
+        'Tasks not owned by any user',
+      ],
+      disabled: OWNER_VALUES.map((v) => (v === 'Me' ? !user : false)),
+    },
+  }
+
   return (
     <div id="controls">
       <div>
@@ -194,9 +233,7 @@ export function Controls({
           onChange={filters.status.onChange}
         />
         <OwnerControl
-          user={user}
           options={filters.owner.options}
-          labels={filters.owner.labels}
           titles={filters.owner.titles}
           disabled={filters.owner.disabled}
           selected={filters.owner.selected}

@@ -4,7 +4,15 @@ import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
 import { Files } from './files'
 import { StatusPill } from './status'
-import { BackendContext, Status, Task, User, Visibility } from '../types'
+import {
+  BackendContext,
+  BackendEnvironment,
+  NewTaskInfo,
+  Status,
+  Task,
+  User,
+  Visibility,
+} from '../types'
 import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEventHandler, FormEventHandler } from 'react'
 import { userOwnsTask } from './helpers'
@@ -161,7 +169,6 @@ function OwnerSelect({
   const nullUser: User = {
     name: 'No one',
     id: '',
-    creationTime: 0,
     pictureUrl: '',
   }
   const isPublic = task?.visibility === Visibility.PUBLIC
@@ -292,7 +299,7 @@ function TaskInfo({
   onSave,
   newTask,
 }: {
-  onSave: (taskInfo: Partial<Task>) => void
+  onSave: (taskInfo: NewTaskInfo | Partial<Task>) => Promise<Task>
   task: Task
   user: User | null
   newTask?: boolean
@@ -331,13 +338,9 @@ function TaskInfo({
   )
 }
 
-export function NewTaskDetails({
-  user,
-  onSave,
-}: {
-  user?: User | null
-  onSave: (taskInfo: Partial<Task>) => void
-}) {
+export function NewTaskDetails({ user }: { user?: User | null }) {
+  const backend = useContext(BackendContext) as BackendEnvironment
+
   const [title, setTitle] = useState<string | undefined>('')
   const [description, setDescription] = useState<string | undefined>('')
   const [status, setStatus] = useState(Status.New)
@@ -351,7 +354,7 @@ export function NewTaskDetails({
     ownerId: owner?.id,
     ownerName: owner?.name,
     owner,
-  } as Partial<Task>
+  } as NewTaskInfo
 
   if (user === undefined) return <TaskDetailsGhost />
   if (user === null)
@@ -418,7 +421,7 @@ export function NewTaskDetails({
           className="dark"
           title={newTask.title ? 'Save task' : 'Task must have a title'}
           disabled={!newTask.title}
-          onClick={() => onSave(newTask)}
+          onClick={() => backend.taskManagement.createTask(newTask)}
         >
           Save task
         </button>
@@ -434,7 +437,7 @@ export function TaskDetails({
   task?: Task | null
   user?: User | null
 }) {
-  const onSave = useContext(BackendContext)!.taskManagement.saveTask
+  const backend = useContext(BackendContext) as BackendEnvironment
   if (task === undefined || user === undefined) return <TaskDetailsGhost />
   if (task === null)
     return (
@@ -443,7 +446,13 @@ export function TaskDetails({
 
   return (
     <div id="task-details">
-      {<TaskInfo task={task} user={user} onSave={onSave} />}
+      {
+        <TaskInfo
+          task={task}
+          user={user}
+          onSave={backend.taskManagement.updateTask}
+        />
+      }
 
       {task && <Files user={user} task={task} />}
 

@@ -1,10 +1,16 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Link from 'next/link'
 import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'
 import { StatusPill } from './status'
 import { PaperClipIcon, TextBubbleIcon } from './icons'
-import { Task, User } from '../types'
+import {
+  BackendContext,
+  DataContext,
+  Task,
+  TaskListOptions,
+  User,
+} from '../types'
 import { userOwnsTask } from './helpers'
 
 function TaskListing({
@@ -41,10 +47,10 @@ function TaskListing({
         {task.owner && <Avatar user={task.owner} size={23} withName={true} />}
       </div>
       <div className="task-listing-fileCount">
-        <PaperClipIcon /> {task.fileCount}
+        <PaperClipIcon /> {task.files.length}
       </div>
       <div className="task-listing-commentCount">
-        <TextBubbleIcon /> {task.commentCount}
+        <TextBubbleIcon /> {task.comments.length}
       </div>
     </Link>
   )
@@ -68,23 +74,18 @@ export function TaskListingsGhost() {
 }
 
 export function TaskList({
-  user,
-  tasks,
-  isLoading,
-  onChangeSort,
-  selectedTask,
-  onChangeSelected,
+  options,
   onUpdateTask,
 }: {
-  user?: User | null
-  tasks: Task[]
-  isLoading: boolean
-  onChangeSort: MouseEventHandler
-  selectedTask: number | null
-  onChangeSelected: (taskNumber: number) => void
+  options: TaskListOptions
   onUpdateTask: (taskInfo: Partial<Task>) => void
 }) {
-  if (!tasks.length && !isLoading) {
+  const backend = useContext(BackendContext)
+  const data = useContext(DataContext)
+  if (!(backend && data)) throw new Error('missing context!') // TODO
+  const { taskList: tasks, user, isLoading } = data
+
+  if (!tasks?.length && !isLoading) {
     return (
       <main className="task-list">
         <div id="task-list-body">
@@ -92,46 +93,47 @@ export function TaskList({
         </div>
       </main>
     )
+  } else {
+    const sortHandler = isLoading ? () => ({}) : options.sort.onChange
+
+    return (
+      <main className="task-list">
+        <div className="task-list-header">
+          <div id="number" onClick={sortHandler} tabIndex={0}>
+            #
+          </div>
+          <div id="title" onClick={sortHandler} tabIndex={0}>
+            Task
+          </div>
+          <div id="status" onClick={sortHandler} tabIndex={0}>
+            Status
+          </div>
+          <div id="owner" onClick={sortHandler} tabIndex={0}>
+            Owner
+          </div>
+          <div id="fileCount" onClick={sortHandler} tabIndex={0}>
+            Files
+          </div>
+          <div id="commentCount" onClick={sortHandler} tabIndex={0}>
+            Comments
+          </div>
+        </div>
+        <div id="task-list-body">
+          {tasks &&
+            tasks.length > 0 &&
+            tasks.map((task) => (
+              <TaskListing
+                key={task.number}
+                user={user}
+                task={task}
+                selected={task.number === options.selectedTask.number}
+                onSelect={() => options.selectedTask.onChange(task.number)}
+                onUpdate={onUpdateTask}
+              />
+            ))}
+          {isLoading && <TaskListingsGhost />}
+        </div>
+      </main>
+    )
   }
-
-  const sortHandler = isLoading ? () => ({}) : onChangeSort
-
-  return (
-    <main className="task-list">
-      <div className="task-list-header">
-        <div id="number" onClick={sortHandler} tabIndex={0}>
-          #
-        </div>
-        <div id="title" onClick={sortHandler} tabIndex={0}>
-          Task
-        </div>
-        <div id="status" onClick={sortHandler} tabIndex={0}>
-          Status
-        </div>
-        <div id="owner" onClick={sortHandler} tabIndex={0}>
-          Owner
-        </div>
-        <div id="fileCount" onClick={sortHandler} tabIndex={0}>
-          Files
-        </div>
-        <div id="commentCount" onClick={sortHandler} tabIndex={0}>
-          Comments
-        </div>
-      </div>
-      <div id="task-list-body">
-        {tasks.length > 0 &&
-          tasks.map((task) => (
-            <TaskListing
-              key={task.number}
-              user={user}
-              task={task}
-              selected={task.number === selectedTask}
-              onSelect={() => onChangeSelected(task.number)}
-              onUpdate={onUpdateTask}
-            />
-          ))}
-        {isLoading && <TaskListingsGhost />}
-      </div>
-    </main>
-  )
 }

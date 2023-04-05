@@ -43,17 +43,13 @@ export function TaskDetailSidebar({
 }
 
 export function NewTaskSidebar({
-  user,
   onDismiss,
-  onSave,
 }: {
-  user?: User | null
   onDismiss: MouseEventHandler
-  onSave: (taskInfo: Partial<Task>) => void
 }) {
   return (
     <Sidebar onDismiss={onDismiss}>
-      <NewTaskDetails user={user} onSave={onSave} />
+      <NewTaskDetails />
     </Sidebar>
   )
 }

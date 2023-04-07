@@ -1,10 +1,16 @@
-import React, { useContext } from 'react'
+import React, { useCallback, useContext } from 'react'
 import Link from 'next/link'
 import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'
 import { StatusPill } from './status'
 import { PaperClipIcon, TextBubbleIcon } from './icons'
-import { Task, TaskListOptions, User } from '../types'
+import {
+  AppData,
+  BackendEnvironment,
+  Task,
+  TaskListOptions,
+  User,
+} from '../types'
 import { BackendContext, DataContext } from '../context'
 import { userOwnsTask } from './helpers'
 
@@ -68,19 +74,23 @@ export function TaskListingsGhost() {
   )
 }
 
-export function TaskList({
-  options,
-  onUpdateTask,
-}: {
-  options: TaskListOptions
-  onUpdateTask: (taskInfo: Partial<Task>) => void
-}) {
-  const backend = useContext(BackendContext)
-  const data = useContext(DataContext)
-  if (!(backend && data)) throw new Error('missing context!') // TODO
-  const { taskList: tasks, user, isLoading } = data
+export function TaskList({ options }: { options: TaskListOptions }) {
+  const {
+    taskManagement: { updateTask },
+  } = useContext(BackendContext) as BackendEnvironment
+  const data = useContext(DataContext) as AppData
 
-  if (!tasks?.length && !isLoading) {
+  const onUpdateTask = useCallback(
+    async (taskInfo: Partial<Task>) => await updateTask(taskInfo),
+    [updateTask]
+  )
+
+  const {
+    taskList: { value: tasks, isLoading },
+    user: { value: user },
+  } = data
+
+  if (!isLoading && !tasks?.length) {
     return (
       <main className="task-list">
         <div id="task-list-body">

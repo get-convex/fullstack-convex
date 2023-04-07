@@ -1,10 +1,11 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useCallback } from 'react'
 import NextError from 'next/error'
 import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
 import { Files } from './files'
 import { StatusPill } from './status'
 import {
+  AppData,
   BackendEnvironment,
   NewTaskInfo,
   Status,
@@ -12,9 +13,9 @@ import {
   User,
   Visibility,
 } from '../types'
-import { BackendContext } from '../context'
+import { BackendContext, DataContext } from '../context'
 import { CalendarIcon, CaretDownIcon } from './icons'
-import type { KeyboardEventHandler, FormEventHandler } from 'react'
+import type { KeyboardEvent, FormEventHandler } from 'react'
 import { userOwnsTask } from './helpers'
 import { useRouter } from 'next/router'
 
@@ -30,17 +31,17 @@ function EditableTitle({
   const [editingTitle, setEditingTitle] = useState(editing)
   const [newTitle, setNewTitle] = useState(task.title ?? '')
 
-  function handleUpdateTitle() {
+  const handleUpdateTitle = useCallback(() => {
     setEditingTitle(false)
     saveChanges({ ...task, title: newTitle })
-  }
+  }, [task, newTitle, saveChanges])
 
-  const handleKeyDown = function (event) {
+  const handleKeyDown = useCallback(function (event: KeyboardEvent) {
     if (event.key === 'Escape') {
       event.preventDefault()
       setEditingTitle(false)
     }
-  } as KeyboardEventHandler
+  }, [])
 
   return (
     <h2 title="Click to edit" onClick={() => setEditingTitle(true)}>
@@ -77,10 +78,13 @@ function EditableDescription({
   const [editingDescription, setEditingDescription] = useState(editing)
   const [newDescription, setNewDescription] = useState(task.description ?? '')
 
-  function handleUpdateDescription() {
-    setEditingDescription(false)
-    saveChanges({ ...task, description: newDescription })
-  }
+  const handleUpdateDescription = useCallback(
+    function () {
+      setEditingDescription(false)
+      saveChanges({ ...task, description: newDescription })
+    },
+    [task, newDescription, saveChanges]
+  )
 
   return (
     <div
@@ -122,22 +126,28 @@ function TextareaInput({
   placeholder: string
   autoFocus: boolean
 }) {
-  const handleKeyDown = function (event) {
-    if (event.key === 'Escape') {
-      event.preventDefault()
-      onCancel()
-    }
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-    }
-  } as KeyboardEventHandler
+  const handleKeyDown = useCallback(
+    function (event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onCancel()
+      }
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault()
+      }
+    },
+    [onCancel]
+  )
 
-  const handleKeyUp = function (event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      onSubmit(event)
-    }
-  } as KeyboardEventHandler
+  const handleKeyUp = useCallback(
+    function (event: KeyboardEvent) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault()
+        onSubmit(event)
+      }
+    },
+    [onSubmit]
+  )
 
   return (
     <form onSubmit={onSubmit} onBlur={onSubmit}>
@@ -178,20 +188,26 @@ function OwnerSelect({
 
   const [editing, setEditing] = useState(false)
 
-  function handleClaimTask() {
-    const taskInfo = {
-      ...task,
-      ownerId: user?.id,
-      ownerName: user?.name,
-      owner: user,
-    } as Partial<Task>
-    saveChanges(taskInfo)
-  }
+  const handleClaimTask = useCallback(
+    function () {
+      const taskInfo = {
+        ...task,
+        ownerId: user?.id,
+        ownerName: user?.name,
+        owner: user,
+      } as Partial<Task>
+      saveChanges(taskInfo)
+    },
+    [task, user, saveChanges]
+  )
 
-  function handleUnclaimTask() {
-    const taskInfo = { ...task, ownerId: null, ownerName: null, owner: null }
-    saveChanges(taskInfo)
-  }
+  const handleUnclaimTask = useCallback(
+    function () {
+      const taskInfo = { ...task, ownerId: null, ownerName: null, owner: null }
+      saveChanges(taskInfo)
+    },
+    [task, saveChanges]
+  )
 
   return (
     <>
@@ -257,10 +273,13 @@ function TaskMetadata({
 }) {
   const isOwner = userOwnsTask(task, user)
 
-  function handleChangeStatus(status: Status) {
-    const taskInfo = { ...task, status }
-    saveChanges(taskInfo)
-  }
+  const handleChangeStatus = useCallback(
+    function (status: Status) {
+      const taskInfo = { ...task, status }
+      saveChanges(taskInfo)
+    },
+    [task, saveChanges]
+  )
 
   return (
     <div id="task-meta">
@@ -341,7 +360,7 @@ function TaskInfo({
 
 export function NewTaskDetails({ user }: { user?: User | null }) {
   const router = useRouter()
-  const backend = useContext(BackendContext) as BackendEnvironment
+  const { taskManagement } = useContext(BackendContext) as BackendEnvironment
 
   const [title, setTitle] = useState<string | undefined>('')
   const [description, setDescription] = useState<string | undefined>('')
@@ -358,10 +377,13 @@ export function NewTaskDetails({ user }: { user?: User | null }) {
     owner,
   } as NewTaskInfo
 
-  async function onCreateTask(taskInfo: NewTaskInfo) {
-    const newTask = await backend.taskManagement.createTask(taskInfo)
-    router.push(`/task/${newTask.number}`)
-  }
+  const onCreateTask = useCallback(
+    async function (taskInfo: NewTaskInfo) {
+      const newTask = await taskManagement.createTask(taskInfo)
+      router.push(`/task/${newTask.number}`)
+    },
+    [taskManagement, router]
+  )
 
   if (user === undefined) return <TaskDetailsGhost />
   if (user === null)
@@ -437,16 +459,12 @@ export function NewTaskDetails({ user }: { user?: User | null }) {
   )
 }
 
-export function TaskDetails({
-  task,
-  user,
-}: {
-  task?: Task | null
-  user?: User | null
-}) {
+export function TaskDetails() {
   const backend = useContext(BackendContext) as BackendEnvironment
-  if (task === undefined || user === undefined) return <TaskDetailsGhost />
-  if (task === null)
+  const { task, user } = useContext(DataContext) as AppData
+  if (task.isLoading || user.isLoading) return <TaskDetailsGhost />
+
+  if (!task.value)
     return (
       <NextError statusCode={404} title="Task not found" withDarkMode={false} />
     )
@@ -455,15 +473,15 @@ export function TaskDetails({
     <div id="task-details">
       {
         <TaskInfo
-          task={task}
-          user={user}
+          task={task.value}
+          user={user.value}
           onSave={backend.taskManagement.updateTask}
         />
       }
 
       {task && <Files />}
 
-      {task && <Comments user={user} task={task} />}
+      {task && <Comments user={user.value} task={task.value} />}
     </div>
   )
 }

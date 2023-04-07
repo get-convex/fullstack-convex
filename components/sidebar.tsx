@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Link from 'next/link'
 import { CircledXIcon } from './icons'
 import { TaskDetails, NewTaskDetails } from './taskDetails'
 import type { PropsWithChildren, MouseEventHandler } from 'react'
 import { Task, User } from '../types'
+import { DataContext } from '../context'
 
 export function Sidebar({
   onDismiss,
@@ -27,17 +28,13 @@ export function Sidebar({
 }
 
 export function TaskDetailSidebar({
-  task,
-  user,
   onDismiss,
 }: {
-  task?: Task | null
-  user?: User | null
   onDismiss: MouseEventHandler
 }) {
   return (
     <Sidebar onDismiss={onDismiss}>
-      <TaskDetails task={task} user={user} />
+      <TaskDetails />
     </Sidebar>
   )
 }

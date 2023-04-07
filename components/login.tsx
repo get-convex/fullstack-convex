@@ -17,7 +17,7 @@ function LogoutButton() {
     )
   }
 
-  const auth = backend.authenticator
+  const auth = backend.authentication
   return (
     <button
       className="dark"
@@ -29,23 +29,14 @@ function LogoutButton() {
 }
 
 function LoginButton() {
-  const backend = useContext(BackendContext) as BackendEnvironment
-  if (!backend) {
-    return (
-      <NextError
-        statusCode={500}
-        title="No backend context provided!"
-        withDarkMode={false}
-      />
-    )
-  }
-  const auth = backend.authenticator
+  const { authentication } = useContext(BackendContext) as BackendEnvironment
+  const { user } = useContext(DataContext) as AppData
   return (
     <button
       className="dark"
       title="Log in"
-      disabled={auth.isLoading}
-      onClick={auth.login}
+      disabled={user.isLoading}
+      onClick={authentication.login}
     >
       Log in
     </button>
@@ -104,13 +95,13 @@ export function NullAvatar() {
 
 export function Login() {
   const data = useContext(DataContext) as AppData
-  const { user, isLoading } = data
+  const { value: user, isLoading } = data.user
   return (
     <div style={{ display: 'flex', gap: 10 }}>
       {user && <Avatar user={user} size={38} />}
       {isLoading ? ( //TODO fix flashing
         <LoginGhost />
-      ) : user === null ? (
+      ) : !user ? (
         <LoginButton />
       ) : (
         <LogoutButton />

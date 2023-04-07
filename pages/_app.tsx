@@ -5,7 +5,6 @@ import { ErrorFallback } from '../components/errors'
 import { ConvexReactClient } from 'convex/react'
 import { ConvexProviderWithAuth0 } from 'convex/react-auth0'
 import { Auth0Provider } from '@auth0/auth0-react'
-import convexConfig from '../convex.json'
 import type { ReactElement, ReactNode } from 'react'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
@@ -28,6 +27,7 @@ if (!authDomain) throw new Error('Auth domain not found')
 if (!authClient) throw new Error('Auth client not found')
 
 function MyApp({ Component, pageProps }: AppPropsWithLayout) {
+  console.log('MyApp', Component, pageProps)
   return (
     <>
       <ErrorBoundary FallbackComponent={ErrorFallback}>

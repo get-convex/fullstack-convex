@@ -1,8 +1,7 @@
-import { findUser } from './getCurrentUser'
 import { mutation } from './_generated/server'
+import { findUser, getTaskFromDoc } from './internal'
 import { Id } from './_generated/dataModel'
 import { Visibility, type Task } from '../types'
-import { getTaskFromDoc } from './getTask'
 
 export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
   const { db, auth } = queryCtx

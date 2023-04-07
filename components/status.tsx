@@ -1,6 +1,7 @@
-import React, { useState, type KeyboardEventHandler } from 'react'
+import React, { useCallback, useState } from 'react'
 import { Status, STATUS_VALUES } from '../types'
 import { CaretDownIcon } from './icons'
+import type { KeyboardEvent } from 'react'
 
 export function StatusPill({
   value,
@@ -15,22 +16,28 @@ export function StatusPill({
 }) {
   const [editing, setEditing] = useState(false)
 
-  const onKeyDown = function (event) {
-    if (editing && event.key === 'Escape') {
-      event.preventDefault()
-      setEditing(false)
-    }
-    if (event.key === 'Enter') {
-      event.preventDefault()
-    }
-  } as KeyboardEventHandler
+  const onKeyDown = useCallback(
+    function (event: KeyboardEvent) {
+      if (editing && event.key === 'Escape') {
+        event.preventDefault()
+        setEditing(false)
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault()
+      }
+    },
+    [editing]
+  )
 
-  const onKeyUp = function (event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      setEditing(!editing)
-    }
-  } as KeyboardEventHandler
+  const onKeyUp = useCallback(
+    function (event: KeyboardEvent) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault()
+        setEditing(!editing)
+      }
+    },
+    [editing]
+  )
 
   return editing ? (
     <StatusSelect
@@ -76,24 +83,30 @@ function StatusSelect({
   onChange: (value: Status) => void
   onCancel: () => void
 }) {
-  const onKeyDown = function (event) {
-    if (event.key === 'Escape') {
-      event.preventDefault()
-      onCancel()
-    }
-    if (event.key === 'Enter') {
-      event.preventDefault()
-    }
-  } as KeyboardEventHandler
-
-  const onKeyUp = function (s: Status) {
-    return function (event) {
-      if (event.key === 'Enter' && !event.shiftKey) {
+  const onKeyDown = useCallback(
+    function (event: KeyboardEvent) {
+      if (event.key === 'Escape') {
         event.preventDefault()
-        onChange(s)
+        onCancel()
       }
-    } as KeyboardEventHandler
-  }
+      if (event.key === 'Enter') {
+        event.preventDefault()
+      }
+    },
+    [onCancel]
+  )
+
+  const onKeyUp = useCallback(
+    function (s: Status) {
+      return function (event: KeyboardEvent) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault()
+          onChange(s)
+        }
+      }
+    },
+    [onChange]
+  )
 
   return (
     <div id="status-select">

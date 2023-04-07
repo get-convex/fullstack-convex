@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react'
+import React, { KeyboardEvent, useCallback, useContext, useState } from 'react'
 import Link from 'next/link'
 import NextError from 'next/error'
-import { Status, STATUS_VALUES, OWNER_VALUES, User } from '../types'
+import { Status, STATUS_VALUES, OWNER_VALUES, User, AppData } from '../types'
 import { DataContext } from '../context'
 import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
 import type { ChangeEventHandler, KeyboardEventHandler } from 'react'
@@ -183,17 +183,9 @@ export function Controls({
   owner: any
   search: { term: string; onSubmit: (term: string) => void }
 }) {
-  const data = useContext(DataContext)
-  if (!data) {
-    return (
-      <NextError
-        statusCode={500}
-        title="No data context provided!"
-        withDarkMode={false}
-      />
-    )
-  }
-  const { user } = data
+  const {
+    user: { value: user },
+  } = useContext(DataContext) as AppData
 
   const filters = {
     status: {
@@ -271,11 +263,13 @@ function SearchControl({
   searchTerm?: string
 }) {
   const [term, setTerm] = useState(searchTerm || '')
-  const onSearch = onSubmit || ((term: string) => console.log(term.trim()))
 
-  const onKeyUp = function (e) {
-    if (e.key === 'Enter') onSearch(term)
-  } as KeyboardEventHandler
+  const onKeyUp = useCallback(
+    function (e: KeyboardEvent) {
+      if (e.key === 'Enter') onSubmit(term)
+    },
+    [onSubmit, term]
+  )
 
   return (
     <div id="search" className="control">

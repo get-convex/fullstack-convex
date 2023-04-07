@@ -1,8 +1,11 @@
 import { Id } from './_generated/dataModel'
 import { mutation } from './_generated/server'
-import { findUser } from './getCurrentUser'
-import { findByTask, getCommentFromDoc } from './getTask'
-import { countResults } from './countTasks'
+import {
+  findUser,
+  findByTask,
+  countResults,
+  getCommentFromDoc,
+} from './internal'
 import type { Comment } from '../types'
 
 export default mutation(

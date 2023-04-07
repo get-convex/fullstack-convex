@@ -1,6 +1,5 @@
-import { findUser } from './getCurrentUser'
-import { getTaskFromDoc } from './getTask'
 import { mutation } from './_generated/server'
+import { findUser, getTaskFromDoc } from './internal'
 import type { NewTaskInfo } from '../types'
 
 export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {

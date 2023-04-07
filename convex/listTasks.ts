@@ -1,6 +1,5 @@
 import { query, type DatabaseReader } from './_generated/server'
-import { findUser } from './getCurrentUser'
-import { getTaskFromDoc } from './getTask'
+import { findUser, getTaskFromDoc } from './internal'
 import { Visibility, Status, SortKey, SortOrder, OWNER_VALUES } from '../types'
 import type { Doc } from './_generated/dataModel'
 import type { PaginationOptions } from 'convex/server'

@@ -2,11 +2,13 @@ import React, {
   useEffect,
   useState,
   useRef,
-  MouseEventHandler,
-  ChangeEventHandler,
+  useCallback,
+  ChangeEvent,
+  MouseEvent,
+  useMemo,
 } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useQuery, useMutation } from '../../convex/_generated/react'
+import { useQuery, useMutation, useAction } from '../../convex/_generated/react'
 import {
   useStablePaginatedQuery,
   useStableQuery,
@@ -34,42 +36,48 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
   // Check if the user is logged in
   // If user is not logged in, they can still read some data
   const { loginWithRedirect: login, logout } = useAuth0()
-  const { isLoading, isAuthenticated } = useConvexAuth()
-  const backend = {
-    authenticator: {
-      isLoading,
-      login,
-      logout,
-    },
-    userManagement: {
-      saveUser: useMutation('saveUser'),
-    },
-    taskManagement: {
-      updateTask: useMutation('updateTask'),
-      createTask: useMutation('createTask'),
-      saveComment: useMutation('saveComment'),
-    },
-    fileHandler: {
-      uploadFile: useMutation('saveFile'),
-      deleteFile: useMutation('deleteFile'),
-    },
-  } as BackendEnvironment
+  const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth()
+
+  const saveUser = useMutation('saveUser'),
+    updateTask = useMutation('updateTask'),
+    createTask = useMutation('createTask'),
+    saveComment = useMutation('saveComment'),
+    saveFile = useAction('actions/uploadFile')
+  // deleteFile = useMutation('deleteFile'),
+
+  const backend = useMemo(
+    () =>
+      ({
+        authentication: {
+          login,
+          logout,
+          saveUser,
+        },
+        taskManagement: {
+          createTask,
+          updateTask,
+          saveComment,
+          saveFile,
+        },
+      } as BackendEnvironment),
+    [login, logout, saveUser, createTask, updateTask, saveComment, saveFile]
+  )
 
   // Call the `saveUser` mutation function to store/retrieve
   // the currently authenticated user (if any) in the `users` table
-  const saveUser = backend.userManagement.saveUser
+  // const saveUser = useMemo(() => userManagement.saveUser, [userManagement.saveUser])
 
   useEffect(() => {
     // Save the user in the database (or get an existing user)
     // `saveUser` gets the user information from the server
     // so we don't need to pass anything here
     async function createOrUpdateUser() {
-      await saveUser()
+      await backend.authentication.saveUser()
     }
     if (isAuthenticated) {
       createOrUpdateUser().catch(console.error)
     }
-  }, [saveUser, isAuthenticated])
+  }, [backend.authentication, isAuthenticated])
 
   const user = useQuery('getCurrentUser')
 
@@ -81,56 +89,71 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
     Status.New,
     Status['In Progress'],
   ])
-  const onChangeStatus = ((event) => {
-    const target = event.target as HTMLInputElement
-    const { value, checked } = target
-    const newFilter = checked
-      ? // A formerly unchecked option is now checked; add value to filter
-        STATUS_VALUES.filter((s) => statusFilter.includes(s) || s === +value)
-      : // A formerly checked option is now unchecked; remove value from filter
-        statusFilter.filter((s) => s !== +value)
-    setStatusFilter(newFilter)
-    return null
-  }) as ChangeEventHandler
+  const onChangeStatus = useCallback(
+    (event: ChangeEvent) => {
+      const target = event.target as HTMLInputElement
+      const { value, checked } = target
+      const newFilter = checked
+        ? // A formerly unchecked option is now checked; add value to filter
+          STATUS_VALUES.filter((s) => statusFilter.includes(s) || s === +value)
+        : // A formerly checked option is now unchecked; remove value from filter
+          statusFilter.filter((s) => s !== +value)
+      setStatusFilter(newFilter)
+      return null
+    },
+    [statusFilter]
+  )
 
   const [ownerFilter, setOwnerFilter] = useState(OWNER_VALUES)
-  const onChangeOwner = ((event) => {
-    const target = event.target as HTMLInputElement
-    const { value, checked } = target
-    const newFilter = checked
-      ? // A formerly unchecked option is now checked; add value to filter
-        OWNER_VALUES.filter((s) => ownerFilter.includes(s) || s === value)
-      : // A formerly checked option is now unchecked; remove value from filter
-        ownerFilter.filter((s) => s !== value)
-    setOwnerFilter(newFilter)
-    return null
-  }) as ChangeEventHandler
+  const onChangeOwner = useCallback(
+    (event: ChangeEvent) => {
+      const target = event.target as HTMLInputElement
+      const { value, checked } = target
+      const newFilter = checked
+        ? // A formerly unchecked option is now checked; add value to filter
+          OWNER_VALUES.filter((s) => ownerFilter.includes(s) || s === value)
+        : // A formerly checked option is now unchecked; remove value from filter
+          ownerFilter.filter((s) => s !== value)
+      setOwnerFilter(newFilter)
+      return null
+    },
+    [ownerFilter]
+  )
 
-  const filter = {
-    status: {
-      selected: statusFilter,
-      onChange: onChangeStatus,
-    },
-    owner: {
-      selected: ownerFilter,
-      onChange: onChangeOwner,
-    },
-  }
+  const filter = useMemo(
+    () => ({
+      status: {
+        selected: statusFilter,
+        onChange: onChangeStatus,
+      },
+      owner: {
+        selected: ownerFilter,
+        onChange: onChangeOwner,
+      },
+    }),
+    [statusFilter, onChangeStatus, ownerFilter, onChangeOwner]
+  )
 
   const [sortKey, setSortKey] = useState(SortKey.NUMBER)
   const [sortOrder, setSortOrder] = useState(SortOrder.DESC)
-  const onChangeSort = ((event) => {
-    event.stopPropagation()
-    const target = event.target as HTMLElement
-    const key = target.id
-    if (sortKey === key) {
-      // We are already sorting by this key, so a click indicates an order reversal
-      setSortOrder(sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC)
-    } else {
-      setSortKey(key as SortKey)
-      setSortOrder(SortOrder.ASC)
-    }
-  }) as MouseEventHandler
+  const onChangeSort = useCallback(
+    (event: MouseEvent) => {
+      // TODO keyboard
+      event.stopPropagation()
+      const target = event.target as HTMLElement
+      const key = target.id
+      if (sortKey === key) {
+        // We are already sorting by this key, so a click indicates an order reversal
+        setSortOrder(
+          sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC
+        )
+      } else {
+        setSortKey(key as SortKey)
+        setSortOrder(SortOrder.ASC)
+      }
+    },
+    [sortKey, sortOrder]
+  )
 
   const listOptions = {
     filter,
@@ -161,24 +184,49 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
 
   // When data is loading, Convex's useQuery hook returns undefined,
   // and paginated queries get a specific loadStatus
-  // Check for these values to see if any data is still loading
-  const isDataLoading =
-    loadStatus === 'LoadingMore' ||
-    [user, task, safeFiles].some((data) => data === undefined)
+  // Check for these values to see if a piece of data is still loading
+  // Convert undefineds to nulls to match the expected types
+  const userData = useMemo(
+    () => ({
+      value: user || null,
+      isLoading: user === undefined || isAuthLoading,
+    }),
+    [user, isAuthLoading]
+  )
+  const taskData = useMemo(
+    () => ({ value: task || null, isLoading: task === undefined }),
+    [task]
+  )
+  const safeFilesData = useMemo(
+    () => ({ value: safeFiles || null, isLoading: safeFiles === undefined }),
+    [safeFiles]
+  )
+  const taskListData = useMemo(
+    () => ({
+      value: taskList || null,
+      isLoading: loadStatus === 'LoadingMore',
+    }),
+    [taskList, loadStatus]
+  )
 
-  const data = {
-    user,
-    taskList,
-    task,
-    safeFiles,
-    isLoading: isDataLoading,
-  } as AppData
+  const data = useMemo(
+    () =>
+      ({
+        user: userData,
+        task: taskData,
+        safeFiles: safeFilesData,
+        taskList: taskListData,
+      } as AppData),
+    [userData, taskData, safeFilesData, taskListData]
+  )
+
+  console.log('data', data)
 
   const pageTitle =
     slug === 'new'
       ? 'New Task'
-      : data.task
-      ? data.task.title
+      : data.task.value
+      ? data.task.value.title
       : 'Fullstack Task Manager'
 
   // We use an IntersectionObserver to notice user has reached bottom of the page
@@ -211,7 +259,12 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
             <style>{`html { font-family: ${FONT.style.fontFamily}; }`}</style>
           </Head>
           <div className={FONT.className}>
-            <TaskManager slug={slug} options={listOptions} />
+            <TaskManager
+              slug={slug}
+              options={
+                listOptions // TODO move options into the TaskManager component?
+              }
+            />
             <div ref={bottom} />
           </div>
         </DataContext.Provider>

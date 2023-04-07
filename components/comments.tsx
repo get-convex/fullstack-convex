@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react'
-import type { FormEventHandler, KeyboardEventHandler } from 'react'
+import React, { useCallback, useContext, useState } from 'react'
+import type { FormEvent, KeyboardEvent } from 'react'
 import { Avatar } from './login'
 import { ArrowUpIcon } from './icons'
 import { BackendEnvironment, Comment, Task, User } from '../types'
@@ -70,20 +70,26 @@ export function Comments({ user, task }: { user?: User | null; task: Task }) {
   const [savingText, setSavingText] = useState('')
   const trimmed = newComment.trim()
 
-  const submitComment = async function (event) {
-    event.preventDefault()
-    setSavingText(trimmed)
-    setNewComment('')
-    await saveComment(task.id, trimmed)
-    setSavingText('')
-  } as FormEventHandler
+  const submitComment = useCallback(
+    async function (event: FormEvent) {
+      event.preventDefault()
+      setSavingText(trimmed)
+      setNewComment('')
+      await saveComment(task.id, trimmed)
+      setSavingText('')
+    },
+    [saveComment, task, trimmed]
+  )
 
-  const handleKeyUp = function (event) {
-    if (!trimmed) return
-    if (event.key === 'Enter' && !event.shiftKey) {
-      submitComment(event)
-    }
-  } as KeyboardEventHandler
+  const handleKeyUp = useCallback(
+    function (event: KeyboardEvent) {
+      if (!trimmed) return
+      if (event.key === 'Enter' && !event.shiftKey) {
+        submitComment(event)
+      }
+    },
+    [submitComment, trimmed]
+  )
 
   return (
     <div id="comments">

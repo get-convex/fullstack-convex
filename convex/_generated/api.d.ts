@@ -10,16 +10,17 @@
  */
 
 import type { ApiFromModules } from "convex/api";
+import type * as actions_uploadFile from "../actions/uploadFile";
 import type * as countTasks from "../countTasks";
 import type * as createTask from "../createTask";
 import type * as deleteFile from "../deleteFile";
 import type * as getCurrentUser from "../getCurrentUser";
 import type * as getSafeFiles from "../getSafeFiles";
 import type * as getTask from "../getTask";
+import type * as internal from "../internal";
 import type * as listTasks from "../listTasks";
 import type * as listUsers from "../listUsers";
 import type * as saveComment from "../saveComment";
-import type * as saveFile from "../saveFile";
 import type * as saveUser from "../saveUser";
 import type * as updateTask from "../updateTask";
 
@@ -33,16 +34,17 @@ import type * as updateTask from "../updateTask";
  * `ConvexReactClient` to create app-specific types.
  */
 export type API = ApiFromModules<{
+  "actions/uploadFile": typeof actions_uploadFile;
   countTasks: typeof countTasks;
   createTask: typeof createTask;
   deleteFile: typeof deleteFile;
   getCurrentUser: typeof getCurrentUser;
   getSafeFiles: typeof getSafeFiles;
   getTask: typeof getTask;
+  internal: typeof internal;
   listTasks: typeof listTasks;
   listUsers: typeof listUsers;
   saveComment: typeof saveComment;
-  saveFile: typeof saveFile;
   saveUser: typeof saveUser;
   updateTask: typeof updateTask;
 }>;

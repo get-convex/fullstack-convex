@@ -30,3 +30,8 @@ export default query(async ({ db, storage }) => {
 
   return files
 })
+
+export const getSafeSHAs = query(async ({ db }) => {
+  const safeFiles = await db.query('safeFiles').collect()
+  return safeFiles.map((f) => f.sha256)
+})

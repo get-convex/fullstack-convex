@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useMemo } from 'react'
 import NextError from 'next/error'
 import { Header } from './login'
 import { Controls } from './controls'
@@ -14,6 +14,8 @@ export function TaskManager({
   slug: number | 'new' | null
   options: TaskListOptions
 }) {
+  const isSidebarOpen = useMemo(() => !!slug, [slug])
+
   // Get backend context with functions to manipulate data
   const backend = useContext(BackendContext)
   // Get data context with loaded data to pass to components
@@ -39,8 +41,6 @@ export function TaskManager({
     )
   }
 
-  const isSidebarOpen = !!slug
-
   return (
     <>
       <div
@@ -59,13 +59,7 @@ export function TaskManager({
             />
           </Header>
         }
-        <TaskList
-          options={options}
-          onUpdateTask={
-            async (taskInfo) =>
-              await backend?.taskManagement.updateTask(taskInfo) // TODO pull into component
-          }
-        />
+        <TaskList options={options} />
         {slug === 'new' ? (
           <NewTaskSidebar
             onDismiss={() => options.selectedTask?.onChange(null)}
@@ -73,8 +67,6 @@ export function TaskManager({
         ) : (
           isSidebarOpen && (
             <TaskDetailSidebar
-              user={data.user}
-              task={data.task}
               onDismiss={() => options.selectedTask?.onChange(null)}
             />
           )

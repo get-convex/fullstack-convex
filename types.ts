@@ -19,7 +19,15 @@ export type File = {
   url: string
   name: string
   type: string
-  sha256?: string //TODO
+}
+
+export type NewFileInfo = {
+  author: User
+  size: number
+  name: string
+  type: string
+  data: Buffer
+  sha256: string
 }
 
 export type Task = {
@@ -99,34 +107,30 @@ export type TaskListOptions = {
   }
 }
 
-type Authenticator = {
-  isLoading: boolean
-  login: () => Promise<void>
-  logout: ({ returnTo }: { returnTo: string }) => void
-}
-
-// Backend environment to be provided by the implementer & set in index.tsx
+// Backend environment to be initialized & provided to the app's BackendContext in index.tsx
 export type BackendEnvironment = {
-  authenticator: Authenticator
-  fileHandler: {
-    uploadFile: (taskId: string, file: globalThis.File) => Promise<File>
-    // deleteFile: (fileId: string) => Promise<null>
+  authentication: {
+    login: () => Promise<void>
+    logout: ({ returnTo }: { returnTo: string }) => void
+    saveUser: () => Promise<User> // returns newly created/updated User object //TODO this should probably accept a Partial<User>?
   }
   taskManagement: {
     createTask: (task: NewTaskInfo) => Promise<Task> // returns newly created Task object
     updateTask: (task: Partial<Task>) => Promise<Task> // returns updated Task object
     saveComment: (taskId: string, body: string) => Promise<Comment> // returns newly created Comment objects
-  }
-  userManagement: {
-    saveUser: () => Promise<User> // returns newly created/updated User object
+    saveFile: (taskId: string, file: NewFileInfo) => Promise<File>
   }
 }
 
-// Loaded data on the client, to be provided by the implementer & set in index.tsx
-export type AppData = {
-  user?: User | null
-  task?: Task | null
-  taskList?: Task[] | null
-  safeFiles?: File[] | null
+type LoadableData<T> = {
+  value: T | null
   isLoading: boolean
-} // TODO add a separate isLoading for each piece of data?
+}
+
+// Data for the client, to be loaded & provided to the app's DataContext in index.tsx
+export type AppData = {
+  user: LoadableData<User>
+  task: LoadableData<Task>
+  taskList: LoadableData<Task[]>
+  safeFiles: LoadableData<File[]>
+}

@@ -1,5 +1,5 @@
 import { mutation } from './_generated/server'
-import { findUser } from './getCurrentUser'
+import { findUser } from './internal'
 import { Id } from './_generated/dataModel'
 
 export default mutation(async ({ db, auth, storage }, fileId: Id<'files'>) => {

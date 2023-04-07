@@ -1,21 +1,7 @@
 import { query } from './_generated/server'
-import { findUser } from './getCurrentUser'
+import { findUser, countResults } from './internal'
 import { findMatchingTasks } from './listTasks'
-import type { GenericTableInfo, OrderedQuery, Query } from 'convex/server'
 import { FindTasksOptions } from './listTasks'
-
-export async function countResults(
-  query: OrderedQuery<GenericTableInfo> | Query<GenericTableInfo>
-) {
-  // If we don't actually care about the task documents, rather
-  // than calling .collect() we run through the iterator directly
-  let count = 0
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  for await (const _ of query) {
-    count++
-  }
-  return count
-}
 
 // Given a user and their chosen filters, find the total number of matching tasks,
 // so we can display the total count even if paginated data hasn't loaded yet

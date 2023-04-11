@@ -1,10 +1,16 @@
-import React, { KeyboardEvent, useCallback, useContext, useState } from 'react'
+import React, { useCallback, useContext, useState } from 'react'
 import Link from 'next/link'
-import NextError from 'next/error'
-import { Status, STATUS_VALUES, OWNER_VALUES, User, AppData } from '../types'
+import {
+  Status,
+  STATUS_VALUES,
+  OWNER_VALUES,
+  User,
+  AppData,
+  Filter,
+} from '../types'
 import { DataContext } from '../context'
 import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
-import type { ChangeEventHandler, KeyboardEventHandler } from 'react'
+import type { ChangeEventHandler, KeyboardEvent } from 'react'
 
 type Value = string | number | Status
 
@@ -179,8 +185,8 @@ export function Controls({
   owner,
   search,
 }: {
-  status: any // TODO
-  owner: any
+  status: Filter<Status>
+  owner: Filter<string>
   search: { term: string; onSubmit: (term: string) => void }
 }) {
   const {
@@ -191,6 +197,7 @@ export function Controls({
     status: {
       options: STATUS_VALUES,
       labels: STATUS_VALUES.map((v) => Status[v]),
+      titles: STATUS_VALUES.map((v) => `${Status[v]} tasks`),
       ...status,
     },
     owner: {
@@ -230,28 +237,6 @@ export function Controls({
       </div>
       <AddTaskButton user={user} />
     </div>
-  )
-}
-
-// TODO cleanup
-
-function ShowingCount({
-  isLoading,
-  showing,
-  matching,
-}: {
-  isLoading: boolean
-  showing?: number
-  matching?: number
-}) {
-  return (
-    <span id="showing">
-      {isLoading
-        ? '... ' // TODO should be a loading spinner or such
-        : ''}
-      {matching !== undefined &&
-        `Showing ${showing} of ${matching} task${matching === 1 ? '' : 's'}`}
-    </span>
   )
 }
 

@@ -1,10 +1,8 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { CircledXIcon } from './icons'
 import { TaskDetails, NewTaskDetails } from './taskDetails'
 import type { PropsWithChildren, MouseEventHandler } from 'react'
-import { Task, User } from '../types'
-import { DataContext } from '../context'
 
 export function Sidebar({
   onDismiss,

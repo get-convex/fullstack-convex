@@ -1,4 +1,4 @@
-import React, { useContext, useCallback, type PropsWithChildren } from 'react'
+import React, { useContext, type PropsWithChildren } from 'react'
 import NextError from 'next/error'
 import Link from 'next/link'
 import Image from 'next/image'

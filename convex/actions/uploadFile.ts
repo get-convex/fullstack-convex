@@ -2,15 +2,6 @@ import { action } from '../_generated/server'
 import fetch from 'node-fetch'
 import { Id } from '../_generated/dataModel'
 import type { File, NewFileInfo } from '../../types'
-import type { SafeFile } from '../getSafeFiles'
-
-async function verifyFile(
-  safeFiles: SafeFile[],
-  { sha256: fileSHA }: NewFileInfo
-) {
-  const safeSHAs = safeFiles.map((f) => f.sha256)
-  return safeSHAs.includes(fileSHA)
-}
 
 async function uploadFile(postUrl: string, file: NewFileInfo) {
   const result = await fetch(postUrl, {
@@ -29,6 +20,12 @@ export default action(
     taskId: string,
     file: NewFileInfo
   ): Promise<File> => {
+    // This function uploads a file to Convex's file storage,
+    // and stores that file's info & associated task in the
+    // 'files' table. This function assumes that the file's
+    // integrity has already been verified client-side
+    // and the file is safe to upload.
+
     // Get a short-lived upload URL
     const postUrl = await runMutation('internal:getUploadUrl')
 

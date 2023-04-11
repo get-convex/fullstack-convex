@@ -8,7 +8,8 @@
         "eslint:recommended",
         "plugin:react/recommended",
         "plugin:react-hooks/recommended",
-        "plugin:@typescript-eslint/recommended"
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@next/next/recommended"
     ],
     "overrides": [
     ],
@@ -19,8 +20,14 @@
     },
     "plugins": [
         "react",
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "@next/next"
     ],
     "rules": {
+    },
+    "settings" : {
+        "react": {
+            "version": "detect"
+        }
     }
 }

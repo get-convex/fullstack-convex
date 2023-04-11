@@ -35,8 +35,12 @@ const FONT = Inter({ subsets: ['latin'] })
 export default function App({ slug }: { slug: number | 'new' | null }) {
   // Check if the user is logged in
   // If user is not logged in, they can still read some data
-  const { loginWithRedirect: login, logout } = useAuth0()
+  const { loginWithRedirect: login, logout: auth0Logout } = useAuth0()
   const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth()
+  const logout = useCallback(
+    () => auth0Logout({ logoutParams: { returnTo: window.location.origin } }),
+    [auth0Logout]
+  )
 
   const saveUser = useMutation('saveUser'),
     updateTask = useMutation('updateTask'),
@@ -219,8 +223,6 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
       } as AppData),
     [userData, taskData, safeFilesData, taskListData]
   )
-
-  console.log('data', data)
 
   const pageTitle =
     slug === 'new'

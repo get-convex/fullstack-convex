@@ -58,7 +58,6 @@ function FileUploadModal({
   useEffect(() => {
     async function uploadFile() {
       if (!fileToUpload) return
-      console.log('trying to upload', fileToUpload)
       try {
         await onUpload(fileToUpload)
       } catch (e) {
@@ -168,7 +167,6 @@ function FileUploadModal({
   )
 }
 export function Files() {
-  console.log('Files rendering')
   const backend = useContext(BackendContext) as BackendEnvironment
   const {
     taskManagement: { saveFile },
@@ -201,7 +199,6 @@ export function Files() {
         .map((b) => b.toString(16).padStart(2, '0'))
         .join('') // convert bytes to hex string
 
-      console.log(safeSHAs, fileSHA)
       return safeSHAs.includes(fileSHA)
     },
     [safeSHAs]
@@ -239,11 +236,10 @@ export function Files() {
 
   const handleUploadFile = useCallback(
     async (inputFile: globalThis.File) => {
-      console.log('handleUploadFile running')
-      // if (!task.value || !user.value)
-      //   throw new Error(
-      //     'Error uploading file: missing task or authenticated user'
-      //   )
+      if (!task.value || !user.value)
+        throw new Error(
+          'Error uploading file: missing task or authenticated user'
+        )
 
       try {
         const validFileInfo = await getFileInfo(inputFile)
@@ -254,7 +250,7 @@ export function Files() {
         throw e as Error
       }
     },
-    [saveFile, taskId, getFileInfo]
+    [saveFile, taskId, getFileInfo, task.value, user.value]
   )
 
   // const handleDeleteFile = async function (fileId: string) {

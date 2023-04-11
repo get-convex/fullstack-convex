@@ -27,7 +27,6 @@ if (!authDomain) throw new Error('Auth domain not found')
 if (!authClient) throw new Error('Auth client not found')
 
 function MyApp({ Component, pageProps }: AppPropsWithLayout) {
-  console.log('MyApp', Component, pageProps)
   return (
     <>
       <ErrorBoundary FallbackComponent={ErrorFallback}>

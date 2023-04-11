@@ -1,4 +1,4 @@
-import React, { useContext, type PropsWithChildren } from 'react'
+import React, { useContext, useCallback, type PropsWithChildren } from 'react'
 import NextError from 'next/error'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -7,7 +7,9 @@ import { AppData, BackendEnvironment, User } from '../types'
 
 function LogoutButton() {
   const backend = useContext(BackendContext) as BackendEnvironment
-  if (!backend) {
+  const auth = backend.authentication
+
+  if (!backend || !auth) {
     return (
       <NextError
         statusCode={500}
@@ -17,12 +19,8 @@ function LogoutButton() {
     )
   }
 
-  const auth = backend.authentication
   return (
-    <button
-      className="dark"
-      onClick={() => auth.logout({ returnTo: window.location.origin })}
-    >
+    <button className="dark" onClick={auth.logout}>
       Log out
     </button>
   )

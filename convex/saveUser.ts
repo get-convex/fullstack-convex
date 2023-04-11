@@ -14,7 +14,7 @@ export default mutation(async (queryCtx) => {
   const { db, auth } = queryCtx
   const identity = await auth.getUserIdentity()
   if (!identity) {
-    throw new Error('Called storeUser without authentication present')
+    throw new Error('Called saveUser without authentication present')
   }
 
   const { tokenIdentifier, name, email, pictureUrl } = identity

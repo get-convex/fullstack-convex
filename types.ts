@@ -111,7 +111,7 @@ export type TaskListOptions = {
 export type BackendEnvironment = {
   authentication: {
     login: () => Promise<void>
-    logout: ({ returnTo }: { returnTo: string }) => void
+    logout: () => void | Promise<void>
     saveUser: () => Promise<User> // returns newly created/updated User object //TODO this should probably accept a Partial<User>?
   }
   taskManagement: {

@@ -43,8 +43,8 @@ function LoginButton() {
 
 function LoginGhost() {
   return (
-    <button className="ghost" title="Log out" disabled>
-      Log out
+    <button className="ghost" title="Log in" disabled>
+      Log in
     </button>
   )
 }
@@ -80,13 +80,26 @@ export function Avatar({
   )
 }
 
-export function NullAvatar() {
+export function NullAvatar({
+  size = 30,
+  withName = true,
+}: {
+  size?: number
+  withName?: boolean
+}) {
   return (
-    <div className="avatar null-avatar">
-      <div className="avatar-ghost"></div>
-      <span className="avatar-name" title="No one">
-        No one
-      </span>
+    <div className="avatar null-avatar" title="Not logged in">
+      <div
+        className="avatar-ghost"
+        style={{ width: size, height: size, fontSize: size - 10 }}
+      >
+        ?
+      </div>
+      {withName && (
+        <span className="avatar-name" title="No one">
+          No one
+        </span>
+      )}
     </div>
   )
 }
@@ -96,14 +109,12 @@ export function Login() {
   const { value: user, isLoading } = data.user
   return (
     <div id="login">
-      {user && <Avatar user={user} size={38} />}
-      {isLoading ? ( //TODO fix flashing
-        <LoginGhost />
-      ) : !user ? (
-        <LoginButton />
+      {user ? (
+        <Avatar user={user} size={38} />
       ) : (
-        <LogoutButton />
+        <NullAvatar withName={false} size={38} />
       )}
+      {!user ? isLoading ? <LoginGhost /> : <LoginButton /> : <LogoutButton />}
     </div>
   )
 }

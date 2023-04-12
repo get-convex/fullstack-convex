@@ -138,7 +138,7 @@ button:hover {
 
 button:disabled {
   background-color: var(--color-grey);
-  cursor: unset;
+  cursor: not-allowed;
 }
 
 .icon-button {
@@ -166,6 +166,7 @@ button.light {
   justify-content: left;
   align-items: center;
   gap: 10px;
+  cursor: default;
 }
 
 .avatar img {
@@ -175,6 +176,11 @@ button.light {
 #login {
   display: flex;
   gap: 10px;
+}
+
+#login > button {
+  width: 68px;
+  justify-content: center;
 }
 
 /* Controls */
@@ -723,9 +729,11 @@ button.light {
 }
 
 .avatar-ghost {
-  width: 30px;
-  height: 30px;
   border-radius: 100%;
+  color: var(--color-light);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .null-avatar > div {

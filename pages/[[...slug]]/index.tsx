@@ -21,6 +21,7 @@ import {
   TaskListOptions,
   SortKey,
   SortOrder,
+  User,
 } from '../../types'
 import { BackendContext, DataContext } from '../../context'
 import type { BackendEnvironment } from '../../types'
@@ -67,23 +68,33 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
     [login, logout, saveUser, createTask, updateTask, saveComment, saveFile]
   )
 
-  // Call the `saveUser` mutation function to store/retrieve
-  // the currently authenticated user (if any) in the `users` table
-  // const saveUser = useMemo(() => userManagement.saveUser, [userManagement.saveUser])
+  // Get the currently authenticated user, if any
+  const [user, setUser] = useState<User | null>()
 
   useEffect(() => {
+    if (isAuthLoading) return
     // Save the user in the database (or get an existing user)
     // `saveUser` gets the user information from the server
     // so we don't need to pass anything here
     async function createOrUpdateUser() {
-      await backend.authentication.saveUser()
+      return await backend.authentication.saveUser()
     }
     if (isAuthenticated) {
-      createOrUpdateUser().catch(console.error)
+      createOrUpdateUser()
+        .then((savedUser) => setUser(savedUser))
+        .catch(console.error)
+    } else {
+      setUser(null)
     }
-  }, [backend.authentication, isAuthenticated])
+  }, [backend.authentication, isAuthenticated, isAuthLoading])
 
-  const user = useQuery('getCurrentUser')
+  const userData = useMemo(
+    () => ({
+      value: user || null,
+      isLoading: user === undefined || isAuthLoading,
+    }),
+    [user, isAuthLoading]
+  )
 
   const [taskNumber, setTaskNumber] = useState(
     typeof slug === 'number' ? slug : null
@@ -190,32 +201,6 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
     { initialNumItems: PAGE_SIZE },
     { statusFilter, ownerFilter, sortKey, sortOrder, searchTerm }
   )
-
-  // If a task is selected, query the db for the task details
-  const task = useStableQuery('getTask', taskNumber)
-
-  // Get the set of safe files pre-approved for upload
-  const safeFiles = useQuery('getSafeFiles')
-
-  // When data is loading, Convex's useQuery hook returns undefined,
-  // and paginated queries get a specific loadStatus
-  // Check for these values to see if a piece of data is still loading
-  // Convert undefineds to nulls to match the expected types
-  const userData = useMemo(
-    () => ({
-      value: user || null,
-      isLoading: user === undefined || isAuthLoading,
-    }),
-    [user, isAuthLoading]
-  )
-  const taskData = useMemo(
-    () => ({ value: task || null, isLoading: task === undefined }),
-    [task]
-  )
-  const safeFilesData = useMemo(
-    () => ({ value: safeFiles || null, isLoading: safeFiles === undefined }),
-    [safeFiles]
-  )
   const taskListData = useMemo(
     () => ({
       value: taskList || null,
@@ -224,6 +209,22 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
     [taskList, loadStatus]
   )
 
+  // If a task is selected, query the db for the task details
+  const task = useStableQuery('getTask', taskNumber)
+  const taskData = useMemo(
+    () => ({ value: task || null, isLoading: task === undefined }),
+    [task]
+  )
+
+  // Get the set of safe files pre-approved for upload
+  const safeFiles = useQuery('getSafeFiles')
+
+  const safeFilesData = useMemo(
+    () => ({ value: safeFiles || null, isLoading: safeFiles === undefined }),
+    [safeFiles]
+  )
+
+  // Collect the loaded/loading AppData to pass to components via DataContext
   const data = useMemo(
     () =>
       ({

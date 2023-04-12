@@ -358,9 +358,12 @@ function TaskInfo({
   )
 }
 
-export function NewTaskDetails({ user }: { user?: User | null }) {
+export function NewTaskDetails() {
   const router = useRouter()
   const { taskManagement } = useContext(BackendContext) as BackendEnvironment
+  const {
+    user: { value: user, isLoading: isUserLoading },
+  } = useContext(DataContext) as AppData
 
   const [title, setTitle] = useState<string | undefined>('')
   const [description, setDescription] = useState<string | undefined>('')
@@ -385,8 +388,8 @@ export function NewTaskDetails({ user }: { user?: User | null }) {
     [taskManagement, router]
   )
 
-  if (user === undefined) return <TaskDetailsGhost />
-  if (user === null)
+  if (isUserLoading) return <TaskDetailsGhost />
+  if (!user)
     return (
       <NextError
         statusCode={403}

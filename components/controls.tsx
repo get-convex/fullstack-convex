@@ -182,6 +182,59 @@ export function AddTaskButton({ user }: { user?: User | null }) {
   )
 }
 
+function SearchControl({
+  searchTerm,
+  onChange,
+}: {
+  onChange: (term: string) => void
+  searchTerm: string
+}) {
+  const [term, setTerm] = useState(searchTerm || '')
+
+  const onChangeText = useCallback((e: any) => setTerm(e.target.value), [])
+
+  const onSubmit = useCallback(() => {
+    onChange(term)
+  }, [onChange, term])
+
+  const onBlur = useCallback(
+    (e: FocusEvent) => {
+      onChangeText(e)
+      onSubmit()
+    },
+    [onChangeText, onSubmit]
+  )
+
+  const onKeyUp = useCallback(
+    function (e: KeyboardEvent) {
+      if (e.key === 'Enter') onSubmit()
+    },
+    [onSubmit]
+  )
+
+  return (
+    <div id="search" className="control">
+      <input
+        type="search"
+        value={term}
+        onChange={onChangeText}
+        onKeyUp={onKeyUp}
+        onBlur={onBlur}
+        placeholder="Search tasks"
+        tabIndex={0}
+      />
+      <button
+        type="submit"
+        className="icon-button"
+        title="Search tasks by title, description, owner name, or comment text"
+        onClick={onSubmit}
+      >
+        <SearchIcon />
+      </button>
+    </div>
+  )
+}
+
 export function Controls({
   status,
   owner,
@@ -238,59 +291,6 @@ export function Controls({
         <SearchControl searchTerm={search.term} onChange={search.onChange} />
       </div>
       <AddTaskButton user={user} />
-    </div>
-  )
-}
-
-function SearchControl({
-  searchTerm,
-  onChange,
-}: {
-  onChange: (term: string) => void
-  searchTerm: string
-}) {
-  const [term, setTerm] = useState(searchTerm || '')
-
-  const onChangeText = useCallback((e: any) => setTerm(e.target.value), [])
-
-  const onSubmit = useCallback(() => {
-    onChange(term)
-  }, [onChange, term])
-
-  const onBlur = useCallback(
-    (e: FocusEvent) => {
-      onChangeText(e)
-      onSubmit()
-    },
-    [onChangeText, onSubmit]
-  )
-
-  const onKeyUp = useCallback(
-    function (e: KeyboardEvent) {
-      if (e.key === 'Enter') onSubmit()
-    },
-    [onSubmit]
-  )
-
-  return (
-    <div id="search" className="control">
-      <input
-        type="search"
-        value={term}
-        onChange={onChangeText}
-        onKeyUp={onKeyUp}
-        onBlur={onBlur}
-        placeholder="Search tasks by title, description [soon: owner name or comment text]"
-        tabIndex={0}
-      />
-      <button
-        type="submit"
-        className="icon-button"
-        title="Click to search"
-        onClick={onSubmit}
-      >
-        <SearchIcon />
-      </button>
     </div>
   )
 }

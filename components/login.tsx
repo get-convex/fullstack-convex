@@ -95,7 +95,7 @@ export function Login() {
   const data = useContext(DataContext) as AppData
   const { value: user, isLoading } = data.user
   return (
-    <div style={{ display: 'flex', gap: 10 }}>
+    <div id="login">
       {user && <Avatar user={user} size={38} />}
       {isLoading ? ( //TODO fix flashing
         <LoginGhost />

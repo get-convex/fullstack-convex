@@ -21,6 +21,7 @@ export default defineSchema(
       ),
       commentCount: s.number(),
       fileCount: s.number(),
+      search: s.string(),
     })
       .index('by_number', ['number'])
       .index('by_ownerId', ['ownerId'])
@@ -29,8 +30,7 @@ export default defineSchema(
       .index('by_title', ['title'])
       .index('by_commentCount', ['commentCount'])
       .index('by_fileCount', ['fileCount'])
-      .searchIndex('search_title', { searchField: 'title' })
-      .searchIndex('search_description', { searchField: 'description' }),
+      .searchIndex('search_all', { searchField: 'search' }),
 
     users: defineTable({
       email: s.string(),

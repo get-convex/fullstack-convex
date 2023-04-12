@@ -196,6 +196,7 @@ function OwnerSelect({
         ownerName: user?.name,
         owner: user,
       } as Partial<Task>
+      console.log('taskInfo', taskInfo)
       saveChanges(taskInfo)
     },
     [task, user, saveChanges]

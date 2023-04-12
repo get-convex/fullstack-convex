@@ -8,7 +8,7 @@ import {
   OWNER_VALUES,
   STATUS_VALUES,
 } from '../types'
-import type { DataModel, Doc } from './_generated/dataModel'
+import { type DataModel, type Doc, Id } from './_generated/dataModel'
 import type {
   PaginationOptions,
   FilterBuilder,
@@ -68,10 +68,11 @@ export function findMatchingTasks(
 
   const tasks = db.query('tasks')
 
+  // Since we use non-search indexes to sort, we can either
+  // search or sort the results but not both. So if we
+  // have a search term to match, we ignore sort options
   const searchedOrSorted = searchTerm
-    ? tasks.withSearchIndex('search_title', (q) =>
-        q.search('title', searchTerm)
-      )
+    ? tasks.withSearchIndex('search_all', (q) => q.search('search', searchTerm))
     : tasks
         .withIndex(`by_${options?.sortKey || SortKey.NUMBER}`)
         .order(options?.sortOrder || SortOrder.DESC)

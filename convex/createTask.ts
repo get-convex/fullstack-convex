@@ -22,6 +22,11 @@ export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {
   const lastCreatedTask = await db.query('tasks').order('desc').first()
   const number = lastCreatedTask ? lastCreatedTask.number + 1 : 1
 
+  // Copy concatenated searchable fields into 'search' field
+  // so that we can search across multiple fields as well as
+  // fields from related documents (user names, comment text)
+  const search = [taskInfo.title, taskInfo.description].join(' ')
+
   // Copy owner name (if any) and comment count (initally 0) into table
   // so that we can index on these to support ordering with pagination
   const taskId = await db.insert('tasks', {
@@ -30,6 +35,7 @@ export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {
     commentCount: 0,
     fileCount: 0,
     number,
+    search,
     ...taskInfo,
   })
 

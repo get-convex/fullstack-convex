@@ -46,6 +46,8 @@ export function Select({
   const optionLabels = labels || options
   const numSelected = selectedValues.length
 
+  // TODO keyboard handler
+
   return (
     <div id={id} className="select" tabIndex={0} role="button">
       {

@@ -101,6 +101,10 @@ export type TaskListOptions = {
     order: SortOrder
     onChange: any
   }
+  search: {
+    term: string
+    onChange: any
+  }
   selectedTask: {
     number?: number | null
     onChange: any

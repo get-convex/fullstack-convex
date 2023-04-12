@@ -159,6 +159,16 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
     [sortKey, sortOrder]
   )
 
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const search = useMemo(
+    () => ({
+      term: searchTerm,
+      onChange: setSearchTerm,
+    }),
+    [searchTerm]
+  )
+
   const listOptions = {
     filter,
     sort: { key: sortKey, order: sortOrder, onChange: onChangeSort },
@@ -166,6 +176,7 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
       number: taskNumber,
       onChange: setTaskNumber,
     },
+    search,
   } as TaskListOptions
 
   // Query the db for the given tasks in the given sort order (updates reactively)
@@ -177,7 +188,7 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
   } = useStablePaginatedQuery(
     'listTasks',
     { initialNumItems: PAGE_SIZE },
-    { statusFilter, ownerFilter, sortKey, sortOrder }
+    { statusFilter, ownerFilter, sortKey, sortOrder, searchTerm }
   )
 
   // If a task is selected, query the db for the task details

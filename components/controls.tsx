@@ -10,7 +10,7 @@ import {
 } from '../types'
 import { DataContext } from '../context'
 import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
-import type { ChangeEventHandler, KeyboardEvent } from 'react'
+import type { ChangeEventHandler, KeyboardEvent, FocusEvent } from 'react'
 
 type Value = string | number | Status
 
@@ -187,7 +187,7 @@ export function Controls({
 }: {
   status: Filter<Status>
   owner: Filter<string>
-  search: { term: string; onSubmit: (term: string) => void }
+  search: { term: string; onChange: (term: string) => void }
 }) {
   const {
     user: { value: user },
@@ -233,7 +233,7 @@ export function Controls({
           selected={filters.owner.selected}
           onChange={filters.owner.onChange}
         />
-        <SearchControl searchTerm={search.term} onSubmit={search.onSubmit} />
+        <SearchControl searchTerm={search.term} onChange={search.onChange} />
       </div>
       <AddTaskButton user={user} />
     </div>
@@ -241,19 +241,33 @@ export function Controls({
 }
 
 function SearchControl({
-  searchTerm = '',
-  onSubmit,
+  searchTerm,
+  onChange,
 }: {
-  onSubmit: (term: string) => void
-  searchTerm?: string
+  onChange: (term: string) => void
+  searchTerm: string
 }) {
   const [term, setTerm] = useState(searchTerm || '')
 
+  const onChangeText = useCallback((e: any) => setTerm(e.target.value), [])
+
+  const onSubmit = useCallback(() => {
+    onChange(term)
+  }, [onChange, term])
+
+  const onBlur = useCallback(
+    (e: FocusEvent) => {
+      onChangeText(e)
+      onSubmit()
+    },
+    [onChangeText, onSubmit]
+  )
+
   const onKeyUp = useCallback(
     function (e: KeyboardEvent) {
-      if (e.key === 'Enter') onSubmit(term)
+      if (e.key === 'Enter') onSubmit()
     },
-    [onSubmit, term]
+    [onSubmit]
   )
 
   return (
@@ -261,16 +275,17 @@ function SearchControl({
       <input
         type="search"
         value={term}
-        onChange={(e) => setTerm(e.target.value)}
+        onChange={onChangeText}
         onKeyUp={onKeyUp}
-        placeholder="Search task titles, descriptions & comments"
+        onBlur={onBlur}
+        placeholder="Search tasks by title, description [soon: owner name or comment text]"
         tabIndex={0}
       />
       <button
         type="submit"
         className="icon-button"
         title="Click to search"
-        onClick={() => onSubmit(term)}
+        onClick={onSubmit}
       >
         <SearchIcon />
       </button>

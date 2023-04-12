@@ -28,7 +28,9 @@ export default defineSchema(
       .index('by_status', ['status'])
       .index('by_title', ['title'])
       .index('by_commentCount', ['commentCount'])
-      .index('by_fileCount', ['fileCount']),
+      .index('by_fileCount', ['fileCount'])
+      .searchIndex('search_title', { searchField: 'title' })
+      .searchIndex('search_description', { searchField: 'description' }),
 
     users: defineTable({
       email: s.string(),

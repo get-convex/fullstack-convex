@@ -16,9 +16,8 @@ export function TaskManager({
 }) {
   const isSidebarOpen = useMemo(() => !!slug, [slug])
 
-  // Get backend context with functions to manipulate data
+  // Check that backend & data contexts are available
   const backend = useContext(BackendContext)
-  // Get data context with loaded data to pass to components
   const data = useContext(DataContext)
 
   if (!backend) {
@@ -50,10 +49,7 @@ export function TaskManager({
         {
           <Header>
             <Controls
-              search={{
-                term: '',
-                onSubmit: (term) => console.log('You searched for:', term),
-              }}
+              search={options.search}
               status={options.filter.status}
               owner={options.filter.owner}
             />

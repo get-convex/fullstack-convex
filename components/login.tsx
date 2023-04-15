@@ -2,7 +2,8 @@ import React, { useContext, type PropsWithChildren } from 'react'
 import NextError from 'next/error'
 import Link from 'next/link'
 import Image from 'next/image'
-import { BackendContext, DataContext } from '../context'
+import { BackendContext } from '../fullstack/backend'
+import { DataContext } from '../fullstack/data'
 import { AppData, BackendEnvironment, User } from '../types'
 
 function LogoutButton() {

@@ -4,11 +4,13 @@ import { Id } from './_generated/dataModel'
 import { Visibility, type Task } from '../types'
 
 export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
+  console.log(taskInfo.id)
   const { db, auth } = queryCtx
   if (!taskInfo.id) {
     throw new Error('Error updating task: Task ID not found')
   }
   const taskId = new Id('tasks', taskInfo.id)
+  console.log(taskId, typeof taskId)
   if (!taskId) {
     throw new Error('Error updating task: Task ID not found')
   }
@@ -19,7 +21,7 @@ export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
   }
 
   const user = await findUser(db, auth)
-  if (!user) {
+  if (!user?._id) {
     throw new Error('Error updating task: User identity not found')
   }
 

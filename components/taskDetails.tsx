@@ -1,4 +1,4 @@
-import React, { useContext, useState, useCallback } from 'react'
+import React, { useContext, useState, useEffect, useCallback } from 'react'
 import NextError from 'next/error'
 import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
@@ -13,7 +13,8 @@ import {
   User,
   Visibility,
 } from '../types'
-import { BackendContext, DataContext } from '../context'
+import { BackendContext } from '../fullstack/backend'
+import { DataContext } from '../fullstack/data'
 import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEvent, FormEventHandler } from 'react'
 import { userOwnsTask } from './helpers'
@@ -368,17 +369,7 @@ export function NewTaskDetails() {
   const [title, setTitle] = useState<string | undefined>('')
   const [description, setDescription] = useState<string | undefined>('')
   const [status, setStatus] = useState(Status.New)
-  const [owner, setOwner] = useState(user || null)
-
-  const newTask = {
-    title,
-    description,
-    status,
-    visibility: Visibility.PUBLIC,
-    ownerId: owner?.id,
-    ownerName: owner?.name,
-    owner,
-  } as NewTaskInfo
+  const [owner, setOwner] = useState<User | null>(user)
 
   const onCreateTask = useCallback(
     async function (taskInfo: NewTaskInfo) {
@@ -389,6 +380,7 @@ export function NewTaskDetails() {
   )
 
   if (isUserLoading) return <TaskDetailsGhost />
+
   if (!user)
     return (
       <NextError
@@ -397,6 +389,17 @@ export function NewTaskDetails() {
         withDarkMode={false}
       />
     )
+
+  const newTask = {
+    title,
+    description,
+    status,
+    visibility: Visibility.PUBLIC,
+    ownerId: owner?.id || user?.id,
+    ownerName: owner?.name || user?.name,
+    owner: owner || user,
+  } as NewTaskInfo
+
   return (
     <div id="task-details">
       <div>

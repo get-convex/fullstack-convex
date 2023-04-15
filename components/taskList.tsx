@@ -11,7 +11,8 @@ import {
   TaskListOptions,
   User,
 } from '../types'
-import { BackendContext, DataContext } from '../context'
+import { BackendContext } from '../fullstack/backend'
+import { DataContext } from '../fullstack/data'
 import { userOwnsTask } from './helpers'
 
 function TaskListing({

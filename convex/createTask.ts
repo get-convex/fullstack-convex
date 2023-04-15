@@ -5,8 +5,8 @@ import type { NewTaskInfo } from '../types'
 export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {
   const { db, auth } = queryCtx
   const user = await findUser(db, auth)
-
-  if (!user) {
+  console.log(user?._id, typeof user?._id)
+  if (!user?._id) {
     throw new Error('Error creating task: User identity not found')
   }
 
@@ -32,13 +32,15 @@ export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {
     number,
     ...taskInfo,
   })
+  console.log(taskId, typeof taskId)
+  console.log('so far so good')
 
-  // Get the newly saved task document and convert to Task object
-  const newTask = await db.get(taskId)
-  if (!newTask) {
-    // Should not happen, but just in case/to appease TS
-    throw new Error('Unexpected error saving task')
-  }
+  // // Get the newly saved task document and convert to Task object
+  // const newTask = await db.get(taskId)
+  // if (!newTask) {
+  //   // Should not happen, but just in case/to appease TS
+  //   throw new Error('Unexpected error saving task')
+  // }
 
-  return await getTaskFromDoc(queryCtx, newTask)
+  // return await getTaskFromDoc(queryCtx, newTask)
 })

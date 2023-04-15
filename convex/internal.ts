@@ -33,6 +33,7 @@ export async function getCommentFromDoc(
   c: Doc<'comments'>
 ): Promise<Comment> {
   const { _id: id, _creationTime: creationTime, userId, body } = c
+  console.error(userId, typeof userId)
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('Comment author not found')
 
@@ -50,7 +51,8 @@ export async function getFileFromDoc(
   { db, storage }: QueryCtx,
   f: Doc<'files'>
 ): Promise<File> {
-  const { name, type, storageId, userId } = f
+  const { name, type, storageId, userId, _id } = f
+  console.error('getFileFromDoc', _id, userId, typeof userId)
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('File author not found')
   const author = getUserFromDoc(authorDoc)
@@ -114,14 +116,16 @@ export async function getTaskFromDoc(
   // Find the currently logged in user's identity (if any)
   const identity = await auth.getUserIdentity()
 
+  console.error(ownerId, typeof ownerId)
   // Join with users table
-  const owner = ownerId && (await db.get(ownerId))
+  const ownerDoc = ownerId && (await db.get(ownerId))
 
   if (task.visibility === Visibility.PRIVATE) {
     if (!identity) throw new Error('You must be logged in to view this task')
-    if (identity.tokenIdentifier !== owner?.tokenIdentifier)
+    if (ownerDoc && identity.tokenIdentifier !== ownerDoc.tokenIdentifier)
       throw new Error('You do not have permission to view this task')
   }
+  const owner = ownerDoc ? getUserFromDoc(ownerDoc) : ownerDoc
 
   // Join with comments table
   const commentsByTask = (await findByTask(
@@ -203,6 +207,7 @@ export const saveFileDoc = mutation(
 // Retrieve a File object from a given
 export const getFileById = internalQuery(
   async (queryCtx, fileId: Id<'files'>): Promise<File | null> => {
+    console.error(fileId, typeof fileId)
     const fileDoc = await queryCtx.db.get(fileId)
     if (!fileDoc) return null
     return await getFileFromDoc(queryCtx, fileDoc)

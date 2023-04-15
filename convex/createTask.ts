@@ -5,7 +5,7 @@ import type { NewTaskInfo } from '../types'
 export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {
   const { db, auth } = queryCtx
   const { title, description, visibility, status, owner } = taskInfo
-  const { id: ownerId } = owner || { id: null }
+  const ownerId = owner && owner.id
 
   const user = await findUser(db, auth)
   if (!user?._id) {

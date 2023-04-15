@@ -7,7 +7,7 @@ import React, {
   useRef,
 } from 'react'
 import { useConvexAuth } from 'convex/react'
-import { usePaginatedQuery, useQuery } from '../convex/_generated/react'
+import { useQuery } from '../convex/_generated/react'
 import {
   useStableQuery,
   useStablePaginatedQuery,
@@ -42,7 +42,7 @@ function useTaskListData(
     results: taskList,
     status: loadStatus,
     loadMore,
-  } = usePaginatedQuery(
+  } = useStablePaginatedQuery(
     'listTasks',
     { initialNumItems: PAGE_SIZE },
     queryOptions

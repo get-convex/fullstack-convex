@@ -1,12 +1,8 @@
 import React, {
-  useEffect,
   useState,
-  useRef,
   useCallback,
   MouseEvent,
   useMemo,
-  useContext,
-  type PropsWithChildren,
   type ChangeEvent,
 } from 'react'
 import Backend from '../../fullstack/backend'
@@ -15,11 +11,9 @@ import {
   Status,
   STATUS_VALUES,
   OWNER_VALUES,
-  AppData,
   TaskListOptions,
   SortKey,
   SortOrder,
-  User,
 } from '../../types'
 
 import { TaskManager } from '../../components/taskManager'
@@ -126,7 +120,6 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
   return (
     <>
       <Head>
-        {/* <title>{pageTitle}</title> */}
         <style>{`html { font-family: ${FONT.style.fontFamily}; }`}</style>
       </Head>
       <Backend>

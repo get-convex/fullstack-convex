@@ -39,12 +39,14 @@ export function TaskDetailSidebar({
 
 export function NewTaskSidebar({
   onDismiss,
+  onCreate,
 }: {
   onDismiss: MouseEventHandler
+  onCreate: (n: number) => void
 }) {
   return (
     <Sidebar onDismiss={onDismiss}>
-      <NewTaskDetails />
+      <NewTaskDetails onCreate={onCreate} />
     </Sidebar>
   )
 }

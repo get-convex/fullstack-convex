@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react'
+import React, { useContext, useState, useCallback, useMemo } from 'react'
 import NextError from 'next/error'
 import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
@@ -174,7 +174,7 @@ function OwnerSelect({
   user,
   saveChanges,
 }: {
-  task: Task
+  task: Partial<Task>
   user?: User | null
   saveChanges: (taskInfo: Partial<Task>) => void
 }) {
@@ -183,9 +183,10 @@ function OwnerSelect({
     id: '',
     pictureUrl: '',
   }
+  const isNewTask = !task.id
   const isPublic = task?.visibility === Visibility.PUBLIC
-  const canChangeOwner = user && isPublic
-  const isOwner = user ? user.id === task?.owner?.id : false
+  const canChangeOwner = user && (isPublic || isNewTask)
+  const isOwner = user ? user.id.toString() === task.owner?.id : false
 
   const [editing, setEditing] = useState(false)
 
@@ -193,8 +194,6 @@ function OwnerSelect({
     function () {
       const taskInfo = {
         ...task,
-        ownerId: user?.id,
-        ownerName: user?.name,
         owner: user,
       } as Partial<Task>
       saveChanges(taskInfo)
@@ -204,7 +203,7 @@ function OwnerSelect({
 
   const handleUnclaimTask = useCallback(
     function () {
-      const taskInfo = { ...task, ownerId: null, ownerName: null, owner: null }
+      const taskInfo = { ...task, owner: null }
       saveChanges(taskInfo)
     },
     [task, saveChanges]
@@ -251,7 +250,7 @@ function OwnerSelect({
           title={canChangeOwner ? 'Change task owner' : 'Task owner'}
           tabIndex={0}
         >
-          {task.owner ? (
+          {task?.owner ? (
             <Avatar user={task.owner} withName={true} />
           ) : (
             <NullAvatar />
@@ -359,7 +358,11 @@ function TaskInfo({
   )
 }
 
-export function NewTaskDetails() {
+export function NewTaskDetails({
+  onCreate,
+}: {
+  onCreate: (n: number) => void
+}) {
   const router = useRouter()
   const { taskManagement } = useContext(BackendContext) as BackendEnvironment
   const {
@@ -369,15 +372,26 @@ export function NewTaskDetails() {
   const [title, setTitle] = useState<string | undefined>('')
   const [description, setDescription] = useState<string | undefined>('')
   const [status, setStatus] = useState(Status.New)
-  const [owner, setOwner] = useState<User | null>(user)
+  const [owner, setOwner] = useState<User | null>(null)
 
   const onCreateTask = useCallback(
     async function (taskInfo: NewTaskInfo) {
       const newTask = await taskManagement.createTask(taskInfo)
+      onCreate(newTask.number)
       router.push(`/task/${newTask.number}`)
     },
-    [taskManagement, router]
+    [taskManagement, router, onCreate]
   )
+  const newTask = useMemo(() => {
+    const newTaskInfo = {
+      title,
+      description,
+      status,
+      visibility: Visibility.PUBLIC,
+      owner,
+    } as NewTaskInfo
+    return newTaskInfo
+  }, [title, description, status, owner])
 
   if (isUserLoading) return <TaskDetailsGhost />
 
@@ -389,16 +403,6 @@ export function NewTaskDetails() {
         withDarkMode={false}
       />
     )
-
-  const newTask = {
-    title,
-    description,
-    status,
-    visibility: Visibility.PUBLIC,
-    ownerId: owner?.id || user?.id,
-    ownerName: owner?.name || user?.name,
-    owner: owner || user,
-  } as NewTaskInfo
 
   return (
     <div id="task-details">
@@ -430,7 +434,8 @@ export function NewTaskDetails() {
             <h4>Owner</h4>
             <div>
               <OwnerSelect
-                task={newTask as Task}
+                key={owner?.id.toString()}
+                task={newTask}
                 user={user}
                 saveChanges={({ owner }) => {
                   setOwner(owner || null)

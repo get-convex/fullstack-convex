@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react'
+import React, { useContext, useMemo, useEffect } from 'react'
 import NextError from 'next/error'
 import Head from 'next/head'
 import { Header } from './login'
@@ -21,6 +21,12 @@ export function TaskManager({
   // Check that backend & data contexts are available
   const backend = useContext(BackendContext)
   const data = useContext(DataContext)
+
+  const { onChange: changeSelectedTask } = options.selectedTask
+
+  useEffect(() => {
+    if (slug === 'new') changeSelectedTask(null)
+  }, [slug, changeSelectedTask])
 
   if (!backend) {
     return (
@@ -70,13 +76,12 @@ export function TaskManager({
         <TaskList options={options} />
         {slug === 'new' ? (
           <NewTaskSidebar
-            onDismiss={() => options.selectedTask?.onChange(null)}
+            onDismiss={() => changeSelectedTask(null)}
+            onCreate={(n) => changeSelectedTask(n)}
           />
         ) : (
           isSidebarOpen && (
-            <TaskDetailSidebar
-              onDismiss={() => options.selectedTask?.onChange(null)}
-            />
+            <TaskDetailSidebar onDismiss={() => changeSelectedTask(null)} />
           )
         )}
       </div>

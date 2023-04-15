@@ -23,6 +23,10 @@ export function findByTask(
   taskId: Id<'tasks'>,
   table: 'comments' | 'files'
 ) {
+  // throw new Error(
+  //   `findByTask taskId: ${taskId} ${typeof taskId}, table: ${table}`
+  // )
+  console.log('findByTask', taskId, table)
   return db.query(table).withIndex('by_task', (q) => q.eq('taskId', taskId))
 }
 
@@ -33,7 +37,10 @@ export async function getCommentFromDoc(
   c: Doc<'comments'>
 ): Promise<Comment> {
   const { _id: id, _creationTime: creationTime, userId, body } = c
-  console.error(userId, typeof userId)
+  if (!userId) {
+    throw new Error(` userId:  ${userId} for comment: ${id}`)
+  }
+
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('Comment author not found')
 
@@ -52,7 +59,9 @@ export async function getFileFromDoc(
   f: Doc<'files'>
 ): Promise<File> {
   const { name, type, storageId, userId, _id } = f
-  console.error('getFileFromDoc', _id, userId, typeof userId)
+  if (!userId) {
+    throw new Error(`Missing userId (${userId}) for file with id ${_id})`)
+  }
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('File author not found')
   const author = getUserFromDoc(authorDoc)
@@ -116,7 +125,6 @@ export async function getTaskFromDoc(
   // Find the currently logged in user's identity (if any)
   const identity = await auth.getUserIdentity()
 
-  console.error(ownerId, typeof ownerId)
   // Join with users table
   const ownerDoc = ownerId && (await db.get(ownerId))
 
@@ -127,26 +135,77 @@ export async function getTaskFromDoc(
   }
   const owner = ownerDoc ? getUserFromDoc(ownerDoc) : ownerDoc
 
+  console.log('internal.js 137')
   // Join with comments table
-  const commentsByTask = (await findByTask(
-    db,
-    _id,
-    'comments'
-  ).collect()) as Doc<'comment'>[]
-  const comments = (await Promise.all(
-    commentsByTask.map(async (c) => await getCommentFromDoc(queryCtx, c))
-  )) as Comment[]
+  let foundComments
+  try {
+    foundComments = await findByTask(db, _id, 'comments')
+  } catch (e) {
+    throw new Error('findByTask failed on comments')
+  }
+
+  console.log('internal.js 146')
+
+  // throw new Error(`foundComments: ${foundComments}`)
+  let commentsByTask
+  try {
+    console.log('internal.js 152')
+    commentsByTask = (await foundComments.collect()) as Doc<'comments'>[]
+    console.log('internal.js 154')
+  } catch (e) {
+    throw new Error('.collect() failed')
+  }
+  // throw new Error(`commentsByTask: ${commentsByTask}`)
+
+  console.log('internal.js 154')
+
+  // const commentsByTask = (await findByTask(
+  //   db,
+  //   _id,
+  //   'comments'
+  // ).collect()) as Doc<'comment'>[]
+
+  // throw new Error(`commentsByTask: ${commentsByTask}`)
+
+  let comments
+  try {
+    comments = (await Promise.all(
+      commentsByTask.map(async (c) => await getCommentFromDoc(queryCtx, c))
+    )) as Comment[]
+  } catch (e) {
+    throw new Error('getCommentFromDoc failed')
+  }
+
+  console.log('internal.js 173')
+
+  // throw new Error(`comments is: ${comments}`)
 
   // Join with files table
-  const filesByTask = (await findByTask(
-    db,
-    _id,
-    'files'
-  ).collect()) as Doc<'files'>[]
-  const files = (await Promise.all(
-    filesByTask.map(async (f) => await getFileFromDoc(queryCtx, f))
-  )) as File[]
+  let filesByTask
+  try {
+    filesByTask = (await findByTask(
+      db,
+      _id,
+      'files'
+    ).collect()) as Doc<'files'>[]
+  } catch (e) {
+    throw new Error('findByTask failed on files')
+  }
 
+  console.log('internal.js 189')
+
+  let files
+  try {
+    files = (await Promise.all(
+      filesByTask.map(async (f) => await getFileFromDoc(queryCtx, f))
+    )) as File[]
+  } catch (e) {
+    throw new Error('getFileFromDoc failed')
+  }
+  // throw new Error(
+  //   `task being returned is:  ${{ ...task, owner, comments, files }}`
+  // )
+  console.log('internal.js 202')
   return { ...task, owner, comments, files }
 }
 
@@ -207,7 +266,9 @@ export const saveFileDoc = mutation(
 // Retrieve a File object from a given
 export const getFileById = internalQuery(
   async (queryCtx, fileId: Id<'files'>): Promise<File | null> => {
-    console.error(fileId, typeof fileId)
+    if (!fileId) {
+      throw new Error(`Invalid fileId:  ${fileId}`)
+    }
     const fileDoc = await queryCtx.db.get(fileId)
     if (!fileDoc) return null
     return await getFileFromDoc(queryCtx, fileDoc)

@@ -4,13 +4,15 @@ import type { NewTaskInfo } from '../types'
 
 export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {
   const { db, auth } = queryCtx
-  const user = await findUser(db, auth)
+  const { title, description, visibility, status, owner } = taskInfo
+  const ownerIdString = owner && owner.id
 
-  if (!user) {
+  const user = await findUser(db, auth)
+  if (!user?._id) {
     throw new Error('Error creating task: User identity not found')
   }
 
-  if (taskInfo.owner?.id && taskInfo.owner.id !== user._id.toString()) {
+  if (ownerIdString && ownerIdString !== user._id.toString()) {
     // Should never happen, but just to double check
     throw new Error(
       'Error creating task: Current user and task owner do not match'
@@ -22,21 +24,22 @@ export default mutation(async (queryCtx, taskInfo: NewTaskInfo) => {
   const lastCreatedTask = await db.query('tasks').order('desc').first()
   const number = lastCreatedTask ? lastCreatedTask.number + 1 : 1
 
-  // Copy concatenated searchable fields into 'search' field
-  // so that we can search across multiple fields as well as
-  // fields from related documents (user names, comment text)
-  const search = [taskInfo.title, taskInfo.description].join(' ')
+  const ownerId = ownerIdString ? user._id : null
+  const ownerName = ownerIdString ? user.name : null
 
   // Copy owner name (if any) and comment count (initally 0) into table
   // so that we can index on these to support ordering with pagination
   const taskId = await db.insert('tasks', {
-    ownerId: taskInfo.owner ? user._id : null,
-    ownerName: taskInfo.owner ? user.name : null,
+    ownerId,
+    ownerName,
     commentCount: 0,
     fileCount: 0,
     number,
-    search,
-    ...taskInfo,
+    title,
+    description,
+    visibility,
+    status,
+    search: [title, description, ownerName].join(' '),
   })
 
   // Get the newly saved task document and convert to Task object

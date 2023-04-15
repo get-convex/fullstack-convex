@@ -69,8 +69,11 @@ export function findMatchingTasks(
   const tasks = db.query('tasks')
 
   const searchedOrSorted = searchTerm
-    ? tasks.withSearchIndex('search_title', (q) =>
-        q.search('title', searchTerm)
+    ? tasks.withSearchIndex(
+        'search_title',
+        (
+          q // TODO
+        ) => q.search('title', searchTerm)
       )
     : tasks
         .withIndex(`by_${options?.sortKey || SortKey.NUMBER}`)

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from 'react'
+import React, { ChangeEvent, useCallback, useContext, useState } from 'react'
 import Link from 'next/link'
 import {
   Status,
@@ -191,15 +191,22 @@ function SearchControl({
 }) {
   const [term, setTerm] = useState(searchTerm || '')
 
-  const onChangeText = useCallback((e: any) => setTerm(e.target.value), [])
+  const onChangeText = useCallback((text: string) => setTerm(text), [])
 
   const onSubmit = useCallback(() => {
     onChange(term)
   }, [onChange, term])
 
+  const onChangeInput = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onChangeText(e.target.value)
+    },
+    [onChangeText]
+  )
+
   const onBlur = useCallback(
-    (e: FocusEvent) => {
-      onChangeText(e)
+    (e: FocusEvent<HTMLInputElement>) => {
+      onChangeText(e.target.value)
       onSubmit()
     },
     [onChangeText, onSubmit]
@@ -213,22 +220,21 @@ function SearchControl({
   )
 
   return (
-    <div id="search" className="control">
+    <div
+      id="search"
+      className="control"
+      title="Search tasks by title, description, owner name, or comment text"
+    >
       <input
         type="search"
         value={term}
-        onChange={onChangeText}
+        onChange={onChangeInput}
         onKeyUp={onKeyUp}
         onBlur={onBlur}
         placeholder="Search tasks"
         tabIndex={0}
       />
-      <button
-        type="submit"
-        className="icon-button"
-        title="Search tasks by title, description, owner name, or comment text"
-        onClick={onSubmit}
-      >
+      <button type="submit" className="icon-button" onClick={onSubmit}>
         <SearchIcon />
       </button>
     </div>

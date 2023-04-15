@@ -6,8 +6,14 @@ import {
   mutation,
 } from './_generated/server'
 import { Comment, File, Visibility } from '../types'
-import type { Doc, Id } from './_generated/dataModel'
-import type { Auth, GenericTableInfo, OrderedQuery, Query } from 'convex/server'
+import type { DataModel, Doc, Id } from './_generated/dataModel'
+import type {
+  Auth,
+  GenericTableInfo,
+  NamedTableInfo,
+  OrderedQuery,
+  Query,
+} from 'convex/server'
 
 type FileDocInfo = {
   type: string
@@ -137,9 +143,11 @@ export async function getTaskFromDoc(
 
   console.log('internal.js 137')
   // Join with comments table
-  let foundComments
+  let foundComments: Query<NamedTableInfo<DataModel, 'comments'>>
   try {
-    foundComments = await findByTask(db, _id, 'comments')
+    foundComments = findByTask(db, _id, 'comments') as Query<
+      NamedTableInfo<DataModel, 'comments'>
+    >
   } catch (e) {
     throw new Error('findByTask failed on comments')
   }

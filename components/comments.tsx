@@ -3,7 +3,7 @@ import type { FormEvent, KeyboardEvent } from 'react'
 import { Avatar } from './login'
 import { ArrowUpIcon } from './icons'
 import { BackendEnvironment, Comment, Task, User } from '../types'
-import { BackendContext } from '../context'
+import { BackendContext } from '../fullstack/backend'
 
 export function showTimeAgo(created: Date) {
   const now = Date.now()

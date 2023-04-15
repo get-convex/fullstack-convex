@@ -8,7 +8,7 @@ import {
   AppData,
   Filter,
 } from '../types'
-import { DataContext } from '../context'
+import { DataContext } from '../fullstack/data'
 import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
 import type { ChangeEventHandler, KeyboardEvent, FocusEvent } from 'react'
 

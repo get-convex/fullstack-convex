@@ -1,10 +1,12 @@
-import React, { useContext, useMemo } from 'react'
+import React, { useContext, useMemo, useEffect } from 'react'
 import NextError from 'next/error'
+import Head from 'next/head'
 import { Header } from './login'
 import { Controls } from './controls'
 import { TaskList } from './taskList'
 import { NewTaskSidebar, TaskDetailSidebar } from './sidebar'
-import { BackendContext, DataContext } from '../context'
+import { BackendContext } from '../fullstack/backend'
+import { DataContext } from '../fullstack/data'
 import { TaskListOptions } from '../types'
 
 export function TaskManager({
@@ -19,6 +21,12 @@ export function TaskManager({
   // Check that backend & data contexts are available
   const backend = useContext(BackendContext)
   const data = useContext(DataContext)
+
+  const { onChange: changeSelectedTask } = options.selectedTask
+
+  useEffect(() => {
+    if (slug === 'new') changeSelectedTask(null)
+  }, [slug, changeSelectedTask])
 
   if (!backend) {
     return (
@@ -40,8 +48,18 @@ export function TaskManager({
     )
   }
 
+  const pageTitle =
+    slug === 'new'
+      ? 'New Task'
+      : data.task.value
+      ? data.task.value.title
+      : 'Fullstack Task Manager'
+
   return (
     <>
+      <Head>
+        <title>{pageTitle}</title>
+      </Head>
       <div
         id="app"
         className={`grid ${isSidebarOpen ? 'with-sidebar' : 'without-sidebar'}`}
@@ -58,13 +76,12 @@ export function TaskManager({
         <TaskList options={options} />
         {slug === 'new' ? (
           <NewTaskSidebar
-            onDismiss={() => options.selectedTask?.onChange(null)}
+            onDismiss={() => changeSelectedTask(null)}
+            onCreate={(n) => changeSelectedTask(n)}
           />
         ) : (
           isSidebarOpen && (
-            <TaskDetailSidebar
-              onDismiss={() => options.selectedTask?.onChange(null)}
-            />
+            <TaskDetailSidebar onDismiss={() => changeSelectedTask(null)} />
           )
         )}
       </div>

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useCallback } from 'react'
+import React, { useContext, useState, useCallback, useMemo } from 'react'
 import NextError from 'next/error'
 import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
@@ -13,7 +13,8 @@ import {
   User,
   Visibility,
 } from '../types'
-import { BackendContext, DataContext } from '../context'
+import { BackendContext } from '../fullstack/backend'
+import { DataContext } from '../fullstack/data'
 import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEvent, FormEventHandler } from 'react'
 import { userOwnsTask } from './helpers'
@@ -173,7 +174,7 @@ function OwnerSelect({
   user,
   saveChanges,
 }: {
-  task: Task
+  task: Partial<Task>
   user?: User | null
   saveChanges: (taskInfo: Partial<Task>) => void
 }) {
@@ -182,9 +183,10 @@ function OwnerSelect({
     id: '',
     pictureUrl: '',
   }
+  const isNewTask = !task.id
   const isPublic = task?.visibility === Visibility.PUBLIC
-  const canChangeOwner = user && isPublic
-  const isOwner = user ? user.id === task?.owner?.id : false
+  const canChangeOwner = user && (isPublic || isNewTask)
+  const isOwner = user ? user.id.toString() === task.owner?.id : false
 
   const [editing, setEditing] = useState(false)
 
@@ -192,8 +194,6 @@ function OwnerSelect({
     function () {
       const taskInfo = {
         ...task,
-        ownerId: user?.id,
-        ownerName: user?.name,
         owner: user,
       } as Partial<Task>
       console.log('taskInfo', taskInfo)
@@ -204,7 +204,7 @@ function OwnerSelect({
 
   const handleUnclaimTask = useCallback(
     function () {
-      const taskInfo = { ...task, ownerId: null, ownerName: null, owner: null }
+      const taskInfo = { ...task, owner: null }
       saveChanges(taskInfo)
     },
     [task, saveChanges]
@@ -251,7 +251,7 @@ function OwnerSelect({
           title={canChangeOwner ? 'Change task owner' : 'Task owner'}
           tabIndex={0}
         >
-          {task.owner ? (
+          {task?.owner ? (
             <Avatar user={task.owner} withName={true} />
           ) : (
             <NullAvatar />
@@ -359,35 +359,44 @@ function TaskInfo({
   )
 }
 
-export function NewTaskDetails({ user }: { user?: User | null }) {
+export function NewTaskDetails({
+  onCreate,
+}: {
+  onCreate: (n: number) => void
+}) {
   const router = useRouter()
   const { taskManagement } = useContext(BackendContext) as BackendEnvironment
+  const {
+    user: { value: user, isLoading: isUserLoading },
+  } = useContext(DataContext) as AppData
 
   const [title, setTitle] = useState<string | undefined>('')
   const [description, setDescription] = useState<string | undefined>('')
   const [status, setStatus] = useState(Status.New)
-  const [owner, setOwner] = useState(user || null)
-
-  const newTask = {
-    title,
-    description,
-    status,
-    visibility: Visibility.PUBLIC,
-    ownerId: owner?.id,
-    ownerName: owner?.name,
-    owner,
-  } as NewTaskInfo
+  const [owner, setOwner] = useState<User | null>(null)
 
   const onCreateTask = useCallback(
     async function (taskInfo: NewTaskInfo) {
       const newTask = await taskManagement.createTask(taskInfo)
+      onCreate(newTask.number)
       router.push(`/task/${newTask.number}`)
     },
-    [taskManagement, router]
+    [taskManagement, router, onCreate]
   )
+  const newTask = useMemo(() => {
+    const newTaskInfo = {
+      title,
+      description,
+      status,
+      visibility: Visibility.PUBLIC,
+      owner,
+    } as NewTaskInfo
+    return newTaskInfo
+  }, [title, description, status, owner])
 
-  if (user === undefined) return <TaskDetailsGhost />
-  if (user === null)
+  if (isUserLoading) return <TaskDetailsGhost />
+
+  if (!user)
     return (
       <NextError
         statusCode={403}
@@ -395,6 +404,7 @@ export function NewTaskDetails({ user }: { user?: User | null }) {
         withDarkMode={false}
       />
     )
+
   return (
     <div id="task-details">
       <div>
@@ -425,7 +435,8 @@ export function NewTaskDetails({ user }: { user?: User | null }) {
             <h4>Owner</h4>
             <div>
               <OwnerSelect
-                task={newTask as Task}
+                key={owner?.id.toString()}
+                task={newTask}
                 user={user}
                 saveChanges={({ owner }) => {
                   setOwner(owner || null)

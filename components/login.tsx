@@ -2,7 +2,8 @@ import React, { useContext, type PropsWithChildren } from 'react'
 import NextError from 'next/error'
 import Link from 'next/link'
 import Image from 'next/image'
-import { BackendContext, DataContext } from '../context'
+import { BackendContext } from '../fullstack/backend'
+import { DataContext } from '../fullstack/data'
 import { AppData, BackendEnvironment, User } from '../types'
 
 function LogoutButton() {
@@ -43,8 +44,8 @@ function LoginButton() {
 
 function LoginGhost() {
   return (
-    <button className="ghost" title="Log out" disabled>
-      Log out
+    <button className="ghost" title="Log in" disabled>
+      Log in
     </button>
   )
 }
@@ -80,13 +81,26 @@ export function Avatar({
   )
 }
 
-export function NullAvatar() {
+export function NullAvatar({
+  size = 30,
+  withName = true,
+}: {
+  size?: number
+  withName?: boolean
+}) {
   return (
-    <div className="avatar null-avatar">
-      <div className="avatar-ghost"></div>
-      <span className="avatar-name" title="No one">
-        No one
-      </span>
+    <div className="avatar null-avatar" title="Not logged in">
+      <div
+        className="avatar-ghost"
+        style={{ width: size, height: size, fontSize: size - 10 }}
+      >
+        ?
+      </div>
+      {withName && (
+        <span className="avatar-name" title="No one">
+          No one
+        </span>
+      )}
     </div>
   )
 }
@@ -95,15 +109,13 @@ export function Login() {
   const data = useContext(DataContext) as AppData
   const { value: user, isLoading } = data.user
   return (
-    <div style={{ display: 'flex', gap: 10 }}>
-      {user && <Avatar user={user} size={38} />}
-      {isLoading ? ( //TODO fix flashing
-        <LoginGhost />
-      ) : !user ? (
-        <LoginButton />
+    <div id="login">
+      {user ? (
+        <Avatar user={user} size={38} />
       ) : (
-        <LogoutButton />
+        <NullAvatar withName={false} size={38} />
       )}
+      {!user ? isLoading ? <LoginGhost /> : <LoginButton /> : <LogoutButton />}
     </div>
   )
 }

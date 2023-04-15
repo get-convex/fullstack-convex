@@ -6,7 +6,7 @@ import {
   mutation,
 } from './_generated/server'
 import { Comment, File, Visibility } from '../types'
-import type { Doc, Id } from './_generated/dataModel'
+import { Doc, Id } from './_generated/dataModel'
 import type { Auth, GenericTableInfo, OrderedQuery, Query } from 'convex/server'
 
 type FileDocInfo = {
@@ -33,6 +33,10 @@ export async function getCommentFromDoc(
   c: Doc<'comments'>
 ): Promise<Comment> {
   const { _id: id, _creationTime: creationTime, userId, body } = c
+
+  if (!(userId instanceof Id<'users'>))
+    throw new Error(`internal.js: Invalid userId ${userId} for comment ${id}`)
+
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('Comment author not found')
 
@@ -50,7 +54,10 @@ export async function getFileFromDoc(
   { db, storage }: QueryCtx,
   f: Doc<'files'>
 ): Promise<File> {
-  const { name, type, storageId, userId } = f
+  const { name, type, storageId, userId, _id } = f
+  if (!(userId instanceof Id<'users'>))
+    throw new Error(`internal.js: Invalid userId ${userId} for file ${_id}`)
+
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('File author not found')
   const author = getUserFromDoc(authorDoc)
@@ -115,30 +122,39 @@ export async function getTaskFromDoc(
   const identity = await auth.getUserIdentity()
 
   // Join with users table
-  const owner = ownerId && (await db.get(ownerId))
+  if (!(ownerId instanceof Id<'users'>) && !(ownerId === null))
+    throw new Error(
+      `internal.js: Invalid ownerId ${ownerId}, type ${typeof ownerId}, for task ${number} ${_id}`
+    )
+  const ownerDoc = ownerId ? await db.get(ownerId) : null
 
   if (task.visibility === Visibility.PRIVATE) {
     if (!identity) throw new Error('You must be logged in to view this task')
-    if (identity.tokenIdentifier !== owner?.tokenIdentifier)
+    if (ownerDoc && identity.tokenIdentifier !== ownerDoc.tokenIdentifier)
       throw new Error('You do not have permission to view this task')
   }
+  const owner = ownerDoc ? getUserFromDoc(ownerDoc) : ownerDoc
 
   // Join with comments table
+
   const commentsByTask = (await findByTask(
     db,
     _id,
     'comments'
   ).collect()) as Doc<'comment'>[]
+
   const comments = (await Promise.all(
     commentsByTask.map(async (c) => await getCommentFromDoc(queryCtx, c))
   )) as Comment[]
 
   // Join with files table
+
   const filesByTask = (await findByTask(
     db,
     _id,
     'files'
   ).collect()) as Doc<'files'>[]
+
   const files = (await Promise.all(
     filesByTask.map(async (f) => await getFileFromDoc(queryCtx, f))
   )) as File[]
@@ -203,6 +219,8 @@ export const saveFileDoc = mutation(
 // Retrieve a File object from a given
 export const getFileById = internalQuery(
   async (queryCtx, fileId: Id<'files'>): Promise<File | null> => {
+    if (!(fileId instanceof Id<'files'>))
+      throw new Error(`internal.js: Invalid fileId ${fileId}`)
     const fileDoc = await queryCtx.db.get(fileId)
     if (!fileDoc) return null
     return await getFileFromDoc(queryCtx, fileDoc)

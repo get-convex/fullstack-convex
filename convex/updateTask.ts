@@ -1,54 +1,70 @@
 import { mutation } from './_generated/server'
 import { findUser, getTaskFromDoc } from './internal'
-import { Id } from './_generated/dataModel'
+import { Id, Doc } from './_generated/dataModel'
 import { Visibility, type Task } from '../types'
 
-interface TaskInfo extends Partial<Task> {
-  search?: string
-}
+export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
+  function throwUpdateError(message: string) {
+    throw new Error(`Error updating task: ${message}, ${taskInfo}`)
+  }
 
-export default mutation(async (queryCtx, taskInfo: TaskInfo) => {
   const { db, auth } = queryCtx
   if (!taskInfo.id) {
-    throw new Error('Error updating task: Task ID not found')
+    throwUpdateError('No task ID provided')
+    return
   }
   const taskId = new Id('tasks', taskInfo.id)
   if (!taskId) {
-    throw new Error('Error updating task: Task ID not found')
+    throwUpdateError('Could not create ID for this task')
   }
   console.log(taskId, taskInfo)
 
   if (taskInfo.visibility === Visibility.PRIVATE && !taskInfo.owner?.id) {
     // Client side validation should prevent this combination, but double check just in case
-    throw new Error('Error updating task: Private tasks must have an owner')
+    throwUpdateError('Private tasks must have an owner')
   }
 
   const user = await findUser(db, auth)
-  console.log(user)
-  if (!user) {
-    throw new Error('Error updating task: User identity not found')
+  if (!user?._id) {
+    throwUpdateError('User identity not found')
+  } else if (taskInfo.owner && !(taskInfo.owner.id === user._id.toString())) {
+    throwUpdateError('User identity does not match task owner')
   }
 
-  // const { title, description } = taskInfo
-  // if (title || description) {
-  //   const ownerName = taskInfo.owner?.name || ''
-  //   const commentText = taskInfo.comments?.map((c) => c.body) || ''
-  //   taskInfo.search = [title, description, ownerName, commentText].join(' ')
-  //   console.log(taskId, typeof taskId, taskInfo.search)
-  // }
+  const updatedInfo = { ...taskInfo } as Partial<Doc<'tasks'>>
+  if (taskInfo.owner !== undefined) {
+    updatedInfo.ownerId = taskInfo.owner && new Id('users', taskInfo.owner.id)
+    updatedInfo.ownerName = taskInfo.owner && taskInfo.owner.name
+    // Un-join user table data
+    delete updatedInfo.owner
+  }
 
-  // Un-join data from users, comments, & files tables
-  delete taskInfo.owner
-  delete taskInfo.comments
-  delete taskInfo.files
-  delete taskInfo.id
+  // Un-join data from comments & files tables
+  delete updatedInfo.comments
+  delete updatedInfo.files
+
+  // Get the current task document from the db to compare
+  const currentDoc = await db.get(taskId)
+  if (!currentDoc) {
+    // Should never happen, here to appease TS
+    return throwUpdateError(`Task not found: ${taskId}`)
+  }
+  // Update the search field if any text fields have changed
+  const updatedText = ['title', 'description', 'ownerName'].map((field) =>
+    updatedInfo[field] !== undefined && currentDoc[field] !== updatedInfo[field]
+      ? updatedInfo[field]
+      : currentDoc[field]
+  )
+  updatedInfo.search = updatedText.join(' ')
 
   // Update this task in the db & retrieve the updated task document
-  const patched = await db.patch(taskId, taskInfo)
-  console.log(patched, taskId)
+  await db.patch(taskId, { ...updatedInfo })
   const updatedDoc = await db.get(taskId)
-  if (!updatedDoc) throw new Error('Task not found') // Should never happen, here to appease TS
-
-  // Return updated Task object
-  return await getTaskFromDoc(queryCtx, updatedDoc)
+  if (!updatedDoc) {
+    // Should never happen, here to appease TS
+    throwUpdateError(`Task not found: ${taskId}`)
+  } else {
+    // Return updated Task object
+    return await getTaskFromDoc(queryCtx, updatedDoc)
+  }
 })

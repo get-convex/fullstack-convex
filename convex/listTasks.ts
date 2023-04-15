@@ -53,7 +53,7 @@ export function findMatchingTasks(
     // Match any of the selected owner categories ("Me", "Others", "Nobody")
     const ownerId = q.field('ownerId')
     const unowned = q.eq(ownerId, null)
-    const mine = user ? q.eq(q.field('ownerId'), user._id) : false
+    const mine = user ? q.eq(ownerId, user._id) : false
     switch (label) {
       case 'Nobody':
         return unowned
@@ -98,11 +98,11 @@ export default query(
     // If logged in, fetch the stored user to get ID for filtering
     const user = await findUser(db, auth)
 
-    const { page, isDone, continueCursor } = await findMatchingTasks(
-      db,
-      user,
-      queryOptions
-    ).paginate(paginationOptions)
+    const matchingTasks = findMatchingTasks(db, user, queryOptions)
+
+    const { page, isDone, continueCursor } = await matchingTasks.paginate(
+      paginationOptions
+    )
 
     return {
       page: await Promise.all(

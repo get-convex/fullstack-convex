@@ -6,14 +6,8 @@ import {
   mutation,
 } from './_generated/server'
 import { Comment, File, Visibility } from '../types'
-import { DataModel, Doc, Id } from './_generated/dataModel'
-import type {
-  Auth,
-  GenericTableInfo,
-  NamedTableInfo,
-  OrderedQuery,
-  Query,
-} from 'convex/server'
+import { Doc, Id } from './_generated/dataModel'
+import type { Auth, GenericTableInfo, OrderedQuery, Query } from 'convex/server'
 
 type FileDocInfo = {
   type: string
@@ -29,10 +23,6 @@ export function findByTask(
   taskId: Id<'tasks'>,
   table: 'comments' | 'files'
 ) {
-  // throw new Error(
-  //   `findByTask taskId: ${taskId} ${typeof taskId}, table: ${table}`
-  // )
-  console.log('findByTask', taskId, table)
   return db.query(table).withIndex('by_task', (q) => q.eq('taskId', taskId))
 }
 
@@ -43,12 +33,9 @@ export async function getCommentFromDoc(
   c: Doc<'comments'>
 ): Promise<Comment> {
   const { _id: id, _creationTime: creationTime, userId, body } = c
-  if (!userId) {
-    throw new Error(` userId:  ${userId} for comment: ${id}`)
-  }
 
   if (!(userId instanceof Id<'users'>))
-    throw new Error(`internal.js 50: userId is ${userId}`)
+    throw new Error(`internal.js: Invalid userId ${userId} for comment ${id}`)
 
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('Comment author not found')
@@ -68,11 +55,8 @@ export async function getFileFromDoc(
   f: Doc<'files'>
 ): Promise<File> {
   const { name, type, storageId, userId, _id } = f
-  if (!userId) {
-    throw new Error(`Missing userId (${userId}) for file with id ${_id})`)
-  }
   if (!(userId instanceof Id<'users'>))
-    throw new Error(`internal.js 74: userId is ${userId}`)
+    throw new Error(`internal.js: Invalid userId ${userId} for file ${_id}`)
 
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('File author not found')
@@ -111,7 +95,6 @@ export async function getTaskFromDoc(
   queryCtx: QueryCtx,
   taskDoc: Doc<'tasks'>
 ) {
-  console.log('getTaskFromDoc', taskDoc)
   const { db, auth } = queryCtx
 
   const {
@@ -139,12 +122,9 @@ export async function getTaskFromDoc(
   const identity = await auth.getUserIdentity()
 
   // Join with users table
-  if (ownerId instanceof String) {
-    console.log('string ownerId', ownerId)
-  }
   if (!(ownerId instanceof Id<'users'>) && !(ownerId === null))
     throw new Error(
-      `internal.js 147: userId is ${ownerId}, typeof ${typeof ownerId}, task ${number}`
+      `internal.js: Invalid ownerId ${ownerId}, type ${typeof ownerId}, for task ${number} ${_id}`
     )
   const ownerDoc = ownerId ? await db.get(ownerId) : null
 
@@ -155,79 +135,30 @@ export async function getTaskFromDoc(
   }
   const owner = ownerDoc ? getUserFromDoc(ownerDoc) : ownerDoc
 
-  console.log('internal.js 137')
   // Join with comments table
-  let foundComments: Query<NamedTableInfo<DataModel, 'comments'>>
-  try {
-    foundComments = findByTask(db, _id, 'comments') as Query<
-      NamedTableInfo<DataModel, 'comments'>
-    >
-  } catch (e) {
-    throw new Error('findByTask failed on comments')
-  }
 
-  console.log('internal.js 146')
+  const commentsByTask = (await findByTask(
+    db,
+    _id,
+    'comments'
+  ).collect()) as Doc<'comment'>[]
 
-  // throw new Error(`foundComments: ${foundComments}`)
-  let commentsByTask
-  try {
-    console.log('internal.js 152')
-    commentsByTask = (await foundComments.collect()) as Doc<'comments'>[]
-    console.log('internal.js 154')
-  } catch (e) {
-    throw new Error('.collect() failed')
-  }
-  // throw new Error(`commentsByTask: ${commentsByTask}`)
-
-  console.log('internal.js 154')
-
-  // const commentsByTask = (await findByTask(
-  //   db,
-  //   _id,
-  //   'comments'
-  // ).collect()) as Doc<'comment'>[]
-
-  // throw new Error(`commentsByTask: ${commentsByTask}`)
-
-  let comments
-  try {
-    comments = (await Promise.all(
-      commentsByTask.map(async (c) => await getCommentFromDoc(queryCtx, c))
-    )) as Comment[]
-  } catch (e) {
-    throw new Error('getCommentFromDoc failed')
-  }
-
-  console.log('internal.js 173')
-
-  // throw new Error(`comments is: ${comments}`)
+  const comments = (await Promise.all(
+    commentsByTask.map(async (c) => await getCommentFromDoc(queryCtx, c))
+  )) as Comment[]
 
   // Join with files table
-  let filesByTask
-  try {
-    filesByTask = (await findByTask(
-      db,
-      _id,
-      'files'
-    ).collect()) as Doc<'files'>[]
-  } catch (e) {
-    throw new Error('findByTask failed on files')
-  }
 
-  console.log('internal.js 189')
+  const filesByTask = (await findByTask(
+    db,
+    _id,
+    'files'
+  ).collect()) as Doc<'files'>[]
 
-  let files
-  try {
-    files = (await Promise.all(
-      filesByTask.map(async (f) => await getFileFromDoc(queryCtx, f))
-    )) as File[]
-  } catch (e) {
-    throw new Error('getFileFromDoc failed')
-  }
-  // throw new Error(
-  //   `task being returned is:  ${{ ...task, owner, comments, files }}`
-  // )
-  console.log('internal.js 202')
+  const files = (await Promise.all(
+    filesByTask.map(async (f) => await getFileFromDoc(queryCtx, f))
+  )) as File[]
+
   return { ...task, owner, comments, files }
 }
 
@@ -288,11 +219,8 @@ export const saveFileDoc = mutation(
 // Retrieve a File object from a given
 export const getFileById = internalQuery(
   async (queryCtx, fileId: Id<'files'>): Promise<File | null> => {
-    if (!fileId) {
-      throw new Error(`Invalid fileId:  ${fileId}`)
-    }
     if (!(fileId instanceof Id<'files'>))
-      throw new Error(`internal.js 289: fileId is ${fileId}`)
+      throw new Error(`internal.js: Invalid fileId ${fileId}`)
     const fileDoc = await queryCtx.db.get(fileId)
     if (!fileDoc) return null
     return await getFileFromDoc(queryCtx, fileDoc)

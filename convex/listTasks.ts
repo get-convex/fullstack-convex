@@ -51,9 +51,10 @@ export function findMatchingTasks(
 
   const filterByOwner = (q: FilterBuilder<TaskTableInfo>, label: string) => {
     // Match any of the selected owner categories ("Me", "Others", "Nobody")
+    console.log('filterByOwner', user, label)
     const ownerId = q.field('ownerId')
     const unowned = q.eq(ownerId, null)
-    const mine = user ? q.eq(q.field('ownerId'), user._id) : false
+    const mine = user ? q.eq(ownerId, user._id) : false
     switch (label) {
       case 'Nobody':
         return unowned
@@ -76,6 +77,7 @@ export function findMatchingTasks(
         .withIndex(`by_${options?.sortKey || SortKey.NUMBER}`)
         .order(options?.sortOrder || SortOrder.DESC)
 
+  console.log('findTasks 80', searchedOrSorted)
   const filtered = searchedOrSorted.filter((q) =>
     q.and(
       filterByUser(q),
@@ -84,6 +86,7 @@ export function findMatchingTasks(
     )
   )
 
+  console.log('findTasks 89', filtered)
   return filtered
 }
 
@@ -96,17 +99,27 @@ export default query(
     const { db, auth } = queryCtx
     // If logged in, fetch the stored user to get ID for filtering
     const user = await findUser(db, auth)
+    console.log('listTasks.js 102', user)
 
-    const { page, isDone, continueCursor } = await findMatchingTasks(
-      db,
-      user,
-      queryOptions
-    ).paginate(paginationOptions)
+    const matchingTasks = findMatchingTasks(db, user, queryOptions)
+
+    console.log('listTasks.js 110', matchingTasks)
+
+    const { page, isDone, continueCursor } = await matchingTasks.paginate(
+      paginationOptions
+    )
+
+    console.log('listTasks.js 112', page, isDone, continueCursor)
 
     return {
       page: await Promise.all(
         // Join each task with owner details from users table
-        page.map(async (taskDoc) => await getTaskFromDoc(queryCtx, taskDoc))
+        page.map(async (taskDoc) => {
+          console.log('listTasks.js 118')
+          const task = await getTaskFromDoc(queryCtx, taskDoc)
+          console.log('listTasks.js 120')
+          return task
+        })
       ),
       isDone,
       continueCursor,

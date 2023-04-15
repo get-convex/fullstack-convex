@@ -6,7 +6,7 @@ import {
   mutation,
 } from './_generated/server'
 import { Comment, File, Visibility } from '../types'
-import type { DataModel, Doc, Id } from './_generated/dataModel'
+import { DataModel, Doc, Id } from './_generated/dataModel'
 import type {
   Auth,
   GenericTableInfo,
@@ -47,6 +47,9 @@ export async function getCommentFromDoc(
     throw new Error(` userId:  ${userId} for comment: ${id}`)
   }
 
+  if (!(userId instanceof Id<'users'>))
+    throw new Error(`internal.js 50: userId is ${userId}`)
+
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('Comment author not found')
 
@@ -68,6 +71,9 @@ export async function getFileFromDoc(
   if (!userId) {
     throw new Error(`Missing userId (${userId}) for file with id ${_id})`)
   }
+  if (!(userId instanceof Id<'users'>))
+    throw new Error(`internal.js 74: userId is ${userId}`)
+
   const authorDoc = await db.get(userId)
   if (!authorDoc) throw new Error('File author not found')
   const author = getUserFromDoc(authorDoc)
@@ -105,6 +111,7 @@ export async function getTaskFromDoc(
   queryCtx: QueryCtx,
   taskDoc: Doc<'tasks'>
 ) {
+  console.log('getTaskFromDoc', taskDoc)
   const { db, auth } = queryCtx
 
   const {
@@ -132,7 +139,14 @@ export async function getTaskFromDoc(
   const identity = await auth.getUserIdentity()
 
   // Join with users table
-  const ownerDoc = ownerId && (await db.get(ownerId))
+  if (ownerId instanceof String) {
+    console.log('string ownerId', ownerId)
+  }
+  if (!(ownerId instanceof Id<'users'>) && !(ownerId === null))
+    throw new Error(
+      `internal.js 147: userId is ${ownerId}, typeof ${typeof ownerId}, task ${number}`
+    )
+  const ownerDoc = ownerId ? await db.get(ownerId) : null
 
   if (task.visibility === Visibility.PRIVATE) {
     if (!identity) throw new Error('You must be logged in to view this task')
@@ -277,6 +291,8 @@ export const getFileById = internalQuery(
     if (!fileId) {
       throw new Error(`Invalid fileId:  ${fileId}`)
     }
+    if (!(fileId instanceof Id<'files'>))
+      throw new Error(`internal.js 289: fileId is ${fileId}`)
     const fileDoc = await queryCtx.db.get(fileId)
     if (!fileDoc) return null
     return await getFileFromDoc(queryCtx, fileDoc)

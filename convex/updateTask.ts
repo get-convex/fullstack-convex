@@ -49,11 +49,10 @@ export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
     // Should never happen, here to appease TS
     return throwUpdateError(`Task not found: ${taskId}`)
   }
-  // Update the search field if any text fields have changed
-  const updatedText = ['title', 'description', 'ownerName'].map((field) =>
-    updatedInfo[field] !== undefined && currentDoc[field] !== updatedInfo[field]
-      ? updatedInfo[field]
-      : currentDoc[field]
+
+  // Update the search field with new values, if any
+  const updatedText = ['title', 'description', 'ownerName'].map(
+    (field) => updatedInfo[field] || currentDoc[field]
   )
   updatedInfo.search = updatedText.join(' ')
 

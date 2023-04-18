@@ -68,8 +68,6 @@ export function findMatchingTasks(
 
   const tasks = db.query('tasks')
 
-  console.log('searchTerm', searchTerm, !!searchTerm)
-
   // Since we use non-search indexes to sort, we can either
   // search or sort the results but not both. So if we
   // have a search term to match, we ignore sort options

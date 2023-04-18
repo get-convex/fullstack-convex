@@ -9,7 +9,13 @@ import {
   Filter,
 } from '../types'
 import { DataContext } from '../fullstack/data'
-import { CaretDownIcon, CaretUpIcon, PlusIcon, SearchIcon } from './icons'
+import {
+  CaretDownIcon,
+  CaretUpIcon,
+  PlusIcon,
+  SearchIcon,
+  CircledXIcon,
+} from './icons'
 import type { ChangeEventHandler, KeyboardEvent, FocusEvent } from 'react'
 
 type Value = string | number | Status
@@ -192,6 +198,10 @@ function SearchControl({
   const [term, setTerm] = useState(searchTerm || '')
 
   const onChangeText = useCallback((text: string) => setTerm(text), [])
+  const onClearText = useCallback(() => {
+    setTerm('')
+    onChange('')
+  }, [onChange])
 
   const onSubmit = useCallback(() => {
     onChange(term)
@@ -234,6 +244,15 @@ function SearchControl({
         placeholder="Search tasks"
         tabIndex={0}
       />
+      {term && (
+        <button
+          className="icon-button"
+          title="Clear text"
+          onClick={onClearText}
+        >
+          <CircledXIcon />
+        </button>
+      )}
       <button type="submit" className="icon-button" onClick={onSubmit}>
         <SearchIcon />
       </button>

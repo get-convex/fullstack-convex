@@ -31,13 +31,16 @@ function useTaskListData(
   // Get the list of tasks matching the given options selected by the user
   // (filter by status/owner, sort, text search)
   const { filter, sort, search } = options
-  const queryOptions = {
-    statusFilter: filter.status.selected,
-    ownerFilter: filter.owner.selected,
-    sortKey: sort.key,
-    sortOrder: sort.order,
-    searchTerm: search.term,
-  }
+  const queryOptions = useMemo(
+    () => ({
+      statusFilter: filter.status.selected,
+      ownerFilter: filter.owner.selected,
+      sortKey: sort.key,
+      sortOrder: sort.order,
+      searchTerm: search.term,
+    }),
+    [filter, sort, search]
+  )
   const {
     results: taskList,
     status: loadStatus,

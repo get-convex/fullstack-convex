@@ -1,4 +1,10 @@
-import React, { ChangeEvent, useCallback, useContext, useState } from 'react'
+import React, {
+  ChangeEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import Link from 'next/link'
 import {
   Status,
@@ -228,6 +234,12 @@ function SearchControl({
     },
     [onSubmit]
   )
+
+  // Search on term change (debounced)
+  useEffect(() => {
+    const debounced = setTimeout(() => onSubmit(), 300)
+    return () => clearTimeout(debounced)
+  }, [onSubmit])
 
   return (
     <div

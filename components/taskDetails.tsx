@@ -1,5 +1,6 @@
 import React, { useContext, useState, useCallback, useMemo } from 'react'
 import NextError from 'next/error'
+import { useRouter } from 'next/router'
 import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
 import { Files } from './files'
@@ -17,8 +18,11 @@ import { BackendContext } from '../fullstack/backend'
 import { DataContext } from '../fullstack/data'
 import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEvent, FormEventHandler } from 'react'
-import { userOwnsTask } from './helpers'
-import { useRouter } from 'next/router'
+
+// Helper to check if the currently authenticated user is the owner of a task
+export function userOwnsTask({ owner }: Partial<Task>, user: User | null) {
+  return user ? user.id === owner?.id : false
+}
 
 function EditableTitle({
   task,

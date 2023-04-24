@@ -13,7 +13,6 @@ import { File, BackendEnvironment, AppData, NewFileInfo, Task } from '../types'
 import { BackendContext } from '../fullstack/backend'
 import { DataContext } from '../fullstack/data'
 import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
-import { useQuery } from '../convex/_generated/react'
 
 function showFileSize(size: number) {
   if (size < 1024) return `${Math.round(size)} B`
@@ -132,9 +131,13 @@ function FileUploadModal({
                 <p className="file-name">{f.name}</p>
                 <p className="file-size">{showFileSize(f.size)}</p>
               </div>
+
               <button
                 className="icon-button light"
                 title={`Download ${f.name}`}
+                onClick={() => {
+                  /* TODO */
+                }}
               >
                 <DownloadIcon />
               </button>
@@ -159,8 +162,8 @@ function FileUploadModal({
           <button className="light" onClick={onClose}>
             Cancel
           </button>
-          <button className="dark">
-            <label htmlFor="upload">Upload</label>
+          <button className="dark" disabled={!!fileToUpload}>
+            <label htmlFor="upload">Upload...</label>
           </button>
         </div>
       </form>
@@ -175,7 +178,7 @@ export function Files() {
 
   const { safeFiles, task, user } = useContext(DataContext) as AppData
   const { id: taskId, files } = useMemo(() => task.value as Task, [task.value])
-  const safeSHAs = useQuery('getSafeFiles:getSafeSHAs') //TODO fix this
+  const safeSHAs = safeFiles.value?.map((sf) => sf.sha256)
 
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
 

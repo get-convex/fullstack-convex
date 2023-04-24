@@ -7,7 +7,6 @@ import React, {
   useRef,
 } from 'react'
 import { useConvexAuth } from 'convex/react'
-import { useQuery } from '../convex/_generated/react'
 import {
   useStableQuery,
   useStablePaginatedQuery,
@@ -138,7 +137,7 @@ export default function Data({
   )
 
   // Get the set of safe files pre-approved for upload
-  const safeFiles = useQuery('getSafeFiles')
+  const safeFiles = useStableQuery('getSafeFiles')
 
   const safeFilesData = useMemo(
     () => ({ value: safeFiles || null, isLoading: safeFiles === undefined }),

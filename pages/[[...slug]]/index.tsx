@@ -138,7 +138,8 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
   )
 }
 
-export async function getServerSideProps({
+// Page slugs don't change based on data, so generate them statically
+export async function getStaticProps({
   params,
 }: {
   params: { slug?: string[] }
@@ -154,5 +155,14 @@ export async function getServerSideProps({
 
   return {
     props: { slug: pageSlug },
+    revalidate: 10,
+  }
+}
+
+// Generate the known paths
+export async function getStaticPaths() {
+  return {
+    paths: [{ params: { slug: ['task', 'new'] } }, { params: { slug: ['/'] } }],
+    fallback: 'blocking', // dynamic paths (e.g. '/task/123') will be SSRed
   }
 }

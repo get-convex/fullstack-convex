@@ -19,6 +19,7 @@ export type File = {
   url: string
   name: string
   type: string
+  sha256?: string
 }
 
 export type NewFileInfo = {

@@ -14,7 +14,7 @@ import { BackendContext } from '../fullstack/backend'
 import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
 import Link from 'next/link'
 import { PaperClipIcon } from './icons'
-import { showTimeAgo } from './comments'
+import { showTimeAgo } from './helpers'
 
 function showFileSize(size: number) {
   if (size < 1024) return `${Math.round(size)} B`

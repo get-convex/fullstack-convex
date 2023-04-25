@@ -13,7 +13,7 @@ import {
 } from '../types'
 import { BackendContext } from '../fullstack/backend'
 import { DataContext } from '../fullstack/data'
-import { userOwnsTask } from './taskDetails'
+import { userOwnsTask } from './helpers'
 
 function TaskListing({
   user,

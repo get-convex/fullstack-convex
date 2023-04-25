@@ -4,25 +4,7 @@ import { Avatar } from './login'
 import { ArrowUpIcon } from './icons'
 import { BackendEnvironment, Comment, Task, User } from '../types'
 import { BackendContext } from '../fullstack/backend'
-
-export function showTimeAgo(created: Date) {
-  const now = Date.now()
-  const secondsAgo = Math.round((now - created.valueOf()) / 1000)
-  if (secondsAgo === 0) return 'now'
-  if (secondsAgo < 60) {
-    return `${secondsAgo} second${secondsAgo === 1 ? '' : 's'} ago`
-  }
-  const minutesAgo = Math.round(secondsAgo / 60)
-  if (minutesAgo < 60) {
-    return `${minutesAgo} minute${minutesAgo === 1 ? '' : 's'} ago`
-  }
-  const hoursAgo = Math.round(minutesAgo / 60)
-  if (hoursAgo < 24) {
-    return `${hoursAgo} hour${hoursAgo === 1 ? '' : 's'} ago`
-  }
-  const daysAgo = Math.round(hoursAgo / 24)
-  return `${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`
-}
+import { showTimeAgo } from './helpers'
 
 function CommentListing({ comment }: { comment: Comment }) {
   const { body, author, creationTime } = comment

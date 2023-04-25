@@ -477,8 +477,9 @@ export function NewTaskDetails({
 
 export function TaskDetails() {
   const backend = useContext(BackendContext) as BackendEnvironment
-  const { task, user } = useContext(DataContext) as AppData
-  if (task.isLoading || user.isLoading) return <TaskDetailsGhost />
+  const { task, user, safeFiles } = useContext(DataContext) as AppData
+  if ([task, user, safeFiles].some((data) => data.isLoading))
+    return <TaskDetailsGhost />
 
   if (!task.value)
     return (
@@ -492,12 +493,26 @@ export function TaskDetails() {
           task={task.value}
           user={user.value}
           onSave={backend.taskManagement.updateTask}
+          key={task.value.id + '-info'}
         />
       }
 
-      {task && <Files />}
+      {task.value && (
+        <Files
+          user={user.value}
+          task={task.value}
+          safeFiles={safeFiles.value || []}
+          key={task.value.id + '-files'}
+        />
+      )}
 
-      {task && <Comments user={user.value} task={task.value} />}
+      {task.value && (
+        <Comments
+          user={user.value}
+          task={task.value}
+          key={task.value.id + '-comments'}
+        />
+      )}
     </div>
   )
 }

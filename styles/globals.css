@@ -545,7 +545,7 @@ button.light {
   position: relative;
   width: 30%;
   height: 115px;
-  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .file-preview:nth-child(-n + 2) {
@@ -553,7 +553,11 @@ button.light {
   flex-grow: 1;
 }
 
-.file-preview:nth-child(2n - 2) {
+.file-preview:nth-child(3n - 1) {
+  flex-grow: 1;
+}
+
+.file-preview:nth-child(3n - 3) {
   flex-grow: 1;
 }
 

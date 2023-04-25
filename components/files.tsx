@@ -9,10 +9,10 @@ import React, {
 import Modal from 'react-modal'
 import Image from 'next/image'
 import type { FormEvent, MouseEvent, KeyboardEvent, EventHandler } from 'react'
-import { File, BackendEnvironment, AppData, NewFileInfo, Task } from '../types'
+import { File, BackendEnvironment, NewFileInfo, Task, User } from '../types'
 import { BackendContext } from '../fullstack/backend'
-import { DataContext } from '../fullstack/data'
 import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
+import Link from 'next/link'
 
 function showFileSize(size: number) {
   if (size < 1024) return `${Math.round(size)} B`
@@ -30,7 +30,7 @@ function FilePreviews({ files }: { files: File[] }) {
       <div id="file-previews">
         {files.map((f, i) => (
           <div key={i} className="file-preview">
-            <Image src={f.url} alt={f.name} fill />
+            <Image src={f.url} alt={f.name} fill sizes="40vw" />
           </div>
         ))}
       </div>
@@ -124,23 +124,21 @@ function FileUploadModal({
         {previews.map((f, i) => (
           <div key={i} className="safe-file">
             <div className="file-preview">
-              <Image src={f.url} alt={f.name} fill />
+              <Image src={f.url} alt={f.name} fill sizes="40vw" />
             </div>
             <div>
               <div>
                 <p className="file-name">{f.name}</p>
                 <p className="file-size">{showFileSize(f.size)}</p>
               </div>
-
-              <button
-                className="icon-button light"
-                title={`Download ${f.name}`}
-                onClick={() => {
-                  /* TODO */
-                }}
-              >
-                <DownloadIcon />
-              </button>
+              <Link href={f.url} target="blank">
+                <button
+                  className="icon-button light"
+                  title={`Download ${f.name}`}
+                >
+                  <DownloadIcon />
+                </button>
+              </Link>
             </div>
           </div>
         ))}
@@ -170,26 +168,28 @@ function FileUploadModal({
     </Modal>
   )
 }
-export function Files() {
-  const backend = useContext(BackendContext) as BackendEnvironment
-  const {
-    taskManagement: { saveFile },
-  } = backend
-
-  const { safeFiles, task, user } = useContext(DataContext) as AppData
-  const { id: taskId, files } = useMemo(() => task.value as Task, [task.value])
-  const safeSHAs = safeFiles.value?.map((sf) => sf.sha256)
-
+export function Files({
+  user,
+  task,
+  safeFiles,
+}: {
+  user?: User | null
+  task: Task
+  safeFiles: File[]
+}) {
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
-  // TODO temporary fix for only displaying image files, although other files can be uploaded
-  const imageFiles = useMemo(
-    () => files?.filter((f) => f.type.startsWith('image')) || [],
-    [files]
-  )
+  const {
+    taskManagement: { saveFile },
+  } = useContext(BackendContext) as BackendEnvironment
+
+  const { id: taskId, files } = task
+  const safeSHAs = useMemo(() => safeFiles.map((sf) => sf.sha256), [safeFiles])
+
   const [visibleIndex, setVisibleIndex] = useState(5)
-  const visibleFiles = imageFiles?.slice(0, visibleIndex) || []
-  const moreFiles = imageFiles?.length - visibleFiles?.length
+
+  const visibleFiles = files?.slice(0, visibleIndex) || []
+  const moreFiles = files?.length - visibleFiles?.length
 
   const checkFileIntegrity = useCallback(
     async (fileBuffer: ArrayBuffer) => {
@@ -219,7 +219,7 @@ export function Files() {
         )
 
       const newFile = {
-        author: user.value,
+        author: user,
         name,
         type,
         size,
@@ -240,7 +240,7 @@ export function Files() {
 
   const handleUploadFile = useCallback(
     async (inputFile: globalThis.File) => {
-      if (!task.value || !user.value)
+      if (!task || !user)
         throw new Error(
           'Error uploading file: missing task or authenticated user'
         )
@@ -254,21 +254,18 @@ export function Files() {
         throw e as Error
       }
     },
-    [saveFile, taskId, getFileInfo, task.value, user.value]
+    [saveFile, taskId, getFileInfo, task, user]
   )
 
+  // TODO
   // const handleDeleteFile = async function (fileId: string) {
   //   await fileHandler.deleteFile(fileId)
   // }
 
-  if (task.isLoading || safeFiles.isLoading) {
-    return null // TODO loading
-  }
-
   return (
     <div id="files">
       <div id="files-header">
-        <h4>Files ({imageFiles?.length || 0})</h4>
+        <h4>Files ({files?.length || 0})</h4>
         <button
           id="file-upload"
           className="light"
@@ -277,7 +274,7 @@ export function Files() {
           <UploadIcon /> Upload
         </button>
         <FileUploadModal
-          previews={(safeFiles.value || []) as File[]}
+          previews={safeFiles}
           isOpen={uploadModalOpen}
           onDismiss={closeModal}
           onUpload={handleUploadFile}
@@ -288,7 +285,7 @@ export function Files() {
         <div id="more-files">
           <button
             className="more-button"
-            onClick={() => setVisibleIndex(imageFiles.length)}
+            onClick={() => setVisibleIndex(files.length)}
           >
             + {moreFiles} more
           </button>

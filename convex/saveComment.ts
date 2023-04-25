@@ -1,11 +1,6 @@
 import { Id } from './_generated/dataModel'
 import { mutation } from './_generated/server'
-import {
-  findUser,
-  findByTask,
-  countResults,
-  getCommentFromDoc,
-} from './internal'
+import { findUser, findByTask, getCommentFromDoc } from './internal'
 import type { Comment } from '../types'
 
 export default mutation(
@@ -25,8 +20,9 @@ export default mutation(
     const commentInfo = { taskId: task._id, userId: user._id, body }
     const commentId = await db.insert('comments', commentInfo)
 
-    // Update the denormalized comment count in the tasks table
+    // Update the tasks table with denormalized comment count
     // (used for indexing to support ordering by comment count)
+    // and search string (used for search indexing)
     const comments = await findByTask(db, task._id, 'comments').collect()
     const commentCount = comments.length
     const search = [

@@ -8,7 +8,7 @@ import {
   OWNER_VALUES,
   STATUS_VALUES,
 } from '../types'
-import { type DataModel, type Doc, Id } from './_generated/dataModel'
+import type { DataModel, Doc } from './_generated/dataModel'
 import type {
   PaginationOptions,
   FilterBuilder,

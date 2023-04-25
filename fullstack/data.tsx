@@ -119,7 +119,7 @@ function LoadAtBottom({ loadTasks }: { loadTasks?: (n: number) => void }) {
   return <div ref={bottom} />
 }
 
-export default function Data({
+export default function DataProvider({
   taskNumber,
   taskListOptions,
   children,

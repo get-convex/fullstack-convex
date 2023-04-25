@@ -5,8 +5,8 @@ import React, {
   useMemo,
   type ChangeEvent,
 } from 'react'
-import Backend from '../../fullstack/backend'
-import Data from '../../fullstack/data'
+import BackendProvider from '../../fullstack/backend'
+import DataProvider from '../../fullstack/data'
 import {
   Status,
   STATUS_VALUES,
@@ -122,8 +122,8 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
       <Head>
         <style>{`html { font-family: ${FONT.style.fontFamily}; }`}</style>
       </Head>
-      <Backend>
-        <Data taskNumber={taskNumber} taskListOptions={taskListOptions}>
+      <BackendProvider>
+        <DataProvider taskNumber={taskNumber} taskListOptions={taskListOptions}>
           <div className={FONT.className}>
             <TaskManager
               slug={slug}
@@ -132,8 +132,8 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
               }
             />
           </div>
-        </Data>
-      </Backend>
+        </DataProvider>
+      </BackendProvider>
     </>
   )
 }

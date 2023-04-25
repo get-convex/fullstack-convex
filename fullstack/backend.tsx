@@ -8,7 +8,7 @@ export const BackendContext = createContext(
   null
 ) as Context<BackendEnvironment | null>
 
-export default function Backend({ children }: PropsWithChildren) {
+export default function BackendProvider({ children }: PropsWithChildren) {
   const { loginWithRedirect: login, logout: auth0Logout } = useAuth0()
   const logout = useCallback(
     () => auth0Logout({ logoutParams: { returnTo: window.location.origin } }),

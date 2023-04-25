@@ -19,8 +19,8 @@ export default function BackendProvider({ children }: PropsWithChildren) {
     updateTask = useMutation('updateTask'),
     createTask = useMutation('createTask'),
     saveComment = useMutation('saveComment'),
-    saveFile = useAction('actions/uploadFile')
-  // deleteFile = useMutation('deleteFile'),
+    saveFile = useAction('actions/uploadFile'),
+    deleteFile = useMutation('deleteFile')
 
   const backend = useMemo(
     () =>
@@ -34,10 +34,22 @@ export default function BackendProvider({ children }: PropsWithChildren) {
           createTask,
           updateTask,
           saveComment,
+        },
+        fileManagement: {
           saveFile,
+          deleteFile,
         },
       } as BackendEnvironment),
-    [login, logout, saveUser, createTask, updateTask, saveComment, saveFile]
+    [
+      login,
+      logout,
+      saveUser,
+      createTask,
+      updateTask,
+      saveComment,
+      saveFile,
+      deleteFile,
+    ]
   )
   return (
     <BackendContext.Provider value={backend}>

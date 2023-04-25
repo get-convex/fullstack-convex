@@ -123,7 +123,10 @@ export type BackendEnvironment = {
     createTask: (task: NewTaskInfo) => Promise<Task> // returns newly created Task object
     updateTask: (task: Partial<Task>) => Promise<Task> // returns updated Task object
     saveComment: (taskId: string, body: string) => Promise<Comment> // returns newly created Comment objects
+  }
+  fileManagement: {
     saveFile: (taskId: string, file: NewFileInfo) => Promise<File>
+    deleteFile: (fileId: string) => Promise<null>
   }
 }
 

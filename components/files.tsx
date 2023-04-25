@@ -13,6 +13,8 @@ import { File, BackendEnvironment, NewFileInfo, Task, User } from '../types'
 import { BackendContext } from '../fullstack/backend'
 import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
 import Link from 'next/link'
+import { PaperClipIcon } from './icons'
+import { showTimeAgo } from './comments'
 
 function showFileSize(size: number) {
   if (size < 1024) return `${Math.round(size)} B`
@@ -24,17 +26,134 @@ function showFileSize(size: number) {
   return `${Math.round(gb)} GB`
 }
 
-function FilePreviews({ files }: { files: File[] }) {
+function FilePreviews({
+  files,
+  onDelete,
+}: {
+  files: File[]
+  onDelete: (fileId: string) => Promise<null>
+}) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
   return (
-    <div className="flex-col">
-      <div id="file-previews">
-        {files.map((f, i) => (
-          <div key={i} className="file-preview">
-            <Image src={f.url} alt={f.name} fill sizes="40vw" />
-          </div>
-        ))}
+    <>
+      <div className="flex-col">
+        <div id="file-previews">
+          {files.map((f, i) => (
+            <div
+              key={i}
+              className="file-preview"
+              onClick={() => setSelectedFile(f)}
+            >
+              <Image src={f.url} alt={f.name} fill sizes="40vw" />
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+      <FileDetailModal
+        file={selectedFile}
+        isOpen={!!selectedFile}
+        onDismiss={() => setSelectedFile(null)}
+        onDelete={async () => {
+          if (selectedFile) {
+            await onDelete(selectedFile.id)
+            setSelectedFile(null)
+          }
+          return null
+        }}
+      />
+    </>
+  )
+}
+
+function FileDetailModal({
+  file,
+  isOpen,
+  onDismiss,
+  onDelete,
+}: {
+  file: File | null
+  isOpen: boolean
+  onDismiss: EventHandler<MouseEvent | KeyboardEvent>
+  onDelete: (fileId: string) => Promise<null>
+}) {
+  Modal.setAppElement('#app')
+
+  const [imageLoading, setImageLoading] = useState(true)
+  const [imageSize, setImageSize] = useState([0, 0])
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  if (!file) return null
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return
+    setConfirmDelete(false)
+    await onDelete(file.id)
+  }
+
+  return (
+    <Modal
+      id="file-detail-modal"
+      isOpen={isOpen}
+      onRequestClose={onDismiss}
+      className="modal-content file-modal"
+      overlayClassName="modal-overlay"
+    >
+      <div className="file-modal-header">
+        <button className="close-button icon-button" onClick={onDismiss}>
+          <CircledXIcon />
+        </button>
+        <h2>
+          <PaperClipIcon /> {file.name}
+        </h2>
+      </div>
+      <div id="file-detail-preview">
+        {imageLoading && 'Loading...'}
+        <Image
+          src={file.url}
+          alt={file.name}
+          width={imageSize[0]}
+          height={imageSize[1]}
+          unoptimized
+          onLoadingComplete={(e) => {
+            setImageSize([e.naturalWidth, e.naturalHeight])
+            setImageLoading(false)
+          }}
+        />
+      </div>
+      <div className="file-modal-footer">
+        <div>
+          <p className="file-size">
+            {`Uploaded ${showTimeAgo(new Date(file.creationTime))} by ${
+              file.author.name
+            }`}
+          </p>
+        </div>
+        <div>
+          <p className="file-size">{showFileSize(file.size)}</p>
+          <Link
+            href={file.url}
+            target="_blank"
+            style={{ textDecoration: 'none' }}
+          >
+            <button className="dark" title={`Download ${file.name}`}>
+              Download
+            </button>
+          </Link>
+          <button
+            className="dark"
+            style={
+              { backgroundColor: 'red' } //TODO
+            }
+            onClick={() =>
+              confirmDelete ? handleDelete() : setConfirmDelete(true)
+            }
+          >
+            {confirmDelete ? `Really delete ${file.name}?` : 'Delete'}
+          </button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 
@@ -110,10 +229,10 @@ function FileUploadModal({
       id="file-upload-modal"
       isOpen={isOpen}
       onRequestClose={onClose}
-      className="modal-content"
+      className="modal-content file-modal"
       overlayClassName="modal-overlay"
     >
-      <div id="file-upload-header">
+      <div className="file-modal-header">
         <button className="close-button icon-button" onClick={onClose}>
           <CircledXIcon />
         </button>
@@ -122,7 +241,7 @@ function FileUploadModal({
       </div>
       <div id="safe-files">
         {previews.map((f, i) => (
-          <div key={i} className="safe-file">
+          <div key={i} className="file-detail">
             <div className="file-preview">
               <Image src={f.url} alt={f.name} fill sizes="40vw" />
             </div>
@@ -131,7 +250,7 @@ function FileUploadModal({
                 <p className="file-name">{f.name}</p>
                 <p className="file-size">{showFileSize(f.size)}</p>
               </div>
-              <Link href={f.url} target="blank">
+              <Link href={f.url} target="_blank">
                 <button
                   className="icon-button light"
                   title={`Download ${f.name}`}
@@ -143,7 +262,11 @@ function FileUploadModal({
           </div>
         ))}
       </div>
-      <form id="file-upload-form" onSubmit={(e) => e.preventDefault()}>
+      <form
+        id="file-upload-form"
+        className="file-modal-footer"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <div>
           <label>
             {error || (fileToUpload && `Uploading ${fileToUpload.name}...`)}
@@ -180,7 +303,7 @@ export function Files({
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
   const {
-    taskManagement: { saveFile },
+    fileManagement: { saveFile, deleteFile },
   } = useContext(BackendContext) as BackendEnvironment
 
   const { id: taskId, files } = task
@@ -257,10 +380,21 @@ export function Files({
     [saveFile, taskId, getFileInfo, task, user]
   )
 
-  // TODO
-  // const handleDeleteFile = async function (fileId: string) {
-  //   await fileHandler.deleteFile(fileId)
-  // }
+  const handleDeleteFile = useCallback(
+    async function (fileId: string) {
+      if (!task || !user) {
+        throw new Error(
+          'Error deleting file: missing task or authenticated user'
+        )
+      }
+      try {
+        return await deleteFile(fileId)
+      } catch (e) {
+        throw e as Error
+      }
+    },
+    [deleteFile, task, user]
+  )
 
   return (
     <div id="files">
@@ -280,7 +414,9 @@ export function Files({
           onUpload={handleUploadFile}
         />
       </div>
-      {visibleFiles && <FilePreviews files={visibleFiles} />}
+      {visibleFiles && (
+        <FilePreviews files={visibleFiles} onDelete={handleDeleteFile} />
+      )}
       {moreFiles > 0 && (
         <div id="more-files">
           <button

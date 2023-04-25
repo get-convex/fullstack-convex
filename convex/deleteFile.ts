@@ -1,20 +1,26 @@
 import { mutation } from './_generated/server'
-import { findUser } from './internal'
+import { findUser, findByTask, countResults } from './internal'
 import { Id } from './_generated/dataModel'
 
-export default mutation(async ({ db, auth, storage }, fileId: Id<'files'>) => {
-  const file = await db.get(fileId)
-  if (!file) throw new Error('Could not delete file: file not found')
+export default mutation(async ({ db, auth, storage }, fileId: string) => {
+  const id = new Id('files', fileId)
+  const fileDoc = await db.get(id)
+  if (!fileDoc) throw new Error('Could not delete file: file not found')
+  const { taskId, userId } = fileDoc
 
   const user = await findUser(db, auth)
   if (!user) throw new Error('Could not delete file: User is not authenticated')
 
-  if (!user._id.equals(file.userId))
+  if (!user._id.equals(userId))
     throw new Error(
       'Could not delete file: Current user does not match file author'
     )
 
-  await storage.delete(file.storageId)
-  await db.delete(fileId)
+  await storage.delete(fileDoc.storageId)
+  await db.delete(id)
+
+  // Update the denormalized file count for this task (for sorting)
+  const fileCount = await countResults(findByTask(db, taskId, 'files'))
+  await db.patch(taskId, { fileCount })
   return null
 })

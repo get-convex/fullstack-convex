@@ -4,7 +4,7 @@ import { Status, Visibility } from '../types'
 export default defineSchema(
   {
     tasks: defineTable({
-      description: s.optional(s.string()),
+      description: s.union(s.string(), s.null()),
       number: s.number(),
       ownerId: s.union(s.id('users'), s.null()),
       ownerName: s.union(s.string(), s.null()),

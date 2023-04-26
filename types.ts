@@ -1,6 +1,7 @@
 export type User = {
   id: string
   name: string
+  email?: string
   pictureUrl: string
 }
 
@@ -36,7 +37,7 @@ export type Task = {
   creationTime: number
   number: number
   title: string
-  description: string
+  description: string | null
   comments: Comment[]
   files: File[]
   visibility: Visibility

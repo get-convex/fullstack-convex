@@ -729,15 +729,6 @@ export default [
     userId: 'RgPP_OK8OKZJukD8r7NLsQ',
   },
   {
-    creationTime: 1677614042106.7964,
-    id: 'zTXNjyJ-bBS5HZ2m6FJL2A',
-    name: 'notes.txt',
-    storageId: 'c5c80205-714f-4f81-a4f9-2ff812883b46',
-    taskId: 'u4X6o5uDOPNK0PSuc0NLzA',
-    type: 'text/plain',
-    userId: 'X21HMDBo1LpRJ5o32LdLow',
-  },
-  {
     creationTime: 1680826600536.1697,
     id: '03HO6NsiIOO1xMq5CO5L_g',
     name: 'shapes.png',

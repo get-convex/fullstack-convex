@@ -92,9 +92,9 @@ export default query(
   async (
     queryCtx,
     {
-      paginationOptions,
+      paginationOpts,
       queryOptions,
-    }: { paginationOptions: PaginationOptions; queryOptions: FindTasksOptions }
+    }: { paginationOpts: PaginationOptions; queryOptions: FindTasksOptions }
   ) => {
     const { db, auth } = queryCtx
     // If logged in, fetch the stored user to get ID for filtering
@@ -103,7 +103,7 @@ export default query(
     const matchingTasks = findMatchingTasks(db, user, queryOptions)
 
     const { page, isDone, continueCursor } = await matchingTasks.paginate(
-      paginationOptions
+      paginationOpts
     )
 
     return {

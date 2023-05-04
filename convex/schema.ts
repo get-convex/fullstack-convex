@@ -1,57 +1,64 @@
-import { defineSchema, defineTable, s } from 'convex/schema'
+import { defineSchema, defineTable } from 'convex/schema'
+import { v } from 'convex/values'
 import { Status, Visibility } from '../types'
 
-export default defineSchema(
-  {
-    tasks: defineTable({
-      description: s.union(s.string(), s.null()),
-      number: s.number(),
-      ownerId: s.union(s.id('users'), s.null()),
-      ownerName: s.union(s.string(), s.null()),
-      status: s.union(
-        s.literal(Status.New),
-        s.literal(Status['In Progress']),
-        s.literal(Status.Done),
-        s.literal(Status.Cancelled)
-      ),
-      title: s.string(),
-      visibility: s.union(
-        s.literal(Visibility.PUBLIC),
-        s.literal(Visibility.PRIVATE)
-      ),
-      commentCount: s.number(),
-      fileCount: s.number(),
-      search: s.string(),
-    })
-      .index('by_number', ['number'])
-      .index('by_ownerId', ['ownerId'])
-      .index('by_owner', ['ownerName'])
-      .index('by_status', ['status'])
-      .index('by_title', ['title'])
-      .index('by_commentCount', ['commentCount'])
-      .index('by_fileCount', ['fileCount'])
-      .searchIndex('search_all', { searchField: 'search' }),
+export default defineSchema({
+  tasks: defineTable({
+    description: v.union(v.string(), v.null()),
+    number: v.number(),
+    ownerId: v.union(v.id('users'), v.null()),
+    ownerName: v.union(v.string(), v.null()),
+    status: v.union(
+      v.literal(Status.New),
+      v.literal(Status['In Progress']),
+      v.literal(Status.Done),
+      v.literal(Status.Cancelled)
+    ),
+    title: v.string(),
+    visibility: v.union(
+      v.literal(Visibility.PUBLIC),
+      v.literal(Visibility.PRIVATE)
+    ),
+    commentCount: v.number(),
+    fileCount: v.number(),
+    search: v.string(),
+  })
+    .index('by_number', ['number'])
+    .index('by_ownerId', ['ownerId'])
+    .index('by_owner', ['ownerName'])
+    .index('by_status', ['status'])
+    .index('by_title', ['title'])
+    .index('by_commentCount', ['commentCount'])
+    .index('by_fileCount', ['fileCount'])
+    .searchIndex('search_all', { searchField: 'search' }),
 
-    users: defineTable({
-      email: s.string(),
-      name: s.string(),
-      pictureUrl: s.string(),
-      tokenIdentifier: s.string(),
-    }).index('by_tokenIdentifier', ['tokenIdentifier']),
+  users: defineTable({
+    email: v.string(),
+    name: v.string(),
+    pictureUrl: v.string(),
+    tokenIdentifier: v.string(),
+  }).index('by_tokenIdentifier', ['tokenIdentifier']),
 
-    comments: defineTable({
-      body: s.string(),
-      taskId: s.id('tasks'),
-      userId: s.id('users'),
-    }).index('by_task', ['taskId']),
+  comments: defineTable({
+    body: v.string(),
+    taskId: v.id('tasks'),
+    userId: v.id('users'),
+  }).index('by_task', ['taskId']),
 
-    files: defineTable({
-      storageId: s.string(),
-      userId: s.id('users'),
-      taskId: s.id('tasks'),
-      type: s.string(),
-      name: s.string(),
-    }).index('by_task', ['taskId']),
-  },
-  { strict: false }
-)
+  files: defineTable({
+    storageId: v.string(),
+    userId: v.id('users'),
+    taskId: v.id('tasks'),
+    type: v.string(),
+    name: v.string(),
+  }).index('by_task', ['taskId']),
+
+  safeFiles: defineTable({
+    storageId: v.string(),
+    userId: v.id('users'),
+    taskId: v.id('tasks'),
+    type: v.string(),
+    name: v.string(),
+    sha256: v.string(),
+  }),
+})

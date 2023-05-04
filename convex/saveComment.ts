@@ -1,4 +1,4 @@
-import { Id } from './_generated/dataModel'
+import { Doc, Id } from './_generated/dataModel'
 import { mutation } from './_generated/server'
 import { findUser, findByTask, getCommentFromDoc } from './internal'
 import type { Comment } from '../types'
@@ -26,7 +26,11 @@ export default mutation(
     // Update the tasks table with denormalized comment count
     // (used for indexing to support ordering by comment count)
     // and search string (used for search indexing)
-    const comments = await findByTask(db, task._id, 'comments').collect()
+    const comments = (await findByTask(
+      db,
+      task._id,
+      'comments'
+    ).collect()) as Doc<'comments'>[]
     const commentCount = comments.length
     const search = [
       task.title,

@@ -1,15 +1,18 @@
 import { internalMutation, type DatabaseWriter } from './_generated/server'
 import { Id, Doc, type TableNames } from './_generated/dataModel'
 import { countResults, findByTask } from './internal'
+import { User, Task, Comment, File } from '../types'
+import type { SafeFile } from './getSafeFiles'
 
 import users from '../fullstack/initialData/users'
 import tasks from '../fullstack/initialData/tasks'
-import safeFiles from '../fullstack/initialData/safeFiles'
 import comments from '../fullstack/initialData/comments'
 import files from '../fullstack/initialData/files'
+import safeFiles from '../fullstack/initialData/safeFiles'
 
-const DATA = { users, safeFiles, comments, files, tasks }
+const DATA = { users, tasks, comments, files, safeFiles }
 type dataKey = keyof typeof DATA
+type dataType = (typeof DATA)[dataKey][0]
 
 async function updateTaskAggregates(db: DatabaseWriter) {
   const tasksToUpdate = await db.query('tasks').collect()
@@ -18,7 +21,11 @@ async function updateTaskAggregates(db: DatabaseWriter) {
     tasksToUpdate.map(async (task) => {
       const taskId = task._id
       const fileCount = await countResults(findByTask(db, taskId, 'files'))
-      const comments = await findByTask(db, taskId, 'comments').collect()
+      const comments = (await findByTask(
+        db,
+        taskId,
+        'comments'
+      ).collect()) as Doc<'comments'>[]
       const commentCount = comments.length
       const owner = task.ownerId && (await db.get(task.ownerId))
       const ownerName = owner?.name || ''
@@ -52,13 +59,13 @@ async function resetTable(db: DatabaseWriter, table: TableNames) {
   }
 
   if (docsToKeep.length !== KEEP.length) {
-    const offenders = [] as any[]
+    const offenders = [] as Id<TableNames>[]
 
     for (const k of KEEP) {
       const id = new Id(table, k.id)
       const doc = await db.get(id)
       if (doc === null) {
-        offenders.push(k.id)
+        offenders.push(id)
       }
     }
 
@@ -77,22 +84,18 @@ async function resetTable(db: DatabaseWriter, table: TableNames) {
   }
 
   const updated = await Promise.all(
-    KEEP.map(async (keeper: any) => {
-      const info = { ...keeper } as Doc<typeof table>
+    KEEP.map(async (keeper: dataType) => {
+      const info = { ...keeper } as User | Task | Comment | File | SafeFile
       const docId = new Id(table, keeper.id)
 
-      // Delete special fields managed by Convex
-      delete info.creationTime
-      delete info.id
-
       // Replace relational ID strings with ID objects
-      if (keeper.taskId) {
+      if ('taskId' in info && 'taskId' in keeper) {
         info.taskId = new Id('tasks', keeper.taskId)
       }
-      if (keeper.userId) {
+      if ('userId' in info && 'userId' in keeper) {
         info.userId = new Id('users', keeper.userId)
       }
-      if (keeper.ownerId) {
+      if ('ownerId' in info && 'ownerId' in keeper && keeper.ownerId) {
         info.ownerId = new Id('users', keeper.ownerId)
       }
 

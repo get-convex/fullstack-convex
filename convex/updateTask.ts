@@ -35,13 +35,7 @@ export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
   if (taskInfo.owner !== undefined) {
     updatedInfo.ownerId = taskInfo.owner && new Id('users', taskInfo.owner.id)
     updatedInfo.ownerName = taskInfo.owner && taskInfo.owner.name
-    // Un-join user table data
-    delete updatedInfo.owner
   }
-
-  // Un-join data from comments & files tables
-  delete updatedInfo.comments
-  delete updatedInfo.files
 
   // Get the current task document from the db to compare
   const currentDoc = await db.get(taskId)
@@ -51,10 +45,11 @@ export default mutation(async (queryCtx, taskInfo: Partial<Task>) => {
   }
 
   // Update the search field with new values, if any
-  const updatedText = ['title', 'description', 'ownerName'].map(
-    (field) => updatedInfo[field] || currentDoc[field]
-  )
-  updatedInfo.search = updatedText.join(' ')
+  updatedInfo.search = [
+    updatedInfo.title || currentDoc.title,
+    updatedInfo.description || currentDoc.description,
+    updatedInfo.ownerName || currentDoc.ownerName,
+  ].join(' ')
 
   // Update this task in the db & retrieve the updated task document
   await db.patch(taskId, { ...updatedInfo })

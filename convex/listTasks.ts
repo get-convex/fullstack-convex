@@ -91,8 +91,10 @@ export function findMatchingTasks(
 export default query(
   async (
     queryCtx,
-    paginationOptions: PaginationOptions,
-    queryOptions: FindTasksOptions
+    {
+      paginationOptions,
+      queryOptions,
+    }: { paginationOptions: PaginationOptions; queryOptions: FindTasksOptions }
   ) => {
     const { db, auth } = queryCtx
     // If logged in, fetch the stored user to get ID for filtering

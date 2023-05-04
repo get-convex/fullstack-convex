@@ -4,7 +4,10 @@ import { findUser, findByTask, getCommentFromDoc } from './internal'
 import type { Comment } from '../types'
 
 export default mutation(
-  async (queryCtx, taskId: string, body: string): Promise<Comment> => {
+  async (
+    queryCtx,
+    { taskId, body }: { taskId: string; body: string }
+  ): Promise<Comment> => {
     const { db, auth } = queryCtx
     const user = await findUser(db, auth)
     if (!user) {

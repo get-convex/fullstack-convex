@@ -17,8 +17,7 @@ async function uploadFile(postUrl: string, file: NewFileInfo) {
 export default action(
   async (
     { runQuery, runMutation },
-    taskId: string,
-    file: NewFileInfo
+    { taskId, file }: { taskId: string; file: NewFileInfo }
   ): Promise<File> => {
     // This function uploads a file to Convex's file storage,
     // and stores that file's info & associated task in the
@@ -46,13 +45,14 @@ export default action(
       type,
     }
 
-    const uploadedFileId = await runMutation(
-      'internal:saveFileDoc',
-      taskDocId,
-      newFileInfo
-    )
+    const uploadedFileId = await runMutation('internal:saveFileDoc', {
+      taskId: taskDocId,
+      fileInfo: newFileInfo,
+    })
 
-    const uploadedFile = await runQuery('internal:getFileById', uploadedFileId)
+    const uploadedFile = await runQuery('internal:getFileById', {
+      fileId: uploadedFileId,
+    })
     if (!uploadedFile) throw new Error('Unexpected error retrieving saved file')
 
     return uploadedFile

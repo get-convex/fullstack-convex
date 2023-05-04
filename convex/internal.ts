@@ -141,7 +141,7 @@ export async function getTaskFromDoc(
     db,
     _id,
     'comments'
-  ).collect()) as Doc<'comment'>[]
+  ).collect()) as Doc<'comments'>[]
 
   const comments = (await Promise.all(
     commentsByTask.map(async (c) => await getCommentFromDoc(queryCtx, c))
@@ -198,7 +198,10 @@ export const getUploadUrl = internalMutation(async ({ storage }) => {
 
 // Save a new file document with the given storage ID
 export const saveFileDoc = mutation(
-  async (mutCtx, taskId: Id<'tasks'>, fileInfo: FileDocInfo) => {
+  async (
+    mutCtx,
+    { taskId, fileInfo }: { taskId: Id<'tasks'>; fileInfo: FileDocInfo }
+  ) => {
     const { db, auth } = mutCtx
     const user = await findUser(db, auth)
     if (!user) {
@@ -218,7 +221,10 @@ export const saveFileDoc = mutation(
 
 // Retrieve a File object from a given
 export const getFileById = internalQuery(
-  async (queryCtx, fileId: Id<'files'>): Promise<File | null> => {
+  async (
+    queryCtx,
+    { fileId }: { fileId: Id<'files'> }
+  ): Promise<File | null> => {
     if (!(fileId instanceof Id<'files'>))
       throw new Error(`internal.js: Invalid fileId ${fileId}`)
     const fileDoc = await queryCtx.db.get(fileId)

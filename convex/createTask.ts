@@ -45,7 +45,6 @@ export default mutation(
 
     // Get the newly saved task document and convert to Task object
     const newTask = await db.get(taskId)
-    console.log('createTask 41: newTask', newTask)
     if (!newTask) {
       // Should not happen, but just in case/to appease TS
       throw new Error('Unexpected error saving task')

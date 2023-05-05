@@ -55,9 +55,6 @@ export default defineSchema({
 
   safeFiles: defineTable({
     storageId: v.string(),
-    userId: v.id('users'),
-    taskId: v.id('tasks'),
-    type: v.string(),
     name: v.string(),
     sha256: v.string(),
   }),

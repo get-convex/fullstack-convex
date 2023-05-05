@@ -1,3 +1,5 @@
+import { ChangeEventHandler, MouseEventHandler } from 'react'
+
 export type User = {
   id: string
   name: string
@@ -90,25 +92,28 @@ export enum SortOrder {
 // Owner filter options are just strings
 export const OWNER_VALUES = ['Me', 'Others', 'Nobody']
 
-export type Filter<T> = { selected: T[]; onChange: any }
+export type Filter<Value, Handler> = {
+  selected: Value[]
+  onChange: Handler
+}
 
 export type TaskListOptions = {
   filter: {
-    status: Filter<Status>
-    owner: Filter<string>
+    status: Filter<Status, ChangeEventHandler>
+    owner: Filter<string, ChangeEventHandler>
   }
   sort: {
     key: SortKey
     order: SortOrder
-    onChange: any
+    onChange: MouseEventHandler
   }
   search: {
     term: string
-    onChange: any
+    onChange: (term: string) => void
   }
   selectedTask: {
     number?: number | null
-    onChange: any
+    onChange: (task: number | null) => void
   }
 }
 

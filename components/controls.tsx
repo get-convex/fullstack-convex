@@ -277,8 +277,8 @@ export function Controls({
   owner,
   search,
 }: {
-  status: Filter<Status>
-  owner: Filter<string>
+  status: Filter<Status, ChangeEventHandler>
+  owner: Filter<string, ChangeEventHandler>
   search: { term: string; onChange: (term: string) => void }
 }) {
   const {

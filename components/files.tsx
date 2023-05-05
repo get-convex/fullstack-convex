@@ -306,7 +306,7 @@ export function Files({
     fileManagement: { saveFile, deleteFile },
   } = useContext(BackendContext) as BackendEnvironment
 
-  const { id: taskId, files } = task
+  const { files } = task
   const safeSHAs = useMemo(() => safeFiles.map((sf) => sf.sha256), [safeFiles])
 
   const [visibleIndex, setVisibleIndex] = useState(5)

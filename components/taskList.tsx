@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from 'react'
+import React, { useContext } from 'react'
 import Link from 'next/link'
 import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'

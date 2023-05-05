@@ -11,22 +11,6 @@ type FileDocInfo = {
   storageId: string
 }
 
-async function uploadFile(postUrl: string, file: NewFileInfo) {
-  const result = await fetch(postUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': file.type },
-    body: file.data,
-  })
-  const { storageId } = (await result.json()) as { storageId: string }
-  if (!storageId) throw new Error('Unexpected error saving file')
-  return storageId
-}
-
-// Generate a short-lived upload URL to post a file to
-export const getUploadUrl = internalMutation(async ({ storage }) => {
-  return await storage.generateUploadUrl()
-})
-
 // Save a new file document with the given storage ID
 export const saveFileDoc = internalMutation(
   async (mutCtx, { fileDocInfo }: { fileDocInfo: FileDocInfo }) => {

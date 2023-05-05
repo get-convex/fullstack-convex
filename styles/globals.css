@@ -19,6 +19,7 @@
   --color-pink: #f4e9f1;
   --color-yellow: #f8d077;
   --color-light-red: #fcd6d5;
+  --color-dark-red: #9f140f;
   --color-green: #e5f3dc;
   --color-purple: #e3d0df;
   --color-dark: #292929;
@@ -136,9 +137,14 @@ button:hover {
   cursor: pointer;
 }
 
-button:disabled {
+button:disabled,
+button:disabled > label {
   background-color: var(--color-grey);
   cursor: not-allowed;
+}
+
+button.delete {
+  background-color: var(--color-dark-red);
 }
 
 .icon-button {

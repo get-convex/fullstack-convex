@@ -27,9 +27,11 @@ function showFileSize(size: number) {
 }
 
 function FilePreviews({
+  loggedIn,
   files,
   onDelete,
 }: {
+  loggedIn: boolean
   files: File[]
   onDelete: (fileId: string) => Promise<null>
 }) {
@@ -51,6 +53,7 @@ function FilePreviews({
         </div>
       </div>
       <FileDetailModal
+        loggedIn={loggedIn}
         file={selectedFile}
         isOpen={!!selectedFile}
         onDismiss={() => setSelectedFile(null)}
@@ -67,11 +70,13 @@ function FilePreviews({
 }
 
 function FileDetailModal({
+  loggedIn,
   file,
   isOpen,
   onDismiss,
   onDelete,
 }: {
+  loggedIn: boolean
   file: File | null
   isOpen: boolean
   onDismiss: EventHandler<MouseEvent | KeyboardEvent>
@@ -141,9 +146,12 @@ function FileDetailModal({
             </button>
           </Link>
           <button
-            className="dark"
-            style={
-              { backgroundColor: 'red' } //TODO
+            className="dark delete"
+            disabled={!loggedIn}
+            title={
+              loggedIn
+                ? 'Permanently delete this file'
+                : 'Log in to manage files'
             }
             onClick={() =>
               confirmDelete ? handleDelete() : setConfirmDelete(true)
@@ -158,11 +166,13 @@ function FileDetailModal({
 }
 
 function FileUploadModal({
+  loggedIn,
   previews,
   isOpen,
   onDismiss,
   onUpload,
 }: {
+  loggedIn: boolean
   previews: File[]
   isOpen: boolean
   onDismiss: EventHandler<MouseEvent | KeyboardEvent>
@@ -219,6 +229,7 @@ function FileUploadModal({
   const onClose = useCallback(
     function onClose(e: MouseEvent | KeyboardEvent) {
       setFileToUpload(null)
+      setError('')
       onDismiss(e)
     },
     [onDismiss]
@@ -283,7 +294,15 @@ function FileUploadModal({
           <button className="light" onClick={onClose}>
             Cancel
           </button>
-          <button className="dark" disabled={!!fileToUpload}>
+          <button
+            className="dark"
+            disabled={!loggedIn || !!fileToUpload}
+            title={
+              loggedIn
+                ? 'Browse for a local file to upload'
+                : 'Log in to upload local files'
+            }
+          >
             <label htmlFor="upload">Upload...</label>
           </button>
         </div>
@@ -296,7 +315,7 @@ export function Files({
   task,
   safeFiles,
 }: {
-  user?: User | null
+  user: User | null
   task: Task
   safeFiles: File[]
 }) {
@@ -408,6 +427,7 @@ export function Files({
           <UploadIcon /> Upload
         </button>
         <FileUploadModal
+          loggedIn={!!user}
           previews={safeFiles}
           isOpen={uploadModalOpen}
           onDismiss={closeModal}
@@ -415,7 +435,11 @@ export function Files({
         />
       </div>
       {visibleFiles && (
-        <FilePreviews files={visibleFiles} onDelete={handleDeleteFile} />
+        <FilePreviews
+          loggedIn={!!user}
+          files={visibleFiles}
+          onDelete={handleDeleteFile}
+        />
       )}
       {moreFiles > 0 && (
         <div id="more-files">

@@ -19,7 +19,7 @@ export default function BackendProvider({ children }: PropsWithChildren) {
     updateTask = useMutation('updateTask'),
     createTask = useMutation('createTask'),
     saveComment = useMutation('saveComment'),
-    saveFile = useAction('actions/uploadFile'),
+    saveFile = useAction('uploadFile'),
     deleteFile = useMutation('deleteFile')
 
   const backend = useMemo(

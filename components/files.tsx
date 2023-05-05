@@ -314,43 +314,43 @@ export function Files({
   const visibleFiles = files?.slice(0, visibleIndex) || []
   const moreFiles = files?.length - visibleFiles?.length
 
-  const checkFileIntegrity = useCallback(
-    async (fileBuffer: ArrayBuffer) => {
-      if (!safeSHAs) return false
-
-      // Check this file's hash to make sure it's one of the
-      // pre-approved safe files to prevent abuse
-      const hashBuffer = await crypto.subtle.digest('SHA-256', fileBuffer)
-      const hashArray = Array.from(new Uint8Array(hashBuffer))
-      const fileSHA = hashArray
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('') // convert bytes to hex string
-
-      return safeSHAs.includes(fileSHA)
-    },
-    [safeSHAs]
-  )
+  const getFileSHA = useCallback(async (fileBuffer: ArrayBuffer) => {
+    // Check this file's hash to make sure it's one of the
+    // pre-approved safe files to prevent abuse
+    const hashBuffer = await crypto.subtle.digest('SHA-256', fileBuffer)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const fileSHA = hashArray
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('') // convert bytes to hex string
+    return fileSHA
+  }, [])
 
   const getFileInfo = useCallback(
     async (inputFile: globalThis.File) => {
-      const { name, type, size } = inputFile
+      if (!user) throw new Error('Error uploading file: user not authenticated')
+
       const fileBuffer = await inputFile.arrayBuffer()
-      const isSafeFile = await checkFileIntegrity(fileBuffer)
+      const fileSHA = await getFileSHA(fileBuffer)
+
+      if (!safeSHAs) {
+        throw new Error('Error verifying file: Safe file SHAs not found')
+      }
+      const isSafeFile = safeSHAs.includes(fileSHA)
       if (!isSafeFile)
         throw new Error(
           'Unsafe file: Only pre-approved files can be uploaded to prevent abuse'
         )
 
-      const newFile = {
+      const { name, type, size } = inputFile
+      return {
         author: user,
         name,
         type,
         size,
         data: fileBuffer,
       } as NewFileInfo
-      return newFile
     },
-    [user, checkFileIntegrity]
+    [user, getFileSHA, safeSHAs]
   )
 
   const closeModal = useCallback(
@@ -363,21 +363,21 @@ export function Files({
 
   const handleUploadFile = useCallback(
     async (inputFile: globalThis.File) => {
-      if (!task || !user)
-        throw new Error(
-          'Error uploading file: missing task or authenticated user'
-        )
+      if (!task) throw new Error('Error uploading file: task not found')
 
       try {
         const validFileInfo = await getFileInfo(inputFile)
-        const newFile = await saveFile(taskId, validFileInfo)
+        const newFile = await saveFile({
+          taskId: task.id,
+          fileInfo: validFileInfo,
+        })
         setUploadModalOpen(false)
         return newFile
       } catch (e) {
         throw e as Error
       }
     },
-    [saveFile, taskId, getFileInfo, task, user]
+    [saveFile, getFileInfo, task]
   )
 
   const handleDeleteFile = useCallback(
@@ -388,7 +388,7 @@ export function Files({
         )
       }
       try {
-        return await deleteFile(fileId)
+        return await deleteFile({ fileId })
       } catch (e) {
         throw e as Error
       }

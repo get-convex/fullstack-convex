@@ -25,11 +25,10 @@ export type File = {
 
 export type NewFileInfo = {
   author: User
-  size: number
   name: string
   type: string
-  data: Buffer
-  sha256: string
+  size: number
+  data: ArrayBuffer
 }
 
 export type Task = {

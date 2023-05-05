@@ -1,21 +1,7 @@
-import {
-  internalQuery,
-  internalMutation,
-  DatabaseReader,
-  QueryCtx,
-  mutation,
-} from './_generated/server'
+import { DatabaseReader, QueryCtx } from './_generated/server'
 import { Comment, File, Visibility } from '../types'
 import { Doc, Id } from './_generated/dataModel'
 import type { Auth, GenericTableInfo, OrderedQuery, Query } from 'convex/server'
-
-type FileDocInfo = {
-  type: string
-  name: string
-  taskId: Id<'tasks'>
-  userId: Id<'users'>
-  storageId: string
-}
 
 // Find all comments/files associated with a given task
 export function findByTask(
@@ -190,45 +176,3 @@ export async function countResults(
   }
   return count
 }
-
-// Generate a short-lived upload URL to post a file to
-export const getUploadUrl = internalMutation(async ({ storage }) => {
-  return await storage.generateUploadUrl()
-})
-
-// Save a new file document with the given storage ID
-export const saveFileDoc = mutation(
-  async (
-    mutCtx,
-    { taskId, fileInfo }: { taskId: Id<'tasks'>; fileInfo: FileDocInfo }
-  ) => {
-    const { db, auth } = mutCtx
-    const user = await findUser(db, auth)
-    if (!user) {
-      throw new Error('Error saving file: User identity not found')
-    }
-
-    const fileId = await db.insert('files', fileInfo)
-
-    // Update the denormalized comment count in the tasks table
-    // (used for indexing to support ordering by comment count)
-    const fileCount = await countResults(findByTask(db, taskId, 'files'))
-
-    await db.patch(taskId, { fileCount })
-    return fileId
-  }
-)
-
-// Retrieve a File object from a given
-export const getFileById = internalQuery(
-  async (
-    queryCtx,
-    { fileId }: { fileId: Id<'files'> }
-  ): Promise<File | null> => {
-    if (!(fileId instanceof Id<'files'>))
-      throw new Error(`internal.js: Invalid fileId ${fileId}`)
-    const fileDoc = await queryCtx.db.get(fileId)
-    if (!fileDoc) return null
-    return await getFileFromDoc(queryCtx, fileDoc)
-  }
-)

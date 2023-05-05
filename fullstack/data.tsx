@@ -46,8 +46,8 @@ function useTaskListData(
     loadMore,
   } = useStablePaginatedQuery(
     'listTasks',
-    { initialNumItems: PAGE_SIZE },
-    queryOptions
+    { queryOptions },
+    { initialNumItems: PAGE_SIZE }
   )
   const taskListData = useMemo(
     () => ({
@@ -130,7 +130,7 @@ export default function DataProvider({
   const user = useUserData()
 
   // If a task is selected, query the db for the task details
-  const task = useStableQuery('getTask', taskNumber)
+  const task = useStableQuery('getTask', { taskNumber })
   const taskData = useMemo(
     () => ({ value: task || null, isLoading: task === undefined }),
     [task]

@@ -50,27 +50,27 @@ export function Comments({ user, task }: { user?: User | null; task: Task }) {
   const { saveComment } = backend.taskManagement
   const [newComment, setNewComment] = useState('')
   const [savingText, setSavingText] = useState('')
-  const trimmed = newComment.trim()
+  const body = newComment.trim()
 
   const submitComment = useCallback(
     async function (event: FormEvent) {
       event.preventDefault()
-      setSavingText(trimmed)
+      setSavingText(body)
       setNewComment('')
-      await saveComment(task.id, trimmed)
+      await saveComment({ taskId: task.id, body })
       setSavingText('')
     },
-    [saveComment, task, trimmed]
+    [saveComment, task, body]
   )
 
   const handleKeyUp = useCallback(
     function (event: KeyboardEvent) {
-      if (!trimmed) return
+      if (!body) return
       if (event.key === 'Enter' && !event.shiftKey) {
         submitComment(event)
       }
     },
-    [submitComment, trimmed]
+    [submitComment, body]
   )
 
   return (
@@ -102,7 +102,7 @@ export function Comments({ user, task }: { user?: User | null; task: Task }) {
               }
               placeholder="Post a comment…"
               title={
-                !newComment || trimmed
+                !newComment || body
                   ? 'Enter to submit, Shift+Enter for newline'
                   : 'Comment cannot be empty'
               }

@@ -16,8 +16,8 @@ export const useStableQuery = ((name, ...args) => {
   return stored.current // undefined on first load, stale data while loading, fresh data after loading
 }) as UseQueryForAPI<API>
 
-export const useStablePaginatedQuery = ((name, options, ...args) => {
-  const result = usePaginatedQuery(name, options, ...args)
+export const useStablePaginatedQuery = ((name, args, options) => {
+  const result = usePaginatedQuery(name, args, options)
   const { results, status, loadMore } = result
   const stored = useRef(results) // ref objects are stable between rerenders
 

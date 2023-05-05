@@ -30,7 +30,7 @@ function EditableTitle({
   editing = false,
 }: {
   task: Task
-  saveChanges: (taskInfo: Partial<Task>) => void
+  saveChanges: ({ taskInfo }: { taskInfo: Partial<Task> }) => void
   editing?: boolean
 }) {
   const [editingTitle, setEditingTitle] = useState(editing)
@@ -38,7 +38,7 @@ function EditableTitle({
 
   const handleUpdateTitle = useCallback(() => {
     setEditingTitle(false)
-    saveChanges({ ...task, title: newTitle })
+    saveChanges({ taskInfo: { ...task, title: newTitle } })
   }, [task, newTitle, saveChanges])
 
   const handleKeyDown = useCallback(function (event: KeyboardEvent) {
@@ -77,7 +77,7 @@ function EditableDescription({
   editing = false,
 }: {
   task: Task
-  saveChanges: (taskInfo: Partial<Task>) => void
+  saveChanges: ({ taskInfo }: { taskInfo: Partial<Task> }) => void
   editing?: boolean
 }) {
   const [editingDescription, setEditingDescription] = useState(editing)
@@ -86,7 +86,7 @@ function EditableDescription({
   const handleUpdateDescription = useCallback(
     function () {
       setEditingDescription(false)
-      saveChanges({ ...task, description: newDescription })
+      saveChanges({ taskInfo: { ...task, description: newDescription } })
     },
     [task, newDescription, saveChanges]
   )
@@ -180,7 +180,7 @@ function OwnerSelect({
 }: {
   task: Partial<Task>
   user?: User | null
-  saveChanges: (taskInfo: Partial<Task>) => void
+  saveChanges: ({ taskInfo }: { taskInfo: Partial<Task> }) => void
 }) {
   const nullUser: User = {
     name: 'No one',
@@ -200,8 +200,7 @@ function OwnerSelect({
         ...task,
         owner: user,
       } as Partial<Task>
-      console.log('taskInfo', taskInfo)
-      saveChanges(taskInfo)
+      saveChanges({ taskInfo })
     },
     [task, user, saveChanges]
   )
@@ -209,7 +208,7 @@ function OwnerSelect({
   const handleUnclaimTask = useCallback(
     function () {
       const taskInfo = { ...task, owner: null }
-      saveChanges(taskInfo)
+      saveChanges({ taskInfo })
     },
     [task, saveChanges]
   )
@@ -274,14 +273,14 @@ function TaskMetadata({
 }: {
   task: Task
   user: User | null
-  saveChanges: (taskInfo: Partial<Task>) => void
+  saveChanges: ({ taskInfo }: { taskInfo: Partial<Task> }) => void
 }) {
   const isOwner = userOwnsTask(task, user)
 
   const handleChangeStatus = useCallback(
     function (status: Status) {
       const taskInfo = { ...task, status }
-      saveChanges(taskInfo)
+      saveChanges({ taskInfo })
     },
     [task, saveChanges]
   )
@@ -324,7 +323,11 @@ function TaskInfo({
   onSave,
   newTask,
 }: {
-  onSave: (taskInfo: NewTaskInfo | Partial<Task>) => Promise<Task>
+  onSave: ({
+    taskInfo,
+  }: {
+    taskInfo: NewTaskInfo | Partial<Task>
+  }) => Promise<Task>
   task: Task
   user: User | null
   newTask?: boolean
@@ -381,7 +384,7 @@ export function NewTaskDetails({
 
   const onCreateTask = useCallback(
     async function (taskInfo: NewTaskInfo) {
-      const newTask = await taskManagement.createTask(taskInfo)
+      const newTask = await taskManagement.createTask({ taskInfo })
       onCreate(newTask.number)
       router.push(`/task/${newTask.number}`)
     },
@@ -442,7 +445,7 @@ export function NewTaskDetails({
                 key={owner?.id.toString()}
                 task={newTask}
                 user={user}
-                saveChanges={({ owner }) => {
+                saveChanges={({ taskInfo: { owner } }) => {
                   setOwner(owner || null)
                 }}
               />

@@ -120,13 +120,25 @@ export type BackendEnvironment = {
     saveUser: () => Promise<User> // returns newly created/updated User object //TODO this should probably accept a Partial<User>?
   }
   taskManagement: {
-    createTask: (task: NewTaskInfo) => Promise<Task> // returns newly created Task object
-    updateTask: (task: Partial<Task>) => Promise<Task> // returns updated Task object
-    saveComment: (taskId: string, body: string) => Promise<Comment> // returns newly created Comment objects
+    createTask: ({ taskInfo }: { taskInfo: NewTaskInfo }) => Promise<Task> // returns newly created Task object
+    updateTask: ({ taskInfo }: { taskInfo: Partial<Task> }) => Promise<Task> // returns updated Task object
+    saveComment: ({
+      taskId,
+      body,
+    }: {
+      taskId: string
+      body: string
+    }) => Promise<Comment> // returns newly created Comment objects
   }
   fileManagement: {
-    saveFile: (taskId: string, file: NewFileInfo) => Promise<File>
-    deleteFile: (fileId: string) => Promise<null>
+    saveFile: ({
+      taskId,
+      fileInfo,
+    }: {
+      taskId: string
+      fileInfo: NewFileInfo
+    }) => Promise<File>
+    deleteFile: ({ fileId }: { fileId: string }) => Promise<null>
   }
 }
 

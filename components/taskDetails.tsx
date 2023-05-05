@@ -19,6 +19,9 @@ import { DataContext } from '../fullstack/data'
 import { CalendarIcon, CaretDownIcon } from './icons'
 import type { KeyboardEvent, FormEventHandler } from 'react'
 
+// Helper type to avoid repetition
+type SaveChanges = ({ taskInfo }: { taskInfo: Partial<Task> }) => void
+
 // Helper to check if the currently authenticated user is the owner of a task
 export function userOwnsTask({ owner }: Partial<Task>, user: User | null) {
   return user ? user.id === owner?.id : false
@@ -30,7 +33,7 @@ function EditableTitle({
   editing = false,
 }: {
   task: Task
-  saveChanges: ({ taskInfo }: { taskInfo: Partial<Task> }) => void
+  saveChanges: SaveChanges
   editing?: boolean
 }) {
   const [editingTitle, setEditingTitle] = useState(editing)
@@ -77,7 +80,7 @@ function EditableDescription({
   editing = false,
 }: {
   task: Task
-  saveChanges: ({ taskInfo }: { taskInfo: Partial<Task> }) => void
+  saveChanges: SaveChanges
   editing?: boolean
 }) {
   const [editingDescription, setEditingDescription] = useState(editing)
@@ -180,7 +183,7 @@ function OwnerSelect({
 }: {
   task: Partial<Task>
   user?: User | null
-  saveChanges: ({ taskInfo }: { taskInfo: Partial<Task> }) => void
+  saveChanges: SaveChanges
 }) {
   const nullUser: User = {
     name: 'No one',
@@ -273,7 +276,7 @@ function TaskMetadata({
 }: {
   task: Task
   user: User | null
-  saveChanges: ({ taskInfo }: { taskInfo: Partial<Task> }) => void
+  saveChanges: SaveChanges
 }) {
   const isOwner = userOwnsTask(task, user)
 
@@ -323,11 +326,7 @@ function TaskInfo({
   onSave,
   newTask,
 }: {
-  onSave: ({
-    taskInfo,
-  }: {
-    taskInfo: NewTaskInfo | Partial<Task>
-  }) => Promise<Task>
+  onSave: BackendEnvironment['taskManagement']['updateTask']
   task: Task
   user: User | null
   newTask?: boolean

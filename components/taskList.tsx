@@ -26,7 +26,7 @@ function TaskListing({
   task: Task
   selected: boolean
   onSelect: MouseEventHandler
-  onUpdate: (task: Partial<Task>) => void
+  onUpdate: BackendEnvironment['taskManagement']['updateTask']
 }) {
   return (
     <Link
@@ -42,7 +42,7 @@ function TaskListing({
         <StatusPill
           value={task.status}
           editable={userOwnsTask(task, user ?? null)}
-          onChange={(status) => onUpdate({ ...task, status })}
+          onChange={(status) => onUpdate({ taskInfo: { ...task, status } })}
         />
       </div>
       <div className="task-listing-owner">
@@ -80,11 +80,6 @@ export function TaskList({ options }: { options: TaskListOptions }) {
     taskManagement: { updateTask },
   } = useContext(BackendContext) as BackendEnvironment
   const data = useContext(DataContext) as AppData
-
-  const onUpdateTask = useCallback(
-    async (taskInfo: Partial<Task>) => await updateTask(taskInfo),
-    [updateTask]
-  )
 
   const {
     taskList: { value: tasks, isLoading },
@@ -134,7 +129,7 @@ export function TaskList({ options }: { options: TaskListOptions }) {
                 task={task}
                 selected={task.number === options.selectedTask.number}
                 onSelect={() => options.selectedTask.onChange(task.number)}
-                onUpdate={onUpdateTask}
+                onUpdate={updateTask}
               />
             ))}
           {isLoading && <TaskListingsGhost />}

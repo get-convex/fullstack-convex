@@ -31,11 +31,22 @@ export default mutation(
       throwUpdateError('User identity does not match task owner')
     }
 
-    const updatedInfo = { ...taskInfo } as Partial<Doc<'tasks'>>
-    if (taskInfo.owner !== undefined) {
-      updatedInfo.ownerId = taskInfo.owner && new Id('users', taskInfo.owner.id)
-      updatedInfo.ownerName = taskInfo.owner && taskInfo.owner.name
-    }
+    const { owner } = taskInfo
+    const ownerId = owner ? new Id('users', owner.id) : null
+    const ownerName = owner ? owner.name : null
+
+    // Un-join data from users, comments & files tables
+    delete taskInfo.owner
+    delete taskInfo.comments
+    delete taskInfo.files
+
+    // Delete fields that were auto-populated by Convex
+    delete taskInfo.creationTime
+    delete taskInfo.id
+
+    const updatedInfo = { ...taskInfo, ownerId, ownerName } as Partial<
+      Doc<'tasks'>
+    >
 
     // Get the current task document from the db to compare
     const currentDoc = await db.get(taskId)

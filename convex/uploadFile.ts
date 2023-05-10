@@ -1,7 +1,7 @@
 import { action, internalMutation, internalQuery } from './_generated/server'
 import { Id } from './_generated/dataModel'
 import { findUser, findByTask, countResults, getFileFromDoc } from './internal'
-import type { File, NewFileInfo } from '../types'
+import type { File, NewFileInfo } from '../fullstack/types'
 
 type FileDocInfo = {
   name: string

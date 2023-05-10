@@ -1,5 +1,5 @@
 import { DatabaseReader, QueryCtx } from './_generated/server'
-import { Comment, File, Visibility } from '../types'
+import { Comment, File, Visibility } from '../fullstack/types'
 import { Doc, Id } from './_generated/dataModel'
 import type { Auth, GenericTableInfo, OrderedQuery, Query } from 'convex/server'
 

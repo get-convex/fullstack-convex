@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { Status, STATUS_VALUES } from '../types'
+import { Status, STATUS_VALUES } from '../fullstack/types'
 import { CaretDownIcon } from './icons'
 import type { KeyboardEvent } from 'react'
 

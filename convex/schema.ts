@@ -1,6 +1,6 @@
 import { defineSchema, defineTable } from 'convex/schema'
 import { v } from 'convex/values'
-import { Status, Visibility } from '../types'
+import { Status, Visibility } from '../fullstack/types'
 
 export default defineSchema({
   tasks: defineTable({

@@ -1,6 +1,6 @@
 import { mutation } from './_generated/server'
 import { findUser, getTaskFromDoc } from './internal'
-import type { NewTaskInfo } from '../types'
+import type { NewTaskInfo } from '../fullstack/types'
 
 export default mutation(
   async (queryCtx, { taskInfo }: { taskInfo: NewTaskInfo }) => {

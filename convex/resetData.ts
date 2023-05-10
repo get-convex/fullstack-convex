@@ -1,7 +1,7 @@
 import { internalMutation, type DatabaseWriter } from './_generated/server'
 import { Id, Doc, type TableNames } from './_generated/dataModel'
 import { countResults, findByTask } from './internal'
-import { User, Task, Comment, File } from '../types'
+import { User, Task, Comment, File } from '../fullstack/types'
 import type { SafeFile } from './getSafeFiles'
 
 import users from '../fullstack/initialData/users'

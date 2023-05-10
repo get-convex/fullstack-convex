@@ -7,7 +7,7 @@ import { TaskList } from './taskList'
 import { NewTaskSidebar, TaskDetailSidebar } from './sidebar'
 import { BackendContext } from '../fullstack/backend'
 import { DataContext } from '../fullstack/data'
-import { TaskListOptions } from '../types'
+import { TaskListOptions } from '../fullstack/types'
 
 export function TaskManager({
   slug,

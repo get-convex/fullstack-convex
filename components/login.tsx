@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { BackendContext } from '../fullstack/backend'
 import { DataContext } from '../fullstack/data'
-import { AppData, BackendEnvironment, User } from '../types'
+import { AppData, BackendEnvironment, User } from '../fullstack/types'
 
 function LogoutButton() {
   const backend = useContext(BackendContext) as BackendEnvironment

@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, createContext } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useMutation, useAction } from '../convex/_generated/react'
 import type { Context, PropsWithChildren } from 'react'
-import type { BackendEnvironment } from '../types'
+import type { BackendEnvironment } from './types'
 
 export const BackendContext = createContext(
   null

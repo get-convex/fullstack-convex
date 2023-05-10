@@ -14,7 +14,7 @@ import {
   TaskListOptions,
   SortKey,
   SortOrder,
-} from '../../types'
+} from '../../fullstack/types'
 
 import { TaskManager } from '../../components/taskManager'
 import Head from 'next/head'

@@ -7,7 +7,7 @@ import {
   SortOrder,
   OWNER_VALUES,
   STATUS_VALUES,
-} from '../types'
+} from '../fullstack/types'
 import type { DataModel, Doc } from './_generated/dataModel'
 import type {
   PaginationOptions,

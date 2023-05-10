@@ -9,7 +9,13 @@ import React, {
 import Modal from 'react-modal'
 import Image from 'next/image'
 import type { FormEvent, MouseEvent, KeyboardEvent, EventHandler } from 'react'
-import { File, BackendEnvironment, NewFileInfo, Task, User } from '../types'
+import {
+  File,
+  BackendEnvironment,
+  NewFileInfo,
+  Task,
+  User,
+} from '../fullstack/types'
 import { BackendContext } from '../fullstack/backend'
 import { CircledXIcon, DownloadIcon, UploadIcon } from './icons'
 import Link from 'next/link'

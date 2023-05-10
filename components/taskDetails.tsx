@@ -13,7 +13,7 @@ import {
   Task,
   User,
   Visibility,
-} from '../types'
+} from '../fullstack/types'
 import { BackendContext } from '../fullstack/backend'
 import { DataContext } from '../fullstack/data'
 import { CalendarIcon, CaretDownIcon } from './icons'

@@ -10,7 +10,7 @@ import { useConvexAuth } from 'convex/react'
 import {
   useStableQuery,
   useStablePaginatedQuery,
-} from '../hooks/useStableQuery'
+} from '../convex-hooks/useStableQuery'
 import { BackendContext } from './backend'
 import type { Context, PropsWithChildren } from 'react'
 import type {
@@ -18,7 +18,7 @@ import type {
   BackendEnvironment,
   TaskListOptions,
   User,
-} from '../types'
+} from './types'
 
 const PAGE_SIZE = 10
 

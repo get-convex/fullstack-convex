@@ -1,4 +1,4 @@
-import { Task, User } from '../types'
+import { Task, User } from '../fullstack/types'
 
 // Check if the currently authenticated user is the owner of a task
 export function userOwnsTask({ owner }: Partial<Task>, user: User | null) {

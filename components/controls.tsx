@@ -13,7 +13,7 @@ import {
   User,
   AppData,
   Filter,
-} from '../types'
+} from '../fullstack/types'
 import { DataContext } from '../fullstack/data'
 import {
   CaretDownIcon,

@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
 import { Avatar } from './login'
 import { ArrowUpIcon } from './icons'
-import { BackendEnvironment, Comment, Task, User } from '../types'
+import { BackendEnvironment, Comment, Task, User } from '../fullstack/types'
 import { BackendContext } from '../fullstack/backend'
 import { showTimeAgo } from './helpers'
 

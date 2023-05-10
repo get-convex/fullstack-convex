@@ -82,7 +82,7 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
     (event: MouseEvent) => {
       // TODO keyboard
       event.stopPropagation()
-      const target = event.target as HTMLElement
+      const target = event.currentTarget as HTMLElement
       const key = target.id
       if (sortKey === key) {
         // We are already sorting by this key, so a click indicates an order reversal

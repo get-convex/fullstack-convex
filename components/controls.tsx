@@ -1,20 +1,12 @@
-import React, {
-  ChangeEvent,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   Status,
   STATUS_VALUES,
   OWNER_VALUES,
   User,
-  AppData,
   Filter,
 } from '../fullstack/types'
-import { DataContext } from '../fullstack/data'
 import {
   CaretDownIcon,
   CaretUpIcon,
@@ -276,15 +268,13 @@ export function Controls({
   status,
   owner,
   search,
+  user,
 }: {
   status: Filter<Status, ChangeEventHandler>
   owner: Filter<string, ChangeEventHandler>
   search: { term: string; onChange: (term: string) => void }
+  user: User | null
 }) {
-  const {
-    user: { value: user },
-  } = useContext(DataContext) as AppData
-
   const filters = {
     status: {
       options: STATUS_VALUES,

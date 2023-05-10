@@ -70,10 +70,16 @@ export function TaskManager({
               search={options.search}
               status={options.filter.status}
               owner={options.filter.owner}
+              user={data.user.value}
             />
           </Header>
         }
-        <TaskList options={options} />
+        <TaskList
+          options={options}
+          tasks={data.taskList.value}
+          isLoading={data.taskList.isLoading}
+          user={data.user.value}
+        />
         {slug === 'new' ? (
           <NewTaskSidebar
             onDismiss={() => changeSelectedTask(null)}

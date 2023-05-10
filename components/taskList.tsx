@@ -1,18 +1,16 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'
 import { StatusPill } from './status'
 import { PaperClipIcon, TextBubbleIcon } from './icons'
 import {
-  AppData,
   BackendEnvironment,
   Task,
   TaskListOptions,
   User,
 } from '../fullstack/types'
 import { BackendContext } from '../fullstack/backend'
-import { DataContext } from '../fullstack/data'
 import { userOwnsTask } from './helpers'
 
 function TaskListing({
@@ -75,26 +73,28 @@ export function TaskListingsGhost() {
   )
 }
 
-export function TaskList({ options }: { options: TaskListOptions }) {
+export function TaskList({
+  options,
+  tasks,
+  isLoading,
+  user,
+}: {
+  options: TaskListOptions
+  tasks: Task[] | null
+  isLoading: boolean
+  user: User | null
+}) {
   const {
     taskManagement: { updateTask },
   } = useContext(BackendContext) as BackendEnvironment
-  const data = useContext(DataContext) as AppData
 
-  const {
-    taskList: { value: tasks, isLoading },
-    user: { value: user },
-  } = data
+  const [isFirstLoad, setIsFirstLoad] = useState(true)
 
-  if (!isLoading && !tasks?.length) {
-    return (
-      <main className="task-list">
-        <div id="task-list-body">
-          <p>No matching tasks found</p>
-        </div>
-      </main>
-    )
-  } else {
+  useEffect(() => {
+    if (!isLoading) setIsFirstLoad(false)
+  }, [isLoading])
+
+  {
     const sortHandler = isLoading ? () => ({}) : options.sort.onChange
 
     return (
@@ -120,8 +120,18 @@ export function TaskList({ options }: { options: TaskListOptions }) {
           </div>
         </div>
         <div id="task-list-body">
-          {tasks &&
-            tasks.length > 0 &&
+          {!tasks?.length ? (
+            isFirstLoad ? (
+              <TaskListingsGhost />
+            ) : (
+              <>
+                <div className="task-listing">
+                  <p />
+                  <p>No matching tasks found {isLoading && <span>...</span>}</p>
+                </div>
+              </>
+            )
+          ) : (
             tasks.map((task) => (
               <TaskListing
                 key={task.number}
@@ -131,8 +141,8 @@ export function TaskList({ options }: { options: TaskListOptions }) {
                 onSelect={() => options.selectedTask.onChange(task.number)}
                 onUpdate={updateTask}
               />
-            ))}
-          {isLoading && <TaskListingsGhost />}
+            ))
+          )}
         </div>
       </main>
     )

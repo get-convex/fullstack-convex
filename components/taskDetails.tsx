@@ -522,44 +522,41 @@ export function TaskDetails() {
 function TaskDetailsGhost() {
   return (
     <div id="task-details">
-      <div id="task-header">
-        <h2>
-          <span id="task-number" className="ghost">
-            #0
-          </span>
-          <span className="ghost">
-            ........................................
-          </span>
-        </h2>
-      </div>
+      <div>
+        <div id="task-header">
+          <h2>
+            <span id="task-number" className="ghost">
+              #0
+            </span>
+            <span className="ghost">.................................</span>
+          </h2>
+        </div>
 
-      <div id="task-description">
-        <p className="ghost">
-          ....................................................
-        </p>
-      </div>
+        <div id="task-description">
+          <p className="ghost">..........................</p>
+        </div>
 
-      <div id="task-info">
-        <div className="task-info-row">
-          <h4>Owner</h4>
-          <div className="owner-details">
-            <div className="ghost avatar-ghost" />
-            <span className="ghost">Firstname Lastname</span>
+        <div id="task-meta">
+          <div className="task-meta-row">
+            <h4>Owner</h4>
+            <div className="owner-details ghost">
+              <span className="ghost">Firstname Lastname</span>
+            </div>
           </div>
-        </div>
 
-        <div className="task-info-row">
-          <h4>Status</h4>
-          <p>
-            <span className="badge ghost">..........</span>
-          </p>
-        </div>
+          <div className="task-meta-row">
+            <h4>Status</h4>
+            <p>
+              <span className="status-pill ghost">In progress</span>
+            </p>
+          </div>
 
-        <div className="task-info-row">
-          <h4>Created</h4>
-          <p>
-            <span className="ghost">ddd MMM DD YYYY</span>
-          </p>
+          <div className="task-meta-row">
+            <h4>Created</h4>
+            <p>
+              <span className="ghost">CAL ddd MMM DD YYYY</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>

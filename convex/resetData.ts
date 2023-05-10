@@ -1,8 +1,6 @@
 import { internalMutation, type DatabaseWriter } from './_generated/server'
 import { Id, Doc, type TableNames } from './_generated/dataModel'
 import { countResults, findByTask } from './internal'
-import { User, Task, Comment, File } from '../fullstack/types'
-import type { SafeFile } from './getSafeFiles'
 
 import users from '../fullstack/initialData/users'
 import tasks from '../fullstack/initialData/tasks'
@@ -85,8 +83,16 @@ async function resetTable(db: DatabaseWriter, table: TableNames) {
 
   const updated = await Promise.all(
     KEEP.map(async (keeper: dataType) => {
-      const info = { ...keeper } as User | Task | Comment | File | SafeFile
+      const info = { ...keeper } as Partial<
+        Doc<TableNames> & { id: string; creationTime: number }
+      >
       const docId = new Id(table, keeper.id)
+
+      // Rename fields auto-populated by Convex
+      info._id = docId
+      delete info.id
+      info._creationTime = keeper.creationTime
+      delete info.creationTime
 
       // Replace relational ID strings with ID objects
       if ('taskId' in info && 'taskId' in keeper) {

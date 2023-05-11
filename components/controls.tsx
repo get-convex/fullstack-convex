@@ -53,11 +53,23 @@ export function Select({
   // TODO keyboard handler
 
   return (
-    <div id={id} className="select" tabIndex={0} role="button">
+    <div
+      id={id}
+      className="select"
+      tabIndex={0}
+      role="button"
+      onBlur={(e) => {
+        if (!e.relatedTarget?.className.startsWith(`select-${id}-option`)) {
+          setShowOptions(false)
+        }
+      }}
+      onFocus={() => {
+        setShowOptions(true)
+      }}
+    >
       {
         <div
           className="control select-legend"
-          onClick={() => setShowOptions(!showOptions)}
           title={`Filter tasks by ${name}`}
         >
           <p>
@@ -75,15 +87,15 @@ export function Select({
       }
       {showOptions &&
         options.map((v, i) => {
-          const isDisabled = disabled
-            ? // If a value for disabled has been explicitly provided, use it
-              disabled[i]
-            : // To prevent de-selecting all values (resulting in empty task list),
-              // if there is only a single item selected, disable de-selecting it
-              isSelected(v) && selectedValues.length === 1
+          const isDisabled =
+            // If a value for disabled has been explicitly provided, use it
+            (disabled && disabled[i]) ||
+            // To prevent de-selecting all values (resulting in empty task list),
+            // if there is only a single item selected, disable de-selecting it
+            (isSelected(v) && selectedValues.length === 1)
           return (
             <label
-              className={`control select-option ${
+              className={`select-${id}-option control select-option  ${
                 isDisabled ? 'select-option-disabled' : ''
               }`}
               key={i}
@@ -92,6 +104,7 @@ export function Select({
               <input
                 type="checkbox"
                 id={`option-${v}`}
+                className={`select-${id}-option-input`}
                 name={name}
                 value={v}
                 checked={isSelected(v)}

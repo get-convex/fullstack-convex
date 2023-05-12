@@ -6,7 +6,11 @@ import { Visibility, type Task } from '../fullstack/types'
 export default mutation(
   async (queryCtx, { taskInfo }: { taskInfo: Partial<Task> }) => {
     function throwUpdateError(message: string) {
-      throw new Error(`Error updating task: ${message}, ${taskInfo}`)
+      throw new Error(
+        `Error updating task (id: ${taskInfo.id}): ${message}, ${JSON.stringify(
+          taskInfo
+        )}`
+      )
     }
 
     const { db, auth } = queryCtx

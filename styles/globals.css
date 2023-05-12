@@ -74,6 +74,7 @@ aside {
   position: relative;
   height: 100vh;
   overflow-y: scroll;
+  z-index: 10;
 }
 
 #close-sidebar {
@@ -106,7 +107,7 @@ header {
   justify-content: space-between;
   align-items: center;
   margin-top: 33px;
-  z-index: 1;
+  z-index: 6;
 }
 
 header a {
@@ -289,6 +290,7 @@ button.light {
 
 .task-list-header {
   position: sticky;
+  z-index: 5;
   top: 0px;
   left: 0px;
   background-color: var(--color-light);
@@ -464,7 +466,6 @@ button.light {
 #owner-select,
 #status-select {
   position: relative;
-  z-index: 3;
 }
 
 #owner-select > div {
@@ -504,6 +505,8 @@ button.light {
   border: 2px solid var(--color-white);
   border-radius: 40px;
   flex-grow: 0;
+  cursor: default;
+  position: relative;
 }
 
 .status-pill-editable {

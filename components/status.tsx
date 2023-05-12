@@ -24,67 +24,49 @@ export function StatusPill({
       }
       if (event.key === 'Enter') {
         event.preventDefault()
-        setEditing(editable)
+        if (editable) {
+          setEditing(true)
+        }
       }
     },
-    [editable]
+    [setEditing]
   )
 
-  const onKeyUp = useCallback(function (event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-    }
-  }, [])
-
-  // const onKeyDown = useCallback(
-  //   function (event: KeyboardEvent) {
-  //     if (event.key === 'Escape') {
-  //       event.preventDefault()
-  //       onCancel()
-  //     }
-  //     if (event.key === 'Enter') {
-  //       event.preventDefault()
-  //     }
-  //   },
-  //   [onCancel]
-  // )
-
-  // const onKeyUp = useCallback(
-  //   function (s: Status) {
-  //     return function (event: KeyboardEvent) {
-  //       if (event.key === 'Enter' && !event.shiftKey) {
-  //         event.preventDefault()
-  //         onChange(s)
-  //       }
-  //     }
-  //   },
-  //   [onChange]
-  // )
+  const getKeyUpHandler = useCallback(
+    function (s: Status) {
+      return function (event: KeyboardEvent) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault()
+          onChange(s)
+          setEditing(false)
+        }
+      }
+    },
+    [onChange, setEditing]
+  )
 
   return (
     <div
       id="status-select"
       role="button"
       style={{ height }}
-      onFocus={(e) => {
+      onClick={(e) => {
         e.stopPropagation()
         if (editable) {
           setEditing(true)
         }
       }}
-      // TODO
-      // onKeyDown={onKeyDown}
-      // onKeyUp={onKeyUp}
-      tabIndex={0}
+      onKeyDown={onKeyDown}
     >
       {editing ? (
         <div
           className={'status-options'}
           onBlur={(e) => {
-            e.preventDefault()
             e.stopPropagation()
-            setEditing(false)
+            if (!e.relatedTarget?.className.startsWith('status-option'))
+              setEditing(false)
           }}
+          tabIndex={0}
         >
           {STATUS_VALUES.map((s) => (
             <div
@@ -92,8 +74,8 @@ export function StatusPill({
               className={`status-option status-${s}`}
               tabIndex={0}
               // TODO
-              // onKeyDown={onKeyDown}
-              // onKeyUp={onKeyUp}
+              onKeyDown={onKeyDown}
+              onKeyUp={getKeyUpHandler(s)}
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -126,6 +108,7 @@ export function StatusPill({
           className={`status-pill status-${value}${
             editable ? ' status-pill-editable' : ''
           }`}
+          tabIndex={editable ? 0 : -1}
         >
           {Status[value]} {editable && <CaretDownIcon />}
         </div>

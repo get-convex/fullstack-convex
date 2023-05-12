@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
-import { Status, STATUS_VALUES } from '../fullstack/types'
 import { CaretDownIcon } from './icons'
+import { Status, STATUS_VALUES } from '../fullstack/types'
 import type { KeyboardEvent } from 'react'
 
 export function StatusPill({
@@ -18,127 +18,118 @@ export function StatusPill({
 
   const onKeyDown = useCallback(
     function (event: KeyboardEvent) {
-      if (editing && event.key === 'Escape') {
-        event.preventDefault()
-        setEditing(false)
-      }
-      if (event.key === 'Enter') {
-        event.preventDefault()
-      }
-    },
-    [editing]
-  )
-
-  const onKeyUp = useCallback(
-    function (event: KeyboardEvent) {
-      if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault()
-        setEditing(!editing)
-      }
-    },
-    [editing]
-  )
-
-  return editing ? (
-    <StatusSelect
-      value={value}
-      onChange={(s) => {
-        setEditing(false)
-        onChange(s)
-      }}
-      onCancel={() => {
-        setEditing(false)
-      }}
-    />
-  ) : (
-    <div
-      role="button"
-      className={`status-pill status-pill-${value}${
-        editable ? ' status-pill-editable' : ''
-      }`}
-      style={{ height }}
-      onClick={
-        editable
-          ? (e) => {
-              e.preventDefault()
-              setEditing(!editing)
-            }
-          : () => undefined
-      }
-      onKeyDown={onKeyDown}
-      onKeyUp={onKeyUp}
-      tabIndex={0}
-    >
-      {Status[value]} {editable && <CaretDownIcon />}
-    </div>
-  )
-}
-
-function StatusSelect({
-  value,
-  onChange,
-  onCancel,
-}: {
-  value: Status
-  onChange: (value: Status) => void
-  onCancel: () => void
-}) {
-  const onKeyDown = useCallback(
-    function (event: KeyboardEvent) {
       if (event.key === 'Escape') {
         event.preventDefault()
-        onCancel()
+        setEditing(false)
       }
       if (event.key === 'Enter') {
         event.preventDefault()
+        setEditing(editable)
       }
     },
-    [onCancel]
+    [editable]
   )
 
-  const onKeyUp = useCallback(
-    function (s: Status) {
-      return function (event: KeyboardEvent) {
-        if (event.key === 'Enter' && !event.shiftKey) {
-          event.preventDefault()
-          onChange(s)
-        }
-      }
-    },
-    [onChange]
-  )
+  const onKeyUp = useCallback(function (event: KeyboardEvent) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+    }
+  }, [])
+
+  // const onKeyDown = useCallback(
+  //   function (event: KeyboardEvent) {
+  //     if (event.key === 'Escape') {
+  //       event.preventDefault()
+  //       onCancel()
+  //     }
+  //     if (event.key === 'Enter') {
+  //       event.preventDefault()
+  //     }
+  //   },
+  //   [onCancel]
+  // )
+
+  // const onKeyUp = useCallback(
+  //   function (s: Status) {
+  //     return function (event: KeyboardEvent) {
+  //       if (event.key === 'Enter' && !event.shiftKey) {
+  //         event.preventDefault()
+  //         onChange(s)
+  //       }
+  //     }
+  //   },
+  //   [onChange]
+  // )
 
   return (
-    <div id="status-select">
-      {STATUS_VALUES.map((s) => (
+    <div
+      id="status-select"
+      role="button"
+      style={{ height }}
+      onFocus={(e) => {
+        e.stopPropagation()
+        if (editable) {
+          setEditing(true)
+        }
+      }}
+      // TODO
+      // onKeyDown={onKeyDown}
+      // onKeyUp={onKeyUp}
+      tabIndex={0}
+    >
+      {editing ? (
         <div
-          key={s}
-          tabIndex={0}
-          onKeyDown={onKeyDown}
-          onKeyUp={onKeyUp(s)}
-          className={`status-pill status-pill-${s} status-pill-editable`}
-          onClick={(e) => {
+          className={'status-options'}
+          onBlur={(e) => {
             e.preventDefault()
-            onChange(s)
+            e.stopPropagation()
+            setEditing(false)
           }}
         >
-          <input
-            type="radio"
-            name="status-select"
-            id={`status-${s}`}
-            value={s}
-            onChange={() => {
-              onChange(s)
-            }}
-            checked={s === value}
-            tabIndex={-1}
-            autoFocus={s === value}
-          />
-          <label className="status-label" htmlFor={`status-${s}`}>
-            {Status[s]}
-          </label>
+          {STATUS_VALUES.map((s) => (
+            <div
+              key={s}
+              className={`status-option status-${s}`}
+              tabIndex={0}
+              // TODO
+              // onKeyDown={onKeyDown}
+              // onKeyUp={onKeyUp}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onChange(s)
+                setEditing(false)
+              }}
+            >
+              <label className="status-label">
+                <input
+                  type="radio"
+                  name="status-select"
+                  className="status-input"
+                  value={s}
+                  onChange={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onChange(s)
+                    setEditing(false)
+                  }}
+                  checked={s === value}
+                  tabIndex={-1}
+                />
+                {Status[s]}
+              </label>
+            </div>
+          ))}
         </div>
-      ))}
+      ) : (
+        <div
+          className={`status-pill status-${value}${
+            editable ? ' status-pill-editable' : ''
+          }`}
+        >
+          {Status[value]} {editable && <CaretDownIcon />}
+        </div>
+      )}
     </div>
   )
 }

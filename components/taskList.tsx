@@ -37,7 +37,16 @@ function TaskListing({
       href={`/task/${task.number}`}
       className={`task-listing${selected ? ` selected-task` : ''}`}
       key={task.number}
-      onClick={onSelect}
+      onClick={(e) => {
+        console.log('listing click', e)
+        onSelect(e)
+      }}
+      onFocus={(e) => {
+        console.log('listing focus', e)
+      }}
+      onBlur={(e) => {
+        console.log('listing blur', e)
+      }}
       tabIndex={0}
     >
       <div className="task-listing-number">{task.number}</div>

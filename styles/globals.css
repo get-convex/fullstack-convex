@@ -509,36 +509,66 @@ button.light {
   position: relative;
 }
 
-.status-pill-editable {
+.status-options {
+  width: max-content;
+  overflow-y: visible;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
   z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 2px solid var(--color-white);
+  border-radius: 20px;
+  background-color: var(--color-light);
 }
 
-.status-pill-editable:hover {
+.status-option {
+  z-index: 3;
+  padding: 6px 12px;
+  border: 1px solid var(--color-white);
+}
+
+.status-option:first-child {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.status-option:last-child {
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.status-label {
+  display: flex;
+  gap: 5px;
+}
+
+.status-pill-editable,
+.status-input,
+.status-label {
   cursor: pointer;
 }
 
-.status-pill-editable > input {
-  z-index: 3;
-}
-
-.status-pill-editable > input {
+/* .status-pill-editable input {
   opacity: 0;
   position: absolute;
-}
+} */
 
-.status-pill-0 {
+.status-0 {
   background-color: var(--color-purple);
 }
 
-.status-pill-1 {
+.status-1 {
   background-color: var(--color-yellow);
 }
 
-.status-pill-2 {
+.status-2 {
   background-color: var(--color-green);
 }
 
-.status-pill-3 {
+.status-3 {
   background-color: var(--color-light-red);
 }
 

@@ -130,7 +130,11 @@ export default function DataProvider({
   const user = useUserData()
 
   // If a task is selected, query the db for the task details
-  const task = useStableQuery('getTask', { taskNumber })
+  const task = useStableQuery(
+    'getTask',
+    { taskNumber: taskNumber as number },
+    { skip: typeof taskNumber !== 'number' }
+  )
   const taskData = useMemo(
     () => ({ value: task || null, isLoading: task === undefined }),
     [task]

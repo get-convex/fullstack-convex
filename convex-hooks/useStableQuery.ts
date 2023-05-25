@@ -18,18 +18,19 @@ export const useStableQuery = ((name, ...args) => {
 
 export const useStablePaginatedQuery = ((name, args, options) => {
   const result = usePaginatedQuery(name, args, options)
-  const { results, status, loadMore } = result
+  const { results, status, isLoading, loadMore } = result
   const stored = useRef(results) // ref objects are stable between rerenders
 
   // If data is still loading, wait and do nothing
   // If data has finished loading, store the results array
-  if (!['LoadingFirstPage', 'LoadingMore'].includes(status)) {
+  if (isLoading) {
     stored.current = result.results
   }
 
   return {
     results: stored.current, // empty array on first load, stale data while loading, fresh data after loading
     status,
+    isLoading,
     loadMore,
   }
 }) as UsePaginatedQueryForAPI<API>

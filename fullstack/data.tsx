@@ -42,7 +42,7 @@ function useTaskListData(
   )
   const {
     results: taskList,
-    status: loadStatus,
+    isLoading,
     loadMore,
   } = useStablePaginatedQuery(
     'listTasks',
@@ -52,9 +52,9 @@ function useTaskListData(
   const taskListData = useMemo(
     () => ({
       value: taskList || null,
-      isLoading: ['LoadingFirstPage', 'LoadingMore'].includes(loadStatus),
+      isLoading,
     }),
-    [taskList, loadStatus]
+    [taskList, isLoading]
   ) as AppData['taskList']
 
   return [taskListData, loadMore]

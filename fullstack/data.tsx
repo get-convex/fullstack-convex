@@ -26,7 +26,7 @@ export const DataContext = createContext(null) as Context<AppData | null>
 
 function useTaskListData(
   options: TaskListOptions
-): [AppData['taskList'], ((n: number) => void)?] {
+): [AppData['taskList'], (n: number) => void] {
   // Get the list of tasks matching the given options selected by the user
   // (filter by status/owner, sort, text search)
   const { filter, sort, search } = options
@@ -52,7 +52,7 @@ function useTaskListData(
   const taskListData = useMemo(
     () => ({
       value: taskList || null,
-      isLoading: loadStatus === 'LoadingMore',
+      isLoading: ['LoadingFirstPage', 'LoadingMore'].includes(loadStatus),
     }),
     [taskList, loadStatus]
   ) as AppData['taskList']
@@ -94,7 +94,7 @@ function useUserData() {
   return userData
 }
 
-function LoadAtBottom({ loadTasks }: { loadTasks?: (n: number) => void }) {
+function LoadAtBottom({ loadTasks }: { loadTasks: (n: number) => void }) {
   // We use an IntersectionObserver to notice user has reached bottom of the page
   // Once they have scrolled to the bottom, load the next set of results
   const bottom = useRef<HTMLDivElement>(null)

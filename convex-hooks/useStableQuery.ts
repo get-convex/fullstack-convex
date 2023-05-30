@@ -23,7 +23,7 @@ export const useStablePaginatedQuery = ((name, args, options) => {
 
   // If data is still loading, wait and do nothing
   // If data has finished loading, store the results array
-  if (isLoading) {
+  if (!isLoading) {
     stored.current = result.results
   }
 

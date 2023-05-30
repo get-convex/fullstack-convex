@@ -6,12 +6,28 @@ import type { KeyboardEvent } from 'react'
 export function StatusPill({
   value,
   height = 20,
-  editable = false,
+}: {
+  value: Status
+  height?: number
+}) {
+  return (
+    <div
+      style={{ height }}
+      className={`status-pill status-${value} `}
+      tabIndex={0}
+    >
+      {Status[value]}
+    </div>
+  )
+}
+
+export function StatusPillEditable({
+  value,
+  height = 20,
   onChange,
 }: {
   value: Status
   height?: number
-  editable?: boolean
   onChange: (value: Status) => void
 }) {
   const [editing, setEditing] = useState(false)
@@ -24,9 +40,8 @@ export function StatusPill({
       }
       if (event.key === 'Enter') {
         event.preventDefault()
-        if (editable) {
-          setEditing(true)
-        }
+
+        setEditing(true)
       }
     },
     [setEditing]
@@ -52,9 +67,7 @@ export function StatusPill({
       style={{ height }}
       onClick={(e) => {
         e.stopPropagation()
-        if (editable) {
-          setEditing(true)
-        }
+        setEditing(true)
       }}
       onKeyDown={onKeyDown}
     >
@@ -73,7 +86,6 @@ export function StatusPill({
               key={s}
               className={`status-option status-${s}`}
               tabIndex={0}
-              // TODO
               onKeyDown={onKeyDown}
               onKeyUp={getKeyUpHandler(s)}
               onClick={(e) => {
@@ -105,12 +117,10 @@ export function StatusPill({
         </div>
       ) : (
         <div
-          className={`status-pill status-${value}${
-            editable ? ' status-pill-editable' : ''
-          }`}
-          tabIndex={editable ? 0 : -1}
+          className={`status-pill status-${value} status-pill-editable`}
+          tabIndex={0}
         >
-          {Status[value]} {editable && <CaretDownIcon />}
+          {Status[value]} <CaretDownIcon />
         </div>
       )}
     </div>

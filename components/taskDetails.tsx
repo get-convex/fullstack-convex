@@ -1,10 +1,9 @@
 import React, { useContext, useState, useCallback, useMemo } from 'react'
 import NextError from 'next/error'
 import { useRouter } from 'next/router'
-import { Avatar, NullAvatar } from './login'
 import { Comments } from './comments'
 import { Files } from './files'
-import { StatusPill } from './status'
+import { StatusPill, StatusPillEditable } from './status'
 import {
   AppData,
   BackendEnvironment,
@@ -16,16 +15,13 @@ import {
 } from '../fullstack/types'
 import { BackendContext } from '../fullstack/backend'
 import { DataContext } from '../fullstack/data'
-import { CalendarIcon, CaretDownIcon } from './icons'
+import { CalendarIcon } from './icons'
 import type { KeyboardEvent, FormEventHandler } from 'react'
+import { userOwnsTask } from './helpers'
+import { OwnerSelect } from './owner'
 
 // Helper type to avoid repetition
 type SaveChanges = ({ taskInfo }: { taskInfo: Partial<Task> }) => void
-
-// Helper to check if the currently authenticated user is the owner of a task
-export function userOwnsTask({ owner }: Partial<Task>, user: User | null) {
-  return user ? user.id === owner?.id : false
-}
 
 function EditableTitle({
   task,
@@ -176,99 +172,6 @@ function TextareaInput({
   )
 }
 
-function OwnerSelect({
-  task,
-  user,
-  saveChanges,
-}: {
-  task: Partial<Task>
-  user?: User | null
-  saveChanges: SaveChanges
-}) {
-  const nullUser: User = {
-    name: 'No one',
-    id: '',
-    pictureUrl: '',
-  }
-  const isNewTask = !task.id
-  const isPublic = task?.visibility === Visibility.PUBLIC
-  const canChangeOwner = user && (isPublic || isNewTask)
-  const isOwner = user ? user.id.toString() === task.owner?.id : false
-
-  const [editing, setEditing] = useState(false)
-
-  const handleClaimTask = useCallback(
-    function () {
-      const taskInfo = {
-        ...task,
-        owner: user,
-      } as Partial<Task>
-      saveChanges({ taskInfo })
-    },
-    [task, user, saveChanges]
-  )
-
-  const handleUnclaimTask = useCallback(
-    function () {
-      const taskInfo = { ...task, owner: null }
-      saveChanges({ taskInfo })
-    },
-    [task, saveChanges]
-  )
-
-  return (
-    <>
-      {canChangeOwner && editing ? (
-        <div id="owner-select">
-          {[task.owner || nullUser, isOwner ? nullUser : user].map((u, i) => {
-            const isCurrentOwner = userOwnsTask(task, u)
-            return (
-              <label
-                className="owner-option"
-                key={i}
-                tabIndex={0}
-                htmlFor={`owner-select-${i}`}
-              >
-                <input
-                  type="radio"
-                  name="owner-select"
-                  id={`owner-select-${i}`}
-                  value={u.id}
-                  tabIndex={-1}
-                  onChange={() => {
-                    if (!isCurrentOwner) {
-                      u.name === 'No one'
-                        ? handleUnclaimTask()
-                        : handleClaimTask()
-                    }
-                    setEditing(false)
-                  }}
-                  checked={isCurrentOwner}
-                />
-                {u.id ? <Avatar user={u} withName={true} /> : <NullAvatar />}
-              </label>
-            )
-          })}
-        </div>
-      ) : (
-        <button
-          id="owner-button"
-          onClick={() => (canChangeOwner ? setEditing(!editing) : null)}
-          title={canChangeOwner ? 'Change task owner' : 'Task owner'}
-          tabIndex={0}
-        >
-          {task?.owner ? (
-            <Avatar user={task.owner} withName={true} />
-          ) : (
-            <NullAvatar />
-          )}
-          {canChangeOwner && <CaretDownIcon />}
-        </button>
-      )}
-    </>
-  )
-}
-
 function TaskMetadata({
   task,
   user,
@@ -292,21 +195,20 @@ function TaskMetadata({
     <div id="task-meta">
       <div className="task-meta-row">
         <h4>Owner</h4>
-        <div>
-          <OwnerSelect task={task} user={user} saveChanges={saveChanges} />
-        </div>
+        <OwnerSelect task={task} user={user} saveChanges={saveChanges} />
       </div>
 
       <div className="task-meta-row">
         <h4>Status</h4>
-        <div>
-          <StatusPill
+        {isOwner ? (
+          <StatusPillEditable
             value={task.status}
             height={30}
-            editable={isOwner}
             onChange={handleChangeStatus}
           />
-        </div>
+        ) : (
+          <StatusPill value={task.status} height={30} />
+        )}
       </div>
 
       <div className="task-meta-row">
@@ -453,10 +355,9 @@ export function NewTaskDetails({
           <div className="task-meta-row">
             <h4>Status</h4>
             <div>
-              <StatusPill
+              <StatusPillEditable
                 value={status}
                 height={30}
-                editable={true}
                 onChange={setStatus}
               />
             </div>

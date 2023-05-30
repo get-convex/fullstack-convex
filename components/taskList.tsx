@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'
@@ -9,28 +9,17 @@ import {
   PaperClipIcon,
   TextBubbleIcon,
 } from './icons'
-import {
-  BackendEnvironment,
-  Task,
-  TaskListOptions,
-  User,
-} from '../fullstack/types'
-import { BackendContext } from '../fullstack/backend'
-import { userOwnsTask } from './helpers'
+import type { Task, TaskListOptions } from '../fullstack/types'
 import { SortOrder } from '../fullstack/types'
 
 function TaskListing({
-  user,
   task,
   selected = false,
   onSelect,
-  onUpdate,
 }: {
-  user?: User | null
   task: Task
   selected: boolean
   onSelect: MouseEventHandler
-  onUpdate: BackendEnvironment['taskManagement']['updateTask']
 }) {
   return (
     <Link
@@ -38,25 +27,14 @@ function TaskListing({
       className={`task-listing${selected ? ` selected-task` : ''}`}
       key={task.number}
       onClick={(e) => {
-        console.log('listing click', e)
         onSelect(e)
-      }}
-      onFocus={(e) => {
-        console.log('listing focus', e)
-      }}
-      onBlur={(e) => {
-        console.log('listing blur', e)
       }}
       tabIndex={0}
     >
       <div className="task-listing-number">{task.number}</div>
       <div className="task-listing-title">{task.title}</div>
       <div className="task-listing-status">
-        <StatusPill
-          value={task.status}
-          editable={userOwnsTask(task, user ?? null)}
-          onChange={(status) => onUpdate({ taskInfo: { ...task, status } })}
-        />
+        <StatusPill value={task.status} />
       </div>
       <div className="task-listing-owner">
         {task.owner && <Avatar user={task.owner} size={23} withName={true} />}
@@ -133,17 +111,11 @@ export function TaskList({
   options,
   tasks,
   isLoading,
-  user,
 }: {
   options: TaskListOptions
   tasks: Task[] | null
   isLoading: boolean
-  user: User | null
 }) {
-  const {
-    taskManagement: { updateTask },
-  } = useContext(BackendContext) as BackendEnvironment
-
   const [isFirstLoad, setIsFirstLoad] = useState(true)
 
   useEffect(() => {
@@ -190,11 +162,9 @@ export function TaskList({
           tasks.map((task) => (
             <TaskListing
               key={task.number}
-              user={user}
               task={task}
               selected={task.number === options.selectedTask.number}
               onSelect={() => options.selectedTask.onChange(task.number)}
-              onUpdate={updateTask}
             />
           ))
         )}

@@ -461,24 +461,11 @@ button.light {
   width: calc(100% - 19px);
 }
 
-/* Task owner & status */
+/* Owner & Status dropdowns */
 
-#owner-select,
-#status-select {
-  position: relative;
-}
-
-#owner-select > div {
-  display: flex;
-  flex-direction: column;
-}
-
-#owner-button {
-  display: flex;
-  gap: 10px;
-  justify-content: left;
-  font-size: inherit;
-  background-color: var(--color-light);
+#status-select,
+#owner-select {
+  height: 2em;
 }
 
 .owner-option {
@@ -486,19 +473,15 @@ button.light {
   display: flex;
   align-items: center;
   padding: 3px 12px;
-  position: relative;
+  align-items: center;
   top: 0;
   border: 2px solid var(--color-white);
-  border-radius: 40px;
 }
 
-.owner-option input {
-  position: absolute;
-  opacity: 0;
-}
-
-.status-pill {
+.status-pill,
+.owner-editable {
   display: flex;
+  justify-content: left;
   align-items: center;
   gap: 5px;
   padding: 3px 12px;
@@ -509,38 +492,53 @@ button.light {
   position: relative;
 }
 
-.status-options {
+.status-options,
+.owner-options {
+  height: 2em;
   width: max-content;
   overflow-y: visible;
   display: flex;
   flex-direction: column;
-  justify-content: left;
+  justify-content: flex-start;
+  align-items: center;
   z-index: 2;
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
   border: 2px solid var(--color-white);
   border-radius: 20px;
+}
+
+.status-options {
   background-color: var(--color-light);
 }
 
-.status-option {
+.owner-options {
+  background-color: var(--color-grey);
+}
+
+.status-option,
+.owner-option {
+  width: 100%;
   z-index: 3;
   padding: 6px 12px;
   border: 1px solid var(--color-white);
 }
 
-.status-option:first-child {
+.status-option:first-child,
+.owner-option:first-child {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
 }
 
-.status-option:last-child {
+.status-option:last-child,
+.owner-option:last-child {
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
 }
 
-.status-label {
+.status-label,
+.owner-label {
   display: flex;
   gap: 5px;
 }
@@ -550,11 +548,6 @@ button.light {
 .status-label {
   cursor: pointer;
 }
-
-/* .status-pill-editable input {
-  opacity: 0;
-  position: absolute;
-} */
 
 .status-0 {
   background-color: var(--color-purple);

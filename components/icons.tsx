@@ -228,6 +228,7 @@ export function SearchIcon() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Search magnifying glass icon"
+      role="img"
     >
       <path
         fillRule="evenodd"

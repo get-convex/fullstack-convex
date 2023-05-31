@@ -105,7 +105,7 @@ export type TaskListOptions = {
   sort: {
     key: SortKey
     order: SortOrder
-    onChange: MouseEventHandler
+    onChange: (key: SortKey) => void
   }
   search: {
     term: string

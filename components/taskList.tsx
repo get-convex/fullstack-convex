@@ -1,6 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  type MouseEventHandler,
+  KeyboardEventHandler,
+} from 'react'
 import Link from 'next/link'
-import type { MouseEventHandler } from 'react'
 import { Avatar } from './login'
 import { StatusPill } from './status'
 import {
@@ -9,8 +14,12 @@ import {
   PaperClipIcon,
   TextBubbleIcon,
 } from './icons'
-import type { Task, TaskListOptions } from '../fullstack/types'
-import { SortOrder } from '../fullstack/types'
+import {
+  SortOrder,
+  type SortKey,
+  type Task,
+  type TaskListOptions,
+} from '../fullstack/types'
 
 function TaskListing({
   task,
@@ -69,12 +78,12 @@ export function TaskListingsGhost() {
 function SortableColumnHeader({
   id,
   label,
-  onClick,
+  onChangeSort,
   isSorted,
 }: {
   id: string
   label: string
-  onClick: MouseEventHandler
+  onChangeSort: (key: SortKey) => void
   isSorted: SortOrder | null
 }) {
   let title: string
@@ -89,10 +98,35 @@ function SortableColumnHeader({
     default:
       title = id
   }
+
+  const onClick = ((event) => {
+    event.stopPropagation()
+    const target = event.currentTarget as HTMLElement
+    const key = target.id as SortKey
+    return onChangeSort(key)
+  }) as MouseEventHandler
+
+  const onKeyDown = ((event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+    }
+  }) as KeyboardEventHandler
+
+  const onKeyUp = ((event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      const target = event.currentTarget as HTMLElement
+      const sortKey = target.id as SortKey
+      return onChangeSort(sortKey)
+    }
+  }) as KeyboardEventHandler
+
   return (
     <div
       id={id}
       onClick={onClick}
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
       title={
         isSorted
           ? `Tasks sorted by ${title} (${isSorted}ending)`
@@ -122,7 +156,7 @@ export function TaskList({
     if (!isLoading) setIsFirstLoad(false)
   }, [isLoading])
 
-  const sortHandler = options.sort.onChange
+  const onChangeSort = options.sort.onChange
   const sortKey = options.sort.key as string
   const sortOrder = options.sort.order
 
@@ -141,7 +175,7 @@ export function TaskList({
             key={id}
             id={id}
             label={label}
-            onClick={sortHandler}
+            onChangeSort={onChangeSort}
             isSorted={sortKey === id ? sortOrder : null}
           />
         ))}

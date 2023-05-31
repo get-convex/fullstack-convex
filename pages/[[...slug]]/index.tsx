@@ -1,4 +1,4 @@
-import React, { useState, useCallback, MouseEvent, useMemo } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import BackendProvider from '../../fullstack/backend'
 import DataProvider from '../../fullstack/data'
 import {
@@ -44,19 +44,14 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
   const [sortKey, setSortKey] = useState(SortKey.NUMBER)
   const [sortOrder, setSortOrder] = useState(SortOrder.DESC)
   const onChangeSort = useCallback(
-    (event: MouseEvent) => {
-      // TODO keyboard
-      event.stopPropagation()
-      const target = event.currentTarget as HTMLElement
-      const key = target.id
+    (key: SortKey) => {
       if (sortKey === key) {
         // We are already sorting by this key, so a click indicates an order reversal
         setSortOrder(
           sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC
         )
       } else {
-        setSortKey(key as SortKey)
-        setSortOrder(SortOrder.ASC)
+        setSortKey(key)
       }
     },
     [sortKey, sortOrder]

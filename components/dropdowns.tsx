@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import type {
   ChangeEventHandler,
   KeyboardEventHandler,
@@ -23,7 +23,7 @@ export function CheckboxDropdown<Value>({
   titles?: string[]
   disabled?: boolean[]
 }) {
-  const id = `select-${name}`
+  const id = `checkbox-dropdown-${name}`
   const isSelected = (value: Value) => selectedValues.includes(value)
   const [editing, setEditing] = useState(false)
   const optionLabels = labels || options.map((o) => `${o}`)
@@ -41,7 +41,7 @@ export function CheckboxDropdown<Value>({
   } as KeyboardEventHandler
 
   const onBlur = function (e) {
-    if (!e.relatedTarget?.className.startsWith(`select-${id}`)) {
+    if (!e.relatedTarget?.className.startsWith(`checkbox-option`)) {
       setEditing(false)
     }
   } as FocusEventHandler
@@ -119,38 +119,136 @@ export function CheckboxDropdown<Value>({
 
           return (
             <label
-              className={`select-${id}-option control select-option  ${
+              className={`checkbox-option ${id}-option control select-option  ${
                 isDisabled ? 'select-option-disabled' : ''
               }`}
               key={i}
-              title={titles ? titles[i].toString() : optionLabels[i]}
+              tabIndex={0}
               onBlur={onBlur}
+              onClick={() => disabled || onInputChange(v)}
+              onKeyDown={onInputKeyDown}
+              onKeyUp={onInputKeyUp(v)}
+              title={
+                isDisabled
+                  ? isSelected(v) && selectedValues.length === 1
+                    ? 'At least one value must be selected'
+                    : titles && titles[i]
+                  : isSelected(v)
+                  ? 'Uncheck to exclude these tasks'
+                  : 'Check to include these tasks'
+              }
             >
               <input
                 type="checkbox"
-                id={`option-${v}`}
-                className={`select-${id}-option-input`}
+                id={`checkbox-option-${v}`}
+                className={`checkbox-option select-option ${id}-option-input`}
                 name={name}
                 value={`${v}`}
                 checked={isSelected(v)}
                 onChange={onInputChange(v)}
-                onKeyDown={onInputKeyDown}
-                onKeyUp={onInputKeyUp(v)}
+                tabIndex={-1}
                 disabled={isDisabled}
-                title={
-                  isDisabled
-                    ? isSelected(v) && selectedValues.length === 1
-                      ? 'At least one value must be selected'
-                      : titles && titles[i]
-                    : isSelected(v)
-                    ? 'Uncheck to exclude these tasks'
-                    : 'Check to include these tasks'
-                }
               />
               {optionLabels[i]}
             </label>
           )
         })}
     </div>
+  )
+}
+
+export function RadioDropdown<Value>({
+  name,
+  options,
+  selectedValue,
+  onChange,
+  labels,
+}: {
+  name: string
+  options: Value[]
+  selectedValue: Value
+  onChange: (value: Value) => void
+  labels?: string[]
+}) {
+  const id = `radio-dropdown-${name}`
+  const optionLabels = labels || options.map((o) => `${o}`)
+  const selectedLabel = optionLabels[options.indexOf(selectedValue)]
+  const [editing, setEditing] = useState(false)
+
+  const onKeyDown = function (event) {
+    if (event.key === 'Escape' || event.key === 'Enter') {
+      event.preventDefault()
+    }
+  } as KeyboardEventHandler
+
+  const getKeyUpHandler = useCallback(
+    function (s: Value) {
+      return function (event) {
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          setEditing(false)
+        }
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault()
+          onChange(s)
+          setEditing(false)
+        }
+      } as KeyboardEventHandler
+    },
+    [onChange, setEditing]
+  )
+
+  return (
+    <form id={id}>
+      {editing ? (
+        <div
+          className="dropdown-options"
+          onBlurCapture={(e) => {
+            if (!e.relatedTarget?.className.startsWith('dropdown-option'))
+              setEditing(false)
+          }}
+          onKeyDown={onKeyDown}
+          role="menu"
+        >
+          {options.map((v, i) => (
+            <label
+              key={i}
+              className={`dropdown-option ${name}-option ${name}-${v} dropdown-option-label`}
+              tabIndex={0}
+              role="menuitemradio"
+              onKeyDown={onKeyDown}
+              onKeyUp={getKeyUpHandler(v)}
+            >
+              <input
+                type="radio"
+                name={id}
+                className={`dropdown-option-input`}
+                value={`${v}`}
+                onChange={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onChange(v)
+                  setEditing(false)
+                }}
+                checked={v === selectedValue}
+                tabIndex={-1}
+              />
+              {optionLabels[i]}
+            </label>
+          ))}
+        </div>
+      ) : (
+        <button
+          className={`dropdown`}
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            setEditing(!editing)
+          }}
+        >
+          {selectedLabel} <CaretDownIcon />
+        </button>
+      )}
+    </form>
   )
 }

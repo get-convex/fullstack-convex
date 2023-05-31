@@ -20,43 +20,45 @@ interface FilterControl<V> {
   disabled?: boolean[]
 }
 
-export function StatusControl({
-  options,
-  labels,
-  selected,
-  onChange,
-}: FilterControl<number>) {
-  return (
-    <CheckboxDropdown
-      name="Status"
-      options={options}
-      selectedValues={selected}
-      onChange={onChange}
-      labels={labels}
-    />
-  )
-}
+// export function StatusControl({
+//   options,
+//   labels,
+//   selected,
+//   onChange,
+// }: FilterControl<number>) {
+//   const StatusFilterControl = CheckboxDropdown<Status>
+//   return (
+//     <StatusFilterControl
+//       name="Status"
+//       options={options}
+//       selectedValues={selected}
+//       onChange={onChange}
+//       labels={labels}
+//     />
+//   )
+// }
 
-export function OwnerControl({
-  options,
-  labels,
-  titles,
-  disabled,
-  selected,
-  onChange,
-}: FilterControl<string>) {
-  return (
-    <CheckboxDropdown
-      name="Owner"
-      options={options}
-      selectedValues={selected}
-      onChange={onChange}
-      labels={labels || options.map((o) => o.toString())}
-      titles={titles}
-      disabled={disabled}
-    />
-  )
-}
+// export function OwnerControl({
+//   options,
+//   labels,
+//   titles,
+//   disabled,
+//   selected,
+//   onChange,
+// }: FilterControl<string>) {
+//   const OwnerDropdown = O
+//   return (
+//     <CheckboxDropdown
+//       name="Owner"
+//       options={options}
+//       selectedValues={selected}
+//       onChange={onChange}
+//       labels={labels || options.map((o) => o.toString())}
+//       titles={titles}
+//       disabled={disabled}
+//     />
+//   )
+// }
 
 export function AddTaskButton({ user }: { user?: User | null }) {
   if (user === undefined) {
@@ -202,22 +204,27 @@ export function Controls({
     },
   }
 
+  const StatusFilterControl = CheckboxDropdown<Status>
+  const OwnerFilterControl = CheckboxDropdown<string>
+
   return (
     <div id="controls">
       <div>
-        <StatusControl
+        <StatusFilterControl
+          name="Status"
           options={filters.status.options}
           labels={filters.status.labels}
           titles={filters.status.titles}
           disabled={filters.owner.disabled}
-          selected={filters.status.selected}
+          selectedValues={filters.status.selected}
           onChange={filters.status.onChange}
         />
-        <OwnerControl
+        <OwnerFilterControl
+          name="Owner"
           options={filters.owner.options}
           titles={filters.owner.titles}
           disabled={filters.owner.disabled}
-          selected={filters.owner.selected}
+          selectedValues={filters.owner.selected}
           onChange={filters.owner.onChange}
         />
         <SearchControl searchTerm={search.term} onChange={search.onChange} />

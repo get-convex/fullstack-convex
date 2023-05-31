@@ -1,7 +1,6 @@
-import React, { KeyboardEventHandler, useCallback, useState } from 'react'
-import { CaretDownIcon } from './icons'
+import React from 'react'
 import { Status, STATUS_VALUES } from '../fullstack/types'
-import type { KeyboardEvent } from 'react'
+import { RadioDropdown } from './dropdowns'
 
 export function StatusPill({
   value,
@@ -26,82 +25,18 @@ export function StatusPillEditable({
   height?: number
   onChange: (value: Status) => void
 }) {
-  const [editing, setEditing] = useState(false)
-
-  const onKeyDown = function (event) {
-    if (event.key === 'Escape' || event.key === 'Enter') {
-      event.preventDefault()
-    }
-  } as KeyboardEventHandler
-
-  const getKeyUpHandler = useCallback(
-    function (s: Status) {
-      return function (event: KeyboardEvent) {
-        if (event.key === 'Escape') {
-          event.preventDefault()
-          setEditing(false)
-        }
-        if (event.key === 'Enter' && !event.shiftKey) {
-          event.preventDefault()
-          onChange(s)
-          setEditing(false)
-        }
-      }
-    },
-    [onChange, setEditing]
-  )
-
   return (
-    <form id="status-select" style={{ height }}>
-      {editing ? (
-        <div
-          className="status-options"
-          onBlurCapture={(e) => {
-            if (!e.relatedTarget?.className.startsWith('status-option'))
-              setEditing(false)
-          }}
-          onKeyDown={onKeyDown}
-          role="menu"
-        >
-          {STATUS_VALUES.map((s) => (
-            <label
-              key={s}
-              className={`status-option status-${s}  status-label`}
-              tabIndex={0}
-              role="menuitemradio"
-              onKeyDown={onKeyDown}
-              onKeyUp={getKeyUpHandler(s)}
-            >
-              <input
-                type="radio"
-                name="status-select"
-                className={`status-option-${s} status-input`}
-                value={s}
-                onChange={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  onChange(s)
-                  setEditing(false)
-                }}
-                checked={s === value}
-                tabIndex={-1}
-              />
-              {Status[s]}
-            </label>
-          ))}
-        </div>
-      ) : (
-        <button
-          className={`status-pill status-${value} status-pill-editable`}
-          onClick={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            setEditing(!editing)
-          }}
-        >
-          {Status[value]} <CaretDownIcon />
-        </button>
-      )}
-    </form>
+    <div
+      id={`status-select status-pill status-pill-editable status-${value}`}
+      style={{ height }}
+    >
+      <RadioDropdown
+        name="status"
+        selectedValue={value}
+        options={STATUS_VALUES}
+        labels={STATUS_VALUES.map((v) => Status[v])}
+        onChange={onChange}
+      />
+    </div>
   )
 }

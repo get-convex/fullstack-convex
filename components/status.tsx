@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { KeyboardEventHandler, useCallback, useState } from 'react'
 import { CaretDownIcon } from './icons'
 import { Status, STATUS_VALUES } from '../fullstack/types'
 import type { KeyboardEvent } from 'react'
@@ -11,11 +11,7 @@ export function StatusPill({
   height?: number
 }) {
   return (
-    <div
-      style={{ height }}
-      className={`status-pill status-${value} `}
-      tabIndex={0}
-    >
+    <div style={{ height }} className={`status-pill status-${value} `}>
       {Status[value]}
     </div>
   )
@@ -32,24 +28,19 @@ export function StatusPillEditable({
 }) {
   const [editing, setEditing] = useState(false)
 
-  const onKeyDown = useCallback(
-    function (event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        setEditing(false)
-      }
-      if (event.key === 'Enter') {
-        event.preventDefault()
-
-        setEditing(true)
-      }
-    },
-    [setEditing]
-  )
+  const onKeyDown = function (event) {
+    if (event.key === 'Escape' || event.key === 'Enter') {
+      event.preventDefault()
+    }
+  } as KeyboardEventHandler
 
   const getKeyUpHandler = useCallback(
     function (s: Status) {
       return function (event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          setEditing(false)
+        }
         if (event.key === 'Enter' && !event.shiftKey) {
           event.preventDefault()
           onChange(s)
@@ -61,68 +52,56 @@ export function StatusPillEditable({
   )
 
   return (
-    <div
-      id="status-select"
-      role="button"
-      style={{ height }}
-      onClick={(e) => {
-        e.stopPropagation()
-        setEditing(true)
-      }}
-      onKeyDown={onKeyDown}
-    >
+    <form id="status-select" style={{ height }}>
       {editing ? (
         <div
-          className={'status-options'}
-          onBlur={(e) => {
-            e.stopPropagation()
+          className="status-options"
+          onBlurCapture={(e) => {
             if (!e.relatedTarget?.className.startsWith('status-option'))
               setEditing(false)
           }}
-          tabIndex={0}
+          onKeyDown={onKeyDown}
+          role="menu"
         >
           {STATUS_VALUES.map((s) => (
-            <div
+            <label
               key={s}
-              className={`status-option status-${s}`}
+              className={`status-option status-${s}  status-label`}
               tabIndex={0}
+              role="menuitemradio"
               onKeyDown={onKeyDown}
               onKeyUp={getKeyUpHandler(s)}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                onChange(s)
-                setEditing(false)
-              }}
             >
-              <label className="status-label">
-                <input
-                  type="radio"
-                  name="status-select"
-                  className="status-input"
-                  value={s}
-                  onChange={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    onChange(s)
-                    setEditing(false)
-                  }}
-                  checked={s === value}
-                  tabIndex={-1}
-                />
-                {Status[s]}
-              </label>
-            </div>
+              <input
+                type="radio"
+                name="status-select"
+                className={`status-option-${s} status-input`}
+                value={s}
+                onChange={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onChange(s)
+                  setEditing(false)
+                }}
+                checked={s === value}
+                tabIndex={-1}
+              />
+              {Status[s]}
+            </label>
           ))}
         </div>
       ) : (
-        <div
+        <button
           className={`status-pill status-${value} status-pill-editable`}
-          tabIndex={0}
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            setEditing(!editing)
+          }}
         >
           {Status[value]} <CaretDownIcon />
-        </div>
+        </button>
       )}
-    </div>
+    </form>
   )
 }

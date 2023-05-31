@@ -1,11 +1,9 @@
 import React, {
-  useCallback,
   useEffect,
   useState,
   type MouseEventHandler,
-  KeyboardEventHandler,
+  type KeyboardEventHandler,
 } from 'react'
-import Link from 'next/link'
 import { Avatar } from './login'
 import { StatusPill } from './status'
 import {
@@ -20,43 +18,7 @@ import {
   type Task,
   type TaskListOptions,
 } from '../fullstack/types'
-
-function TaskListing({
-  task,
-  selected = false,
-  onSelect,
-}: {
-  task: Task
-  selected: boolean
-  onSelect: MouseEventHandler
-}) {
-  return (
-    <Link
-      href={`/task/${task.number}`}
-      className={`task-listing${selected ? ` selected-task` : ''}`}
-      key={task.number}
-      onClick={(e) => {
-        onSelect(e)
-      }}
-      tabIndex={0}
-    >
-      <div className="task-listing-number">{task.number}</div>
-      <div className="task-listing-title">{task.title}</div>
-      <div className="task-listing-status">
-        <StatusPill value={task.status} />
-      </div>
-      <div className="task-listing-owner">
-        {task.owner && <Avatar user={task.owner} size={23} withName={true} />}
-      </div>
-      <div className="task-listing-fileCount">
-        <PaperClipIcon /> {task.files.length}
-      </div>
-      <div className="task-listing-commentCount">
-        <TextBubbleIcon /> {task.comments.length}
-      </div>
-    </Link>
-  )
-}
+import { useRouter } from 'next/router'
 
 export function TaskListingsGhost() {
   return (
@@ -75,16 +37,83 @@ export function TaskListingsGhost() {
   )
 }
 
+function TaskListing({
+  task,
+  selected = false,
+  onSelect,
+}: {
+  task: Task
+  selected: boolean
+  onSelect: TaskListOptions['selectedTask']['onChange']
+}) {
+  const onClick = (() => {
+    onSelect(task.number)
+  }) as MouseEventHandler
+
+  const onKeyDown = ((e) => {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+      e.preventDefault()
+    }
+  }) as KeyboardEventHandler
+
+  const onKeyUp = ((e) => {
+    e.preventDefault()
+    if (selected && e.key === 'Escape') {
+      onSelect(null)
+    }
+    if (!selected && e.key === 'Enter') {
+      onSelect(task.number)
+    }
+  }) as KeyboardEventHandler
+
+  return (
+    <div
+      key={task.number}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
+      tabIndex={0}
+      role="link"
+    >
+      <div
+        className={`task-listing${selected ? ` selected-task` : ''}`}
+        role="row"
+      >
+        <div role="cell" className="task-listing-number">
+          {task.number}
+        </div>
+        <div role="cell" className="task-listing-title">
+          {task.title}
+        </div>
+        <div role="cell" className="task-listing-status">
+          <StatusPill value={task.status} />
+        </div>
+        <div role="cell" className="task-listing-owner">
+          {task.owner && <Avatar user={task.owner} size={23} withName={true} />}
+        </div>
+        <div role="cell" className="task-listing-fileCount">
+          <PaperClipIcon /> {task.files.length}
+        </div>
+        <div role="cell" className="task-listing-commentCount">
+          <TextBubbleIcon /> {task.comments.length}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function SortableColumnHeader({
   id,
   label,
   onChangeSort,
-  isSorted,
+  sortOrder,
+  isCurrentKey,
 }: {
   id: string
   label: string
   onChangeSort: (key: SortKey) => void
-  isSorted: SortOrder | null
+  sortOrder: SortOrder
+  isCurrentKey: boolean
 }) {
   let title: string
   switch (id) {
@@ -124,19 +153,16 @@ function SortableColumnHeader({
   return (
     <div
       id={id}
+      title={`Sort tasks ${title} (${sortOrder}ending)`}
+      role="columnheader"
       onClick={onClick}
       onKeyDown={onKeyDown}
       onKeyUp={onKeyUp}
-      title={
-        isSorted
-          ? `Tasks sorted by ${title} (${isSorted}ending)`
-          : `Sort tasks by ${title}`
-      }
       tabIndex={0}
     >
       {label}
-      {isSorted &&
-        (isSorted === SortOrder.DESC ? <CaretUpIcon /> : <CaretDownIcon />)}
+      {isCurrentKey &&
+        (sortOrder === SortOrder.DESC ? <CaretUpIcon /> : <CaretDownIcon />)}
     </div>
   )
 }
@@ -150,6 +176,7 @@ export function TaskList({
   tasks: Task[] | null
   isLoading: boolean
 }) {
+  const router = useRouter()
   const [isFirstLoad, setIsFirstLoad] = useState(true)
 
   useEffect(() => {
@@ -159,6 +186,15 @@ export function TaskList({
   const onChangeSort = options.sort.onChange
   const sortKey = options.sort.key as string
   const sortOrder = options.sort.order
+
+  const onChangeSelected = (taskNumber: number | null) => {
+    if (!taskNumber) {
+      router.push('/')
+    } else {
+      router.push(`/task/${taskNumber}`)
+    }
+    options.selectedTask.onChange(taskNumber)
+  }
 
   return (
     <main className="task-list">
@@ -176,7 +212,8 @@ export function TaskList({
             id={id}
             label={label}
             onChangeSort={onChangeSort}
-            isSorted={sortKey === id ? sortOrder : null}
+            sortOrder={sortOrder}
+            isCurrentKey={sortKey === id}
           />
         ))}
       </div>
@@ -198,7 +235,7 @@ export function TaskList({
               key={task.number}
               task={task}
               selected={task.number === options.selectedTask.number}
-              onSelect={() => options.selectedTask.onChange(task.number)}
+              onSelect={onChangeSelected}
             />
           ))
         )}

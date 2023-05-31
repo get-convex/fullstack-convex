@@ -1,15 +1,8 @@
-import React, {
-  useState,
-  useCallback,
-  MouseEvent,
-  useMemo,
-  type ChangeEvent,
-} from 'react'
+import React, { useState, useCallback, MouseEvent, useMemo } from 'react'
 import BackendProvider from '../../fullstack/backend'
 import DataProvider from '../../fullstack/data'
 import {
   Status,
-  STATUS_VALUES,
   OWNER_VALUES,
   TaskListOptions,
   SortKey,
@@ -31,49 +24,21 @@ export default function App({ slug }: { slug: number | 'new' | null }) {
     Status.New,
     Status['In Progress'],
   ])
-  const onChangeStatus = useCallback(
-    (event: ChangeEvent) => {
-      const target = event.target as HTMLInputElement
-      const { value, checked } = target
-      const newFilter = checked
-        ? // A formerly unchecked option is now checked; add value to filter
-          STATUS_VALUES.filter((s) => statusFilter.includes(s) || s === +value)
-        : // A formerly checked option is now unchecked; remove value from filter
-          statusFilter.filter((s) => s !== +value)
-      setStatusFilter(newFilter)
-      return null
-    },
-    [statusFilter]
-  )
 
   const [ownerFilter, setOwnerFilter] = useState(OWNER_VALUES)
-  const onChangeOwner = useCallback(
-    (event: ChangeEvent) => {
-      const target = event.target as HTMLInputElement
-      const { value, checked } = target
-      const newFilter = checked
-        ? // A formerly unchecked option is now checked; add value to filter
-          OWNER_VALUES.filter((s) => ownerFilter.includes(s) || s === value)
-        : // A formerly checked option is now unchecked; remove value from filter
-          ownerFilter.filter((s) => s !== value)
-      setOwnerFilter(newFilter)
-      return null
-    },
-    [ownerFilter]
-  )
 
   const filter = useMemo(
     () => ({
       status: {
         selected: statusFilter,
-        onChange: onChangeStatus,
+        onChange: (newStatus: Status[]) => setStatusFilter(newStatus),
       },
       owner: {
         selected: ownerFilter,
-        onChange: onChangeOwner,
+        onChange: (newOwner: string[]) => setOwnerFilter(newOwner),
       },
     }),
-    [statusFilter, onChangeStatus, ownerFilter, onChangeOwner]
+    [statusFilter, ownerFilter]
   )
 
   const [sortKey, setSortKey] = useState(SortKey.NUMBER)

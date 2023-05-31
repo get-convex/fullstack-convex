@@ -92,15 +92,15 @@ export enum SortOrder {
 // Owner filter options are just strings
 export const OWNER_VALUES = ['Me', 'Others', 'Nobody']
 
-export type Filter<Value, Handler> = {
+export type Filter<Value> = {
   selected: Value[]
-  onChange: Handler
+  onChange: (newSelected: Value[]) => void
 }
 
 export type TaskListOptions = {
   filter: {
-    status: Filter<Status, ChangeEventHandler>
-    owner: Filter<string, ChangeEventHandler>
+    status: Filter<Status>
+    owner: Filter<string>
   }
   sort: {
     key: SortKey

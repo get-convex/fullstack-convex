@@ -1,5 +1,7 @@
 import React, { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { CheckboxDropdown } from './dropdowns'
+import { PlusIcon, SearchIcon, CircledXIcon } from './icons'
 import {
   Status,
   STATUS_VALUES,
@@ -7,125 +9,15 @@ import {
   User,
   Filter,
 } from '../fullstack/types'
-import {
-  CaretDownIcon,
-  CaretUpIcon,
-  PlusIcon,
-  SearchIcon,
-  CircledXIcon,
-} from './icons'
-import type { ChangeEventHandler, KeyboardEvent, FocusEvent } from 'react'
+import type { KeyboardEvent, FocusEvent } from 'react'
 
-type Value = string | number | Status
-
-interface FilterControl {
-  options: Value[]
-  selected: Value[]
-  onChange: ChangeEventHandler
+interface FilterControl<V> {
+  options: V[]
+  selected: V[]
+  onChange: (newSelected: V[]) => void
   labels?: string[]
   titles?: string[]
   disabled?: boolean[]
-}
-
-export function Select({
-  name,
-  options,
-  selectedValues,
-  onChange,
-  labels,
-  titles,
-  disabled,
-}: {
-  name: string
-  options: Value[]
-  selectedValues: Value[]
-  onChange: ChangeEventHandler
-  labels?: string[]
-  titles?: string[]
-  disabled?: boolean[]
-}) {
-  const id = `select-${name}`
-  const isSelected = (value: Value) => selectedValues.includes(value)
-  const [showOptions, setShowOptions] = useState(false)
-  const optionLabels = labels || options
-  const numSelected = selectedValues.length
-
-  // TODO keyboard handler
-
-  return (
-    <div
-      id={id}
-      className="select"
-      tabIndex={0}
-      role="button"
-      onBlur={(e) => {
-        if (!e.relatedTarget?.className.startsWith(`select-${id}-option`)) {
-          setShowOptions(false)
-        }
-      }}
-      onFocus={() => {
-        setShowOptions(true)
-      }}
-    >
-      {
-        <div
-          className="control select-legend"
-          title={`Filter tasks by ${name}`}
-        >
-          <p>
-            {name}{' '}
-            <span
-              title={`${numSelected} value${
-                numSelected === 1 ? '' : 's'
-              } selected`}
-            >
-              ({numSelected})
-            </span>
-          </p>
-          {showOptions ? <CaretUpIcon /> : <CaretDownIcon />}
-        </div>
-      }
-      {showOptions &&
-        options.map((v, i) => {
-          const isDisabled =
-            // If a value for disabled has been explicitly provided, use it
-            (disabled && disabled[i]) ||
-            // To prevent de-selecting all values (resulting in empty task list),
-            // if there is only a single item selected, disable de-selecting it
-            (isSelected(v) && selectedValues.length === 1)
-          return (
-            <label
-              className={`select-${id}-option control select-option  ${
-                isDisabled ? 'select-option-disabled' : ''
-              }`}
-              key={i}
-              title={titles ? titles[i].toString() : optionLabels[i].toString()}
-            >
-              <input
-                type="checkbox"
-                id={`option-${v}`}
-                className={`select-${id}-option-input`}
-                name={name}
-                value={v}
-                checked={isSelected(v)}
-                onChange={onChange}
-                disabled={isDisabled}
-                title={
-                  isDisabled
-                    ? isSelected(v) && selectedValues.length === 1
-                      ? 'At least one value must be selected'
-                      : titles && titles[i]
-                    : isSelected(v)
-                    ? 'Uncheck to exclude these tasks'
-                    : 'Check to include these tasks'
-                }
-              />
-              {optionLabels[i]}
-            </label>
-          )
-        })}
-    </div>
-  )
 }
 
 export function StatusControl({
@@ -133,9 +25,9 @@ export function StatusControl({
   labels,
   selected,
   onChange,
-}: FilterControl) {
+}: FilterControl<number>) {
   return (
-    <Select
+    <CheckboxDropdown
       name="Status"
       options={options}
       selectedValues={selected}
@@ -152,9 +44,9 @@ export function OwnerControl({
   disabled,
   selected,
   onChange,
-}: FilterControl) {
+}: FilterControl<string>) {
   return (
-    <Select
+    <CheckboxDropdown
       name="Owner"
       options={options}
       selectedValues={selected}
@@ -283,8 +175,8 @@ export function Controls({
   search,
   user,
 }: {
-  status: Filter<Status, ChangeEventHandler>
-  owner: Filter<string, ChangeEventHandler>
+  status: Filter<Status>
+  owner: Filter<string>
   search: { term: string; onChange: (term: string) => void }
   user: User | null
 }) {

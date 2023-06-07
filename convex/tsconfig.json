@@ -7,29 +7,17 @@
     /* These settings are not required by Convex and can be modified. */
     "allowJs": true,
     "strict": true,
-    /* These compiler options are required by Fullstack */
-    "resolveJsonModule": true,
+
     /* These compiler options are required by Convex */
     "target": "ESNext",
-    "lib": [
-      "ES2021",
-      "dom"
-    ],
+    "lib": ["ES2021", "dom"],
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "module": "ESNext",
     "moduleResolution": "Node",
     "isolatedModules": true,
-    "noEmit": true,
-    /* Prevents node_modules from adding additional global types e.g. node types */
-    "types": []
+    "noEmit": true
   },
-  "include": [
-    "./**/*",
-    "../convex-hooks"
-  ],
-  "exclude": [
-    "./_generated",
-    "./actions"
-  ]
+  "include": ["./**/*"],
+  "exclude": ["./_generated"]
 }

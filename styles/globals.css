@@ -830,7 +830,7 @@ button.light {
   left: 0px;
   right: 0px;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 5;
+  z-index: 10;
   padding: 0px;
   margin: 0px;
 }

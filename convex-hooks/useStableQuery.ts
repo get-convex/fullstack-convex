@@ -1,5 +1,5 @@
+import { useQuery, usePaginatedQuery } from "convex/react";
 import { useRef } from 'react'
-import { useQuery, usePaginatedQuery } from '../convex/_generated/react'
 import type { UseQueryForAPI, UsePaginatedQueryForAPI } from 'convex/react'
 import type { API } from '../convex/_generated/api'
 

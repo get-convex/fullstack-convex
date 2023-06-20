@@ -1,4 +1,5 @@
-import { action, internalMutation, internalQuery } from './_generated/server'
+import { api } from "./_generated/api";
+import { action, internalMutation, internalQuery } from './_generated/server';
 import { Id } from './_generated/dataModel'
 import { findUser, findByTask, countResults, getFileFromDoc } from './internal'
 import type { File, NewFileInfo } from '../fullstack/types'
@@ -78,11 +79,11 @@ export default action(
       type,
     } as FileDocInfo
 
-    const uploadedFileId = await runMutation('uploadFile:saveFileDoc', {
+    const uploadedFileId = await runMutation(api.uploadFile.saveFileDoc, {
       fileDocInfo,
     })
 
-    const uploadedFile = await runQuery('uploadFile:getFileById', {
+    const uploadedFile = await runQuery(api.uploadFile.getFileById, {
       fileId: uploadedFileId,
     })
     if (!uploadedFile) throw new Error('Unexpected error retrieving saved file')

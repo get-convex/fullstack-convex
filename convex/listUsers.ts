@@ -1,4 +1,4 @@
-import { query, type DatabaseReader } from './_generated/server'
+import { query, type DatabaseReader } from './_generated/server';
 
 export async function findUsersByName(db: DatabaseReader, name: string) {
   return await db

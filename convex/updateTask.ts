@@ -1,4 +1,4 @@
-import { mutation } from './_generated/server'
+import { mutation } from './_generated/server';
 import { findUser, getTaskFromDoc } from './internal'
 import { Id, Doc } from './_generated/dataModel'
 import { Visibility, type Task } from '../fullstack/types'

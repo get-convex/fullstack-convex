@@ -1,4 +1,4 @@
-import { query, type DatabaseReader } from './_generated/server'
+import { query, type DatabaseReader } from './_generated/server';
 import { findUser, getTaskFromDoc } from './internal'
 import {
   Visibility,

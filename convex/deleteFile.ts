@@ -1,4 +1,4 @@
-import { mutation } from './_generated/server'
+import { mutation } from './_generated/server';
 import { findUser, findByTask, countResults } from './internal'
 import { Id } from './_generated/dataModel'
 

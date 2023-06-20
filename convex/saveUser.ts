@@ -1,5 +1,5 @@
 import { getUserFromDoc } from './internal'
-import { mutation } from './_generated/server'
+import { mutation } from './_generated/server';
 
 // Insert or update the user in a Convex table.
 //

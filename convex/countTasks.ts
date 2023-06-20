@@ -1,4 +1,4 @@
-import { query } from './_generated/server'
+import { query } from './_generated/server';
 import { findUser, countResults } from './internal'
 import { findMatchingTasks } from './listTasks'
 import { FindTasksOptions } from './listTasks'

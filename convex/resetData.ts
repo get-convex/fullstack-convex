@@ -1,4 +1,4 @@
-import { internalMutation, type DatabaseWriter } from './_generated/server'
+import { internalMutation, type DatabaseWriter } from './_generated/server';
 import { Id, Doc, type TableNames } from './_generated/dataModel'
 import { countResults, findByTask } from './internal'
 

@@ -1,6 +1,7 @@
+import { api } from "../convex/_generated/api";
+import { useMutation, useAction } from "convex/react";
 import React, { useMemo, useCallback, createContext } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useMutation, useAction } from '../convex/_generated/react'
 import type { Context, PropsWithChildren } from 'react'
 import type { BackendEnvironment } from './types'
 
@@ -15,12 +16,12 @@ export default function BackendProvider({ children }: PropsWithChildren) {
     [auth0Logout]
   )
 
-  const saveUser = useMutation('saveUser'),
-    updateTask = useMutation('updateTask'),
-    createTask = useMutation('createTask'),
-    saveComment = useMutation('saveComment'),
-    saveFile = useAction('uploadFile'),
-    deleteFile = useMutation('deleteFile')
+  const saveUser = useMutation(api.saveUser.default),
+    updateTask = useMutation(api.updateTask.default),
+    createTask = useMutation(api.createTask.default),
+    saveComment = useMutation(api.saveComment.default),
+    saveFile = useAction(api.uploadFile.default),
+    deleteFile = useMutation(api.deleteFile.default)
 
   const backend = useMemo(
     () =>

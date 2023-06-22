@@ -1,7 +1,104 @@
-import { DatabaseReader, QueryCtx } from './_generated/server'
-import { Comment, File, Visibility } from '../fullstack/types'
-import { Doc, Id } from './_generated/dataModel'
+import {
+  internalQuery,
+  internalMutation,
+  DatabaseReader,
+  QueryCtx,
+  MutationCtx,
+} from './_generated/server'
+import { Doc, Id, DataModel } from './_generated/dataModel'
+import {
+  Comment,
+  File,
+  Visibility,
+  Status,
+  SortKey,
+  SortOrder,
+  OWNER_VALUES,
+  STATUS_VALUES,
+} from '../fullstack/types'
+import type { FilterBuilder, NamedTableInfo } from 'convex/server'
 import type { Auth, GenericTableInfo, OrderedQuery, Query } from 'convex/server'
+
+export type FileDocInfo = {
+  name: string
+  type: string
+  taskId: Id<'tasks'>
+  userId: Id<'users'>
+  storageId: string
+}
+
+export type FindTasksOptions = {
+  statusFilter: Status[]
+  ownerFilter: string[]
+  sortKey: SortKey
+  sortOrder: SortOrder
+  searchTerm: string
+}
+
+type TaskTableInfo = NamedTableInfo<DataModel, 'tasks'>
+
+// Find tasks that match the given search/filter terms
+export function findMatchingTasks(
+  db: DatabaseReader,
+  user: Doc<'users'> | null,
+  options?: FindTasksOptions
+) {
+  const statuses = options?.statusFilter || STATUS_VALUES
+  const owners = options?.ownerFilter || OWNER_VALUES
+  const searchTerm = options?.searchTerm || ''
+
+  const filterByUser = (q: FilterBuilder<TaskTableInfo>) =>
+    user
+      ? // Logged in users see their private tasks as well as public
+        q.or(
+          q.eq(q.field('visibility'), Visibility.PUBLIC),
+          q.eq(q.field('ownerId'), user._id)
+        )
+      : // Logged out users only see public tasks
+        q.eq(q.field('visibility'), Visibility.PUBLIC)
+
+  const filterByStatus = (q: FilterBuilder<TaskTableInfo>, status: number) =>
+    // Match any of the given status values
+    q.eq(q.field('status'), status)
+
+  const filterByOwner = (q: FilterBuilder<TaskTableInfo>, label: string) => {
+    // Match any of the selected owner categories ("Me", "Others", "Nobody")
+    const ownerId = q.field('ownerId')
+    const unowned = q.eq(ownerId, null)
+    const mine = user ? q.eq(ownerId, user._id) : false
+    switch (label) {
+      case 'Nobody':
+        return unowned
+      case 'Others':
+        return q.and(q.not(unowned), q.not(mine))
+      case 'Me':
+        return mine
+      default:
+        return false
+    }
+  }
+
+  const tasks = db.query('tasks')
+
+  // Since we use non-search indexes to sort, we can either
+  // search or sort the results but not both. So if we
+  // have a search term to match, we ignore sort options
+  const searchedOrSorted = searchTerm
+    ? tasks.withSearchIndex('search_all', (q) => q.search('search', searchTerm))
+    : tasks
+        .withIndex(`by_${options?.sortKey || SortKey.NUMBER}`)
+        .order(options?.sortOrder || SortOrder.DESC)
+
+  const filtered = searchedOrSorted.filter((q) =>
+    q.and(
+      filterByUser(q),
+      q.or(...statuses.map((s) => filterByStatus(q, s))),
+      q.or(...owners.map((o) => filterByOwner(q, o)))
+    )
+  )
+
+  return filtered
+}
 
 // Find all comments/files associated with a given task
 export function findByTask(
@@ -176,3 +273,41 @@ export async function countResults(
   }
   return count
 }
+
+// Save a new file document with the given storage ID
+export const saveFileDoc = internalMutation(
+  async (mutCtx, { fileDocInfo }: { fileDocInfo: FileDocInfo }) => {
+    const { db, auth } = mutCtx
+    const user = await findUser(db, auth)
+    if (!user) {
+      throw new Error('Error saving file: User identity not found')
+    }
+    const { taskId, userId } = fileDocInfo
+    if (user._id !== userId) {
+      throw new Error('Error saving file: Invalid user identity')
+    }
+
+    const fileId = await db.insert('files', fileDocInfo)
+
+    // Update the denormalized comment count in the tasks table
+    // (used for indexing to support ordering by comment count)
+    const fileCount = await countResults(findByTask(db, taskId, 'files'))
+
+    await db.patch(taskId, { fileCount })
+    return fileId
+  }
+)
+
+// Retrieve a File object from a given
+export const getFileById = internalQuery(
+  async (
+    queryCtx,
+    { fileId }: { fileId: Id<'files'> }
+  ): Promise<File | null> => {
+    if (queryCtx.db.normalizeId('files', fileId) === null)
+      throw new Error(`Invalid fileId ${fileId}`)
+    const fileDoc = await queryCtx.db.get(fileId)
+    if (!fileDoc) return null
+    return await getFileFromDoc(queryCtx, fileDoc)
+  }
+)

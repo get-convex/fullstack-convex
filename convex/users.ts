@@ -1,5 +1,10 @@
+import { query, mutation } from './_generated/server'
 import { getUserFromDoc } from './internal'
-import { mutation } from './_generated/server';
+
+// List all users
+export const list = query(async ({ db }) => {
+  return await db.query('users').collect()
+})
 
 // Insert or update the user in a Convex table.
 //
@@ -10,7 +15,7 @@ import { mutation } from './_generated/server';
 // presence of which depends on the identity provider chosen. It's up to the
 // application developer to determine which ones are available and to decide
 // which of those need to be persisted.
-export default mutation(async (queryCtx) => {
+export const save = mutation(async (queryCtx) => {
   const { db, auth } = queryCtx
   const identity = await auth.getUserIdentity()
   if (!identity) {

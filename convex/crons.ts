@@ -6,7 +6,7 @@ const crons = cronJobs()
 crons.daily(
   'Reset all tables to initial dataset',
   { hourUTC: 7, minuteUTC: 0 },
-  api.resetData.default
+  api.data.reset
 )
 
 export default crons

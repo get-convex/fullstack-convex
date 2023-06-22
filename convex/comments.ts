@@ -3,10 +3,10 @@ import { mutation } from './_generated/server'
 import { findUser, findByTask, getCommentFromDoc } from './internal'
 import type { Comment } from '../fullstack/types'
 
-export default mutation(
+export const save = mutation(
   async (
     queryCtx,
-    { taskId, body }: { taskId: Id<'tasks'>; body: string }
+    { taskId, body }: { taskId: string; body: string }
   ): Promise<Comment> => {
     const { db, auth } = queryCtx
     const user = await findUser(db, auth)
@@ -14,7 +14,11 @@ export default mutation(
       throw new Error('Error saving comment: User identity not found')
     }
 
-    const task = await db.get(taskId)
+    const taskDocId = db.normalizeId('tasks', taskId)
+    if (taskDocId === null)
+      throw new Error(`Error saving comment: Invalid task Id ${taskId}`)
+
+    const task = await db.get(taskDocId)
     if (!task) {
       throw new Error('Error saving comment: Task not found')
     }

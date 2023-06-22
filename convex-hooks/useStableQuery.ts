@@ -1,10 +1,8 @@
-import { useQuery, usePaginatedQuery } from "convex/react";
+import { useQuery, usePaginatedQuery } from 'convex/react'
 import { useRef } from 'react'
-import type { UseQueryForAPI, UsePaginatedQueryForAPI } from 'convex/react'
-import type { API } from '../convex/_generated/api'
 
-export const useStableQuery = ((name, ...args) => {
-  const result = useQuery(name, ...args)
+export const useStableQuery = ((queryFn, ...args) => {
+  const result = useQuery(queryFn, ...args)
   const stored = useRef(result) // ref objects are stable between rerenders
 
   // result is only undefined while data is loading
@@ -14,10 +12,10 @@ export const useStableQuery = ((name, ...args) => {
   }
 
   return stored.current // undefined on first load, stale data while loading, fresh data after loading
-}) as UseQueryForAPI<API>
+}) as typeof useQuery
 
-export const useStablePaginatedQuery = ((name, args, options) => {
-  const result = usePaginatedQuery(name, args, options)
+export const useStablePaginatedQuery = ((queryFn, args, options) => {
+  const result = usePaginatedQuery(queryFn, args, options)
   const { results, status, isLoading, loadMore } = result
   const stored = useRef(results) // ref objects are stable between rerenders
 
@@ -33,4 +31,4 @@ export const useStablePaginatedQuery = ((name, args, options) => {
     isLoading,
     loadMore,
   }
-}) as UsePaginatedQueryForAPI<API>
+}) as typeof usePaginatedQuery

@@ -10,20 +10,13 @@
  */
 
 import type { ApiFromModules } from "convex/server";
-import type * as countTasks from "../countTasks";
-import type * as createTask from "../createTask";
+import type * as comments from "../comments";
 import type * as crons from "../crons";
-import type * as deleteFile from "../deleteFile";
-import type * as getSafeFiles from "../getSafeFiles";
-import type * as getTask from "../getTask";
+import type * as data from "../data";
+import type * as files from "../files";
 import type * as internal from "../internal";
-import type * as listTasks from "../listTasks";
-import type * as listUsers from "../listUsers";
-import type * as resetData from "../resetData";
-import type * as saveComment from "../saveComment";
-import type * as saveUser from "../saveUser";
-import type * as updateTask from "../updateTask";
-import type * as uploadFile from "../uploadFile";
+import type * as tasks from "../tasks";
+import type * as users from "../users";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -34,18 +27,11 @@ import type * as uploadFile from "../uploadFile";
  * ```
  */
 export declare const api: ApiFromModules<{
-  countTasks: typeof countTasks;
-  createTask: typeof createTask;
+  comments: typeof comments;
   crons: typeof crons;
-  deleteFile: typeof deleteFile;
-  getSafeFiles: typeof getSafeFiles;
-  getTask: typeof getTask;
+  data: typeof data;
+  files: typeof files;
   internal: typeof internal;
-  listTasks: typeof listTasks;
-  listUsers: typeof listUsers;
-  resetData: typeof resetData;
-  saveComment: typeof saveComment;
-  saveUser: typeof saveUser;
-  updateTask: typeof updateTask;
-  uploadFile: typeof uploadFile;
+  tasks: typeof tasks;
+  users: typeof users;
 }>;

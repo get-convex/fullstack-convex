@@ -11,6 +11,7 @@ import {
   useStableQuery,
   useStablePaginatedQuery,
 } from '../convex-hooks/useStableQuery'
+import { api } from '../convex/_generated/api'
 import { BackendContext } from './backend'
 import type { Context, PropsWithChildren } from 'react'
 import type {
@@ -45,7 +46,7 @@ function useTaskListData(
     isLoading,
     loadMore,
   } = useStablePaginatedQuery(
-    'listTasks',
+    api.tasks.list,
     { queryOptions },
     { initialNumItems: PAGE_SIZE }
   )
@@ -130,18 +131,16 @@ export default function DataProvider({
   const user = useUserData()
 
   // If a task is selected, query the db for the task details
-  const task = useStableQuery(
-    'getTask',
-    { taskNumber: taskNumber as number },
-    { skip: typeof taskNumber !== 'number' }
-  )
+  const task = useStableQuery(api.tasks.getByNumber, {
+    taskNumber: taskNumber as number,
+  })
   const taskData = useMemo(
     () => ({ value: task || null, isLoading: task === undefined }),
     [task]
   )
 
   // Get the set of safe files pre-approved for upload
-  const safeFiles = useStableQuery('getSafeFiles')
+  const safeFiles = useStableQuery(api.files.getSafeFiles)
 
   const safeFilesData = useMemo(
     () => ({ value: safeFiles || null, isLoading: safeFiles === undefined }),

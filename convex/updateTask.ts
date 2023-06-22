@@ -1,4 +1,4 @@
-import { mutation } from './_generated/server';
+import { mutation } from './_generated/server'
 import { findUser, getTaskFromDoc } from './internal'
 import { Id, Doc } from './_generated/dataModel'
 import { Visibility, type Task } from '../fullstack/types'
@@ -18,9 +18,9 @@ export default mutation(
       throwUpdateError('No task ID provided')
       return
     }
-    const taskId = new Id('tasks', taskInfo.id)
+    const taskId = taskInfo.id as Id<'tasks'>
     if (!taskId) {
-      throwUpdateError('Could not create ID for this task')
+      throwUpdateError(`Invalid task ID ${taskInfo.id}`)
     }
 
     if (taskInfo.visibility === Visibility.PRIVATE && !taskInfo.owner?.id) {
@@ -36,7 +36,7 @@ export default mutation(
     }
 
     const { owner } = taskInfo
-    const ownerId = owner ? new Id('users', owner.id) : null
+    const ownerId = owner ? db.normalizeId('users', owner.id) : null
     const ownerName = owner ? owner.name : null
 
     // Un-join data from users, comments & files tables

@@ -1,5 +1,5 @@
-import { api } from "./_generated/api";
-import { action, internalMutation, internalQuery } from './_generated/server';
+import { api } from './_generated/api'
+import { action, internalMutation, internalQuery } from './_generated/server'
 import { Id } from './_generated/dataModel'
 import { findUser, findByTask, countResults, getFileFromDoc } from './internal'
 import type { File, NewFileInfo } from '../fullstack/types'
@@ -21,7 +21,7 @@ export const saveFileDoc = internalMutation(
       throw new Error('Error saving file: User identity not found')
     }
     const { taskId, userId } = fileDocInfo
-    if (!user._id.equals(userId)) {
+    if (user._id !== userId) {
       throw new Error('Error saving file: Invalid user identity')
     }
 
@@ -42,7 +42,7 @@ export const getFileById = internalQuery(
     queryCtx,
     { fileId }: { fileId: Id<'files'> }
   ): Promise<File | null> => {
-    if (!(fileId instanceof Id<'files'>))
+    if (queryCtx.db.normalizeId('files', fileId) === null)
       throw new Error(`Invalid fileId ${fileId}`)
     const fileDoc = await queryCtx.db.get(fileId)
     if (!fileDoc) return null
@@ -69,12 +69,10 @@ export default action(
     const storageId = await storage.store(blob)
 
     // Save the file metadata, url & storageId to 'files' table
-    const taskDocId = new Id('tasks', taskId)
-    const userDocId = new Id('users', author.id)
     const fileDocInfo = {
       storageId,
-      taskId: taskDocId,
-      userId: userDocId,
+      taskId,
+      userId: author.id,
       name,
       type,
     } as FileDocInfo

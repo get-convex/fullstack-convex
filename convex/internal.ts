@@ -1,4 +1,4 @@
-import { DatabaseReader, QueryCtx } from './_generated/server';
+import { DatabaseReader, QueryCtx } from './_generated/server'
 import { Comment, File, Visibility } from '../fullstack/types'
 import { Doc, Id } from './_generated/dataModel'
 import type { Auth, GenericTableInfo, OrderedQuery, Query } from 'convex/server'
@@ -20,7 +20,7 @@ export async function getCommentFromDoc(
 ): Promise<Comment> {
   const { _id: id, _creationTime: creationTime, userId, body } = c
 
-  if (!(userId instanceof Id<'users'>))
+  if (db.normalizeId('users', userId) === null)
     throw new Error(`internal.js: Invalid userId ${userId} for comment ${id}`)
 
   const authorDoc = await db.get(userId)
@@ -41,7 +41,7 @@ export async function getFileFromDoc(
   f: Doc<'files'>
 ): Promise<File> {
   const { name, type, storageId, userId, _id } = f
-  if (!(userId instanceof Id<'users'>))
+  if (db.normalizeId('users', userId) === null)
     throw new Error(`internal.js: Invalid userId ${userId} for file ${_id}`)
 
   const authorDoc = await db.get(userId)
@@ -108,7 +108,7 @@ export async function getTaskFromDoc(
   const identity = await auth.getUserIdentity()
 
   // Join with users table
-  if (!(ownerId instanceof Id<'users'>) && !(ownerId === null))
+  if (!(ownerId === null) && db.normalizeId('users', ownerId) === null)
     throw new Error(
       `internal.js: Invalid ownerId ${ownerId}, type ${typeof ownerId}, for task ${number} ${_id}`
     )

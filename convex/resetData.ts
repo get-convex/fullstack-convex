@@ -1,4 +1,4 @@
-import { internalMutation, type DatabaseWriter } from './_generated/server';
+import { internalMutation, type DatabaseWriter } from './_generated/server'
 import { Id, Doc, type TableNames } from './_generated/dataModel'
 import { countResults, findByTask } from './internal'
 
@@ -42,13 +42,11 @@ async function resetTable(db: DatabaseWriter, table: TableNames) {
   const KEEP = DATA[table as dataKey]
 
   const allDocs = await db.query(table).collect()
-  const docsToKeep = [],
-    docsToDelete = []
+  const docsToKeep = [] as Doc<TableNames>[],
+    docsToDelete = [] as Doc<TableNames>[]
 
   for (const doc of allDocs) {
-    const isKeeper = KEEP.some((keeper) =>
-      new Id(table, keeper.id).equals(doc._id)
-    )
+    const isKeeper = KEEP.some((keeper) => keeper.id === doc._id)
     if (isKeeper) {
       docsToKeep.push(doc)
     } else {
@@ -60,7 +58,9 @@ async function resetTable(db: DatabaseWriter, table: TableNames) {
     const offenders = [] as Id<TableNames>[]
 
     for (const k of KEEP) {
-      const id = new Id(table, k.id)
+      const id = db.normalizeId(table, k.id)
+      if (id === null)
+        throw new Error(`Invalid document id ${k.id} for table ${table}`)
       const doc = await db.get(id)
       if (doc === null) {
         offenders.push(id)
@@ -86,24 +86,16 @@ async function resetTable(db: DatabaseWriter, table: TableNames) {
       const info = { ...keeper } as Partial<
         Doc<TableNames> & { id: string; creationTime: number }
       >
-      const docId = new Id(table, keeper.id)
+
+      const docId = db.normalizeId(table, keeper.id)
+      if (docId === null)
+        throw new Error(`Invalid document id ${keeper.id} for table ${table}`)
 
       // Rename fields auto-populated by Convex
       info._id = docId
       delete info.id
       info._creationTime = keeper.creationTime
       delete info.creationTime
-
-      // Replace relational ID strings with ID objects
-      if ('taskId' in info && 'taskId' in keeper) {
-        info.taskId = new Id('tasks', keeper.taskId)
-      }
-      if ('userId' in info && 'userId' in keeper) {
-        info.userId = new Id('users', keeper.userId)
-      }
-      if ('ownerId' in info && 'ownerId' in keeper && keeper.ownerId) {
-        info.ownerId = new Id('users', keeper.ownerId)
-      }
 
       await db.patch(docId, info)
       return db.get(docId)

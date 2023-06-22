@@ -1,10 +1,12 @@
-import { mutation } from './_generated/server';
+import { mutation } from './_generated/server'
 import { findUser, findByTask, countResults } from './internal'
 import { Id } from './_generated/dataModel'
 
 export default mutation(
-  async ({ db, auth, storage }, { fileId }: { fileId: string }) => {
-    const id = new Id('files', fileId)
+  async ({ db, auth, storage }, { fileId }: { fileId: Id<'files'> }) => {
+    const id = db.normalizeId('files', fileId)
+    if (id === null)
+      throw new Error(`Could not delete file: Invalid fileId ${fileId}`)
     const fileDoc = await db.get(id)
     if (!fileDoc) throw new Error('Could not delete file: file not found')
     const { taskId, userId } = fileDoc
@@ -13,7 +15,7 @@ export default mutation(
     if (!user)
       throw new Error('Could not delete file: User is not authenticated')
 
-    if (!user._id.equals(userId))
+    if (user._id !== userId)
       throw new Error(
         'Could not delete file: Current user does not match file author'
       )

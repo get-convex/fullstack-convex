@@ -1,12 +1,12 @@
 import { Doc, Id } from './_generated/dataModel'
-import { mutation } from './_generated/server';
+import { mutation } from './_generated/server'
 import { findUser, findByTask, getCommentFromDoc } from './internal'
 import type { Comment } from '../fullstack/types'
 
 export default mutation(
   async (
     queryCtx,
-    { taskId, body }: { taskId: string; body: string }
+    { taskId, body }: { taskId: Id<'tasks'>; body: string }
   ): Promise<Comment> => {
     const { db, auth } = queryCtx
     const user = await findUser(db, auth)
@@ -14,7 +14,7 @@ export default mutation(
       throw new Error('Error saving comment: User identity not found')
     }
 
-    const task = await db.get(new Id('tasks', taskId))
+    const task = await db.get(taskId)
     if (!task) {
       throw new Error('Error saving comment: Task not found')
     }

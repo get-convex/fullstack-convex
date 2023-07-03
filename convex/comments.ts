@@ -1,4 +1,4 @@
-import { Doc, Id } from './_generated/dataModel'
+import { Doc } from './_generated/dataModel'
 import { mutation } from './_generated/server'
 import { findUser, findByTask, getCommentFromDoc } from './internal'
 import type { Comment } from '../fullstack/types'

@@ -1,5 +1,3 @@
-import { ChangeEventHandler, MouseEventHandler } from 'react'
-
 export type User = {
   id: string
   name: string

@@ -7,7 +7,6 @@ import {
   type FileDocInfo,
 } from './internal'
 import type { File, NewFileInfo } from '../fullstack/types'
-import type { Id } from './_generated/dataModel'
 
 export type SafeFile = {
   name: string

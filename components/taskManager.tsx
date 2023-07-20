@@ -78,7 +78,6 @@ export function TaskManager({
           options={options}
           tasks={data.taskList.value}
           isLoading={data.taskList.isLoading}
-          user={data.user.value}
         />
         {slug === 'new' ? (
           <NewTaskSidebar

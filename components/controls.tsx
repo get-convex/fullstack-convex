@@ -11,55 +11,6 @@ import {
 } from '../fullstack/types'
 import type { KeyboardEvent, FocusEvent } from 'react'
 
-interface FilterControl<V> {
-  options: V[]
-  selected: V[]
-  onChange: (newSelected: V[]) => void
-  labels?: string[]
-  titles?: string[]
-  disabled?: boolean[]
-}
-
-// export function StatusControl({
-//   options,
-//   labels,
-//   selected,
-//   onChange,
-// }: FilterControl<number>) {
-//   const StatusFilterControl = CheckboxDropdown<Status>
-//   return (
-//     <StatusFilterControl
-//       name="Status"
-//       options={options}
-//       selectedValues={selected}
-//       onChange={onChange}
-//       labels={labels}
-//     />
-//   )
-// }
-
-// export function OwnerControl({
-//   options,
-//   labels,
-//   titles,
-//   disabled,
-//   selected,
-//   onChange,
-// }: FilterControl<string>) {
-//   const OwnerDropdown = O
-//   return (
-//     <CheckboxDropdown
-//       name="Owner"
-//       options={options}
-//       selectedValues={selected}
-//       onChange={onChange}
-//       labels={labels || options.map((o) => o.toString())}
-//       titles={titles}
-//       disabled={disabled}
-//     />
-//   )
-// }
-
 export function AddTaskButton({ user }: { user?: User | null }) {
   if (user === undefined) {
     return (
@@ -187,7 +138,8 @@ export function Controls({
       options: STATUS_VALUES,
       labels: STATUS_VALUES.map((v) => Status[v]),
       titles: STATUS_VALUES.map((v) => `${Status[v]} tasks`),
-      ...status,
+      selected: status.selected,
+      onChange: status.onChange,
     },
     owner: {
       options: OWNER_VALUES,
@@ -215,7 +167,6 @@ export function Controls({
           options={filters.status.options}
           labels={filters.status.labels}
           titles={filters.status.titles}
-          disabled={filters.owner.disabled}
           selectedValues={filters.status.selected}
           onChange={filters.status.onChange}
         />

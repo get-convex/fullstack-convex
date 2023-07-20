@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, ReactElement } from 'react'
 import type {
   ChangeEventHandler,
   KeyboardEventHandler,
@@ -168,7 +168,7 @@ export function RadioDropdown<Value>({
   options: Value[]
   selectedValue: Value
   onChange: (value: Value) => void
-  labels?: string[]
+  labels?: string[] | ReactElement[]
 }) {
   const id = `radio-dropdown-${name}`
   const optionLabels = labels || options.map((o) => `${o}`)

@@ -1,13 +1,12 @@
 import { Doc } from './_generated/dataModel'
 import { mutation } from './_generated/server'
-import { findUser, findByTask, getCommentFromDoc } from './internal'
+import { findUser, findByTask, getCommentFromDoc } from './util'
+import { v } from 'convex/values'
 import type { Comment } from '../fullstack/types'
 
-export const save = mutation(
-  async (
-    queryCtx,
-    { taskId, body }: { taskId: string; body: string }
-  ): Promise<Comment> => {
+export const save = mutation({
+  args: { taskId: v.string(), body: v.string() },
+  handler: async (queryCtx, { taskId, body }): Promise<Comment> => {
     const { db, auth } = queryCtx
     const user = await findUser(db, auth)
     if (!user) {
@@ -54,5 +53,5 @@ export const save = mutation(
       throw new Error('Unexpected error saving comment')
     }
     return await getCommentFromDoc(queryCtx, commentDoc)
-  }
-)
+  },
+})

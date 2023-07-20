@@ -1,11 +1,5 @@
-import {
-  internalQuery,
-  internalMutation,
-  DatabaseReader,
-  QueryCtx,
-  MutationCtx,
-} from './_generated/server'
-import { Doc, Id, DataModel } from './_generated/dataModel'
+import { DatabaseReader, QueryCtx } from './_generated/server'
+import { Doc, DataModel } from './_generated/dataModel'
 import {
   Comment,
   File,
@@ -15,16 +9,9 @@ import {
   OWNER_VALUES,
   STATUS_VALUES,
 } from '../fullstack/types'
+import type { tTaskId } from './validators'
 import type { FilterBuilder, NamedTableInfo } from 'convex/server'
 import type { Auth, GenericTableInfo, OrderedQuery, Query } from 'convex/server'
-
-export type FileDocInfo = {
-  name: string
-  type: string
-  taskId: Id<'tasks'>
-  userId: Id<'users'>
-  storageId: string
-}
 
 export type FindTasksOptions = {
   statusFilter: Status[]
@@ -91,7 +78,7 @@ export function findMatchingTasks(
 // Find all comments/files associated with a given task
 export function findByTask(
   db: DatabaseReader,
-  taskId: Id<'tasks'>,
+  taskId: tTaskId,
   table: 'comments' | 'files'
 ) {
   return db.query(table).withIndex('by_task', (q) => q.eq('taskId', taskId))
@@ -166,7 +153,7 @@ export async function getTaskFromDoc(
   queryCtx: QueryCtx,
   taskDoc: Doc<'tasks'>
 ) {
-  const { db, auth } = queryCtx
+  const { db } = queryCtx
 
   const {
     _id,
@@ -193,7 +180,6 @@ export async function getTaskFromDoc(
       `internal.js: Invalid ownerId ${ownerId}, type ${typeof ownerId}, for task ${number} ${_id}`
     )
   const ownerDoc = ownerId ? await db.get(ownerId) : null
-
   const owner = ownerDoc ? getUserFromDoc(ownerDoc) : ownerDoc
 
   // Join with comments table
@@ -251,41 +237,3 @@ export async function countResults(
   }
   return count
 }
-
-// Save a new file document with the given storage ID
-export const saveFileDoc = internalMutation(
-  async (mutCtx, { fileDocInfo }: { fileDocInfo: FileDocInfo }) => {
-    const { db, auth } = mutCtx
-    const user = await findUser(db, auth)
-    if (!user) {
-      throw new Error('Error saving file: User identity not found')
-    }
-    const { taskId, userId } = fileDocInfo
-    if (user._id !== userId) {
-      throw new Error('Error saving file: Invalid user identity')
-    }
-
-    const fileId = await db.insert('files', fileDocInfo)
-
-    // Update the denormalized comment count in the tasks table
-    // (used for indexing to support ordering by comment count)
-    const fileCount = await countResults(findByTask(db, taskId, 'files'))
-
-    await db.patch(taskId, { fileCount })
-    return fileId
-  }
-)
-
-// Retrieve a File object from a given
-export const getFileById = internalQuery(
-  async (
-    queryCtx,
-    { fileId }: { fileId: Id<'files'> }
-  ): Promise<File | null> => {
-    if (queryCtx.db.normalizeId('files', fileId) === null)
-      throw new Error(`Invalid fileId ${fileId}`)
-    const fileDoc = await queryCtx.db.get(fileId)
-    if (!fileDoc) return null
-    return await getFileFromDoc(queryCtx, fileDoc)
-  }
-)

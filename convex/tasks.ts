@@ -1,20 +1,22 @@
 import { query, mutation } from './_generated/server'
+import { v } from 'convex/values'
 import {
   findUser,
   countResults,
   getTaskFromDoc,
   findMatchingTasks,
-  type FindTasksOptions,
-} from './internal'
-import { type NewTaskInfo, type Task } from '../fullstack/types'
-import type { Id, Doc } from './_generated/dataModel'
-import type { PaginationOptions } from 'convex/server'
+} from './util'
+import { vNewTaskInfo, vFindTaskOpts, vUpdateTaskInfo } from './validators'
+import type { Doc } from './_generated/dataModel'
+import { paginationOptsValidator } from 'convex/server'
 
 // Given a task's number, retrieve the task document
-export const getByNumber = query(
-  async (queryCtx, { taskNumber }: { taskNumber: number }) => {
-    const { db } = queryCtx
+export const getByNumber = query({
+  args: { taskNumber: v.optional(v.union(v.number(), v.null())) },
+  handler: async (queryCtx, { taskNumber }) => {
+    if (!taskNumber) return null
 
+    const { db } = queryCtx
     const taskDoc = await db
       .query('tasks')
       .withIndex('by_number', (q) => q.eq('number', taskNumber))
@@ -22,33 +24,29 @@ export const getByNumber = query(
     if (!taskDoc) return null
 
     return await getTaskFromDoc(queryCtx, taskDoc)
-  }
-)
+  },
+})
 
 // Given a user and their chosen filters, find the total number of matching tasks,
 // so we can display the total count even if paginated data hasn't loaded yet
-export const count = query(
-  async (
-    { db, auth },
-    { filterOptions }: { filterOptions: FindTasksOptions }
-  ) => {
+export const count = query({
+  args: { filterOptions: vFindTaskOpts },
+  handler: async ({ db, auth }, { filterOptions }) => {
     // If logged in, fetch the stored user to get ID for filtering
     const user = await findUser(db, auth)
     const tasks = findMatchingTasks(db, user, filterOptions)
 
     return await countResults(tasks)
-  }
-)
+  },
+})
 
 // List all tasks matching the given options
-export const list = query(
-  async (
-    queryCtx,
-    {
-      paginationOpts,
-      queryOptions,
-    }: { paginationOpts: PaginationOptions; queryOptions: FindTasksOptions }
-  ) => {
+export const list = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    queryOptions: vFindTaskOpts,
+  },
+  handler: async (queryCtx, { paginationOpts, queryOptions }) => {
     const { db, auth } = queryCtx
     // If logged in, fetch the stored user to get ID for filtering
     const user = await findUser(db, auth)
@@ -67,12 +65,13 @@ export const list = query(
       isDone,
       continueCursor,
     }
-  }
-)
+  },
+})
 
 // Create a new task document
-export const create = mutation(
-  async (queryCtx, { taskInfo }: { taskInfo: NewTaskInfo }) => {
+export const create = mutation({
+  args: { taskInfo: vNewTaskInfo },
+  handler: async (queryCtx, { taskInfo }) => {
     const { db, auth } = queryCtx
     const { title, description, status, owner } = taskInfo
     const ownerIdString = owner && owner.id
@@ -119,11 +118,12 @@ export const create = mutation(
     }
 
     return await getTaskFromDoc(queryCtx, newTask)
-  }
-)
+  },
+})
 
-export const update = mutation(
-  async (queryCtx, { taskInfo }: { taskInfo: Partial<Task> }) => {
+export const update = mutation({
+  args: { taskInfo: vUpdateTaskInfo },
+  handler: async (queryCtx, { taskInfo }) => {
     function throwUpdateError(message: string) {
       throw new Error(
         `Error updating task (id: ${taskInfo.id}): ${message}, ${JSON.stringify(
@@ -137,7 +137,7 @@ export const update = mutation(
       throwUpdateError('No task ID provided')
       return
     }
-    const taskId = taskInfo.id as Id<'tasks'>
+    const taskId = taskInfo.id
     if (!taskId) {
       throwUpdateError(`Invalid task ID ${taskInfo.id}`)
     }
@@ -167,7 +167,7 @@ export const update = mutation(
     >
 
     // Get the current task document from the db to compare
-    const currentDoc = await db.get(taskId)
+    const currentDoc = (await db.get(taskId)) as Doc<'tasks'>
     if (!currentDoc) {
       // Should never happen, here to appease TS
       return throwUpdateError(`Task not found: ${taskId}`)
@@ -182,7 +182,7 @@ export const update = mutation(
 
     // Update this task in the db & retrieve the updated task document
     await db.patch(taskId, { ...updatedInfo })
-    const updatedDoc = await db.get(taskId)
+    const updatedDoc = (await db.get(taskId)) as Doc<'tasks'>
     if (!updatedDoc) {
       // Should never happen, here to appease TS
       throwUpdateError(`Task not found: ${taskId}`)
@@ -190,5 +190,5 @@ export const update = mutation(
       // Return updated Task object
       return await getTaskFromDoc(queryCtx, updatedDoc)
     }
-  }
-)
+  },
+})

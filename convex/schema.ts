@@ -15,6 +15,7 @@ export default defineSchema({
       v.literal(Status.Cancelled)
     ),
     title: v.string(),
+    visibility: v.optional(v.string()),
     commentCount: v.number(),
     fileCount: v.number(),
     search: v.string(),

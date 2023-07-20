@@ -1,12 +1,15 @@
-import { api } from './_generated/api'
-import { query, mutation, action } from './_generated/server'
+import { internal } from './_generated/api'
 import {
-  countResults,
-  findByTask,
-  findUser,
-  type FileDocInfo,
-} from './internal'
-import type { File, NewFileInfo } from '../fullstack/types'
+  query,
+  mutation,
+  action,
+  internalQuery,
+  internalMutation,
+} from './_generated/server'
+import { countResults, findByTask, findUser, getFileFromDoc } from './util'
+import { v } from 'convex/values'
+import { vUser, type tTaskId, type tUserId } from './validators'
+import type { File } from '../fullstack/types'
 
 export type SafeFile = {
   name: string
@@ -16,33 +19,46 @@ export type SafeFile = {
   size: number
 }
 
-export const getSafeFiles = query(async ({ db, storage }) => {
-  const safeFiles = await db.query('safeFiles').collect()
+export const getSafeFiles = query({
+  args: {},
+  handler: async ({ db, storage }) => {
+    const safeFiles = await db.query('safeFiles').collect()
 
-  const files = (await Promise.all(
-    safeFiles.map(async (f) => {
-      const url = await storage.getUrl(f.storageId)
-      if (!url)
-        throw new Error('Error loading file URL; does the file still exist?')
+    const files = (await Promise.all(
+      safeFiles.map(async (f) => {
+        const url = await storage.getUrl(f.storageId)
+        if (!url)
+          throw new Error('Error loading file URL; does the file still exist?')
 
-      const metadata = await storage.getMetadata(f.storageId)
-      if (!metadata)
-        throw new Error(
-          'Error loading file metadata; does the file still exist?'
-        )
-      const { size } = metadata
+        const metadata = await storage.getMetadata(f.storageId)
+        if (!metadata)
+          throw new Error(
+            'Error loading file metadata; does the file still exist?'
+          )
+        const { size } = metadata
 
-      return { ...f, url, size }
-    })
-  )) as SafeFile[]
+        return { ...f, url, size }
+      })
+    )) as SafeFile[]
 
-  return files
+    return files
+  },
 })
 
-export const upload = action(
-  async (
+export const upload = action({
+  args: {
+    taskId: v.string(),
+    fileInfo: v.object({
+      author: vUser,
+      name: v.string(),
+      type: v.string(),
+      data: v.bytes(),
+      size: v.number(),
+    }),
+  },
+  handler: async (
     { runQuery, runMutation, storage },
-    { taskId, fileInfo }: { taskId: string; fileInfo: NewFileInfo }
+    { taskId, fileInfo }
   ): Promise<File> => {
     // This function uploads a file to Convex's file storage,
     // and stores that file's info & associated task in the
@@ -60,27 +76,28 @@ export const upload = action(
     // Save the file metadata, url & storageId to 'files' table
     const fileDocInfo = {
       storageId,
-      taskId,
-      userId: author.id,
+      taskId: taskId as tTaskId,
+      userId: author.id as tUserId,
       name,
       type,
-    } as FileDocInfo
+    }
 
-    const uploadedFileId = await runMutation(api.internal.saveFileDoc, {
+    const uploadedFileId = await runMutation(internal.files.saveFileDoc, {
       fileDocInfo,
     })
 
-    const uploadedFile = await runQuery(api.internal.getFileById, {
+    const uploadedFile = await runQuery(internal.files.getFileById, {
       fileId: uploadedFileId,
     })
     if (!uploadedFile) throw new Error('Unexpected error retrieving saved file')
 
     return uploadedFile
-  }
-)
+  },
+})
 
-export const remove = mutation(
-  async ({ db, auth, storage }, { fileId }: { fileId: string }) => {
+export const remove = mutation({
+  args: { fileId: v.string() },
+  handler: async ({ db, auth, storage }, { fileId }) => {
     const id = db.normalizeId('files', fileId)
     if (id === null)
       throw new Error(`Could not delete file: Invalid fileId ${fileId}`)
@@ -104,5 +121,50 @@ export const remove = mutation(
     const fileCount = await countResults(findByTask(db, taskId, 'files'))
     await db.patch(taskId, { fileCount })
     return null
-  }
-)
+  },
+})
+
+// Save a new file document with the given storage ID
+export const saveFileDoc = internalMutation({
+  args: {
+    fileDocInfo: v.object({
+      name: v.string(),
+      type: v.string(),
+      taskId: v.id('tasks'),
+      userId: v.id('users'),
+      storageId: v.string(),
+    }),
+  },
+  handler: async (mutCtx, { fileDocInfo }) => {
+    const { db, auth } = mutCtx
+    const user = await findUser(db, auth)
+    if (!user) {
+      throw new Error('Error saving file: User identity not found')
+    }
+    const { taskId, userId } = fileDocInfo
+    if (user._id !== userId) {
+      throw new Error('Error saving file: Invalid user identity')
+    }
+
+    const fileId = await db.insert('files', fileDocInfo)
+
+    // Update the denormalized comment count in the tasks table
+    // (used for indexing to support ordering by comment count)
+    const fileCount = await countResults(findByTask(db, taskId, 'files'))
+
+    await db.patch(taskId, { fileCount })
+    return fileId
+  },
+})
+
+// Retrieve a File object from a given
+export const getFileById = internalQuery({
+  args: { fileId: v.id('files') },
+  handler: async (queryCtx, { fileId }): Promise<File | null> => {
+    if (queryCtx.db.normalizeId('files', fileId) === null)
+      throw new Error(`Invalid fileId ${fileId}`)
+    const fileDoc = await queryCtx.db.get(fileId)
+    if (!fileDoc) return null
+    return await getFileFromDoc(queryCtx, fileDoc)
+  },
+})

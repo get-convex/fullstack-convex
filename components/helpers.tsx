@@ -9,10 +9,7 @@ export function userOwnsTask({ owner }: Partial<Task>, user: User | null) {
 export function showTimeAgo(created: Date) {
   const now = Date.now()
   const secondsAgo = Math.round((now - created.valueOf()) / 1000)
-  if (secondsAgo === 0) return 'now'
-  if (secondsAgo < 60) {
-    return `${secondsAgo} second${secondsAgo === 1 ? '' : 's'} ago`
-  }
+  if (secondsAgo < 60) return 'just now'
   const minutesAgo = Math.round(secondsAgo / 60)
   if (minutesAgo < 60) {
     return `${minutesAgo} minute${minutesAgo === 1 ? '' : 's'} ago`

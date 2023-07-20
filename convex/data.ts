@@ -1,5 +1,5 @@
 import { internalMutation, type DatabaseWriter } from './_generated/server'
-import { countResults, findByTask } from './internal'
+import { countResults, findByTask } from './util'
 import type { Id, Doc, TableNames } from './_generated/dataModel'
 
 import users from '../fullstack/initialData/users'
@@ -111,13 +111,16 @@ async function resetTable(db: DatabaseWriter, table: TableNames) {
   return { deleted, updated }
 }
 
-export const reset = internalMutation(async ({ db }) => {
-  const users = await resetTable(db, 'users')
-  const tasks = await resetTable(db, 'tasks')
-  const safeFiles = await resetTable(db, 'safeFiles')
-  const files = await resetTable(db, 'files')
-  const comments = await resetTable(db, 'comments')
-  await updateTaskAggregates(db)
+export const reset = internalMutation({
+  args: {},
+  handler: async ({ db }) => {
+    const users = await resetTable(db, 'users')
+    const tasks = await resetTable(db, 'tasks')
+    const safeFiles = await resetTable(db, 'safeFiles')
+    const files = await resetTable(db, 'files')
+    const comments = await resetTable(db, 'comments')
+    await updateTaskAggregates(db)
 
-  return { users, tasks, safeFiles, files, comments }
+    return { users, tasks, safeFiles, files, comments }
+  },
 })

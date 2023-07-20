@@ -175,11 +175,27 @@ export function RadioDropdown<Value>({
   const selectedLabel = optionLabels[options.indexOf(selectedValue)]
   const [editing, setEditing] = useState(false)
 
-  const onKeyDown = function (event) {
-    if (event.key === 'Escape' || event.key === 'Enter') {
+  const onKeyUp: KeyboardEventHandler = function (event) {
+    if (event.key === 'Escape') {
       event.preventDefault()
+      setEditing(false)
     }
-  } as KeyboardEventHandler
+  }
+
+  const onKeyDown: KeyboardEventHandler = useCallback(
+    function (event) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setEditing(false)
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault()
+
+        setEditing(true)
+      }
+    },
+    [setEditing]
+  )
 
   const getKeyUpHandler = useCallback(
     function (s: Value) {
@@ -199,16 +215,25 @@ export function RadioDropdown<Value>({
   )
 
   return (
-    <form id={id}>
+    <div
+      role="button"
+      id={id}
+      onClick={(e) => {
+        e.stopPropagation()
+        setEditing(true)
+      }}
+      onKeyDown={onKeyDown}
+    >
       {editing ? (
         <div
           className="dropdown-options"
-          onBlurCapture={(e) => {
+          onKeyUp={onKeyUp}
+          onBlur={(e) => {
             if (!e.relatedTarget?.className.startsWith('dropdown-option'))
               setEditing(false)
           }}
-          onKeyDown={onKeyDown}
           role="menu"
+          tabIndex={0}
         >
           {options.map((v, i) => (
             <label
@@ -216,7 +241,6 @@ export function RadioDropdown<Value>({
               className={`dropdown-option ${name}-option ${name}-${v} dropdown-option-label`}
               tabIndex={0}
               role="menuitemradio"
-              onKeyDown={onKeyDown}
               onKeyUp={getKeyUpHandler(v)}
             >
               <input
@@ -238,17 +262,13 @@ export function RadioDropdown<Value>({
           ))}
         </div>
       ) : (
-        <button
-          className={`dropdown`}
-          onClick={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            setEditing(!editing)
-          }}
+        <div
+          className={`dropdown dropdown-${name} ${name}-${selectedValue}`}
+          tabIndex={0}
         >
           {selectedLabel} <CaretDownIcon />
-        </button>
+        </div>
       )}
-    </form>
+    </div>
   )
 }

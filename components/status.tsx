@@ -27,7 +27,7 @@ export function StatusPillEditable({
 }) {
   return (
     <div
-      id={`status-select status-pill status-pill-editable status-${value}`}
+      className={`status-select status-pill status-pill-editable `}
       style={{ height }}
     >
       <RadioDropdown

@@ -475,7 +475,8 @@ button.light {
 }
 
 .status-pill,
-.owner-editable {
+.owner-editable,
+.dropdown {
   display: flex;
   justify-content: left;
   align-items: center;
@@ -489,7 +490,8 @@ button.light {
 }
 
 .status-options,
-.owner-options {
+.owner-options,
+.dropdown-options {
   height: 2em;
   width: max-content;
   overflow-y: visible;
@@ -505,16 +507,13 @@ button.light {
   border-radius: 20px;
 }
 
-.status-options {
-  background-color: var(--color-light);
-}
-
 .owner-options {
   background-color: var(--color-grey);
 }
 
 .status-option,
-.owner-option {
+.owner-option,
+.dropdown-option {
   width: 100%;
   z-index: 3;
   padding: 6px 12px;
@@ -534,7 +533,8 @@ button.light {
 }
 
 .status-label,
-.owner-label {
+.owner-label,
+.dropdown-option-label {
   display: flex;
   gap: 5px;
 }

@@ -39,7 +39,6 @@ export type Task = {
   description: string | null
   comments: Comment[]
   files: File[]
-  visibility: Visibility
   status: Status
   owner: User | null
 }
@@ -47,7 +46,6 @@ export type Task = {
 export type NewTaskInfo = {
   title: string
   description: string
-  visibility: Visibility
   status: Status
   owner: User | null
 }
@@ -70,10 +68,6 @@ export const STATUS_VALUES = Object.values(Status).filter(
 ) as number[]
 
 // The rest are string enums for simplicity
-export enum Visibility {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
-}
 export enum SortKey {
   NUMBER = 'number',
   TITLE = 'title',

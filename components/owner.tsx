@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { Avatar, NullAvatar } from './login'
 import { CaretDownIcon } from './icons'
 import { userOwnsTask } from './helpers'
-import { Task, User, Visibility } from '../fullstack/types'
+import { Task, User } from '../fullstack/types'
 import type { KeyboardEvent } from 'react'
 
 function OwnerAvatar({ task }: { task: Partial<Task> }) {
@@ -27,9 +27,7 @@ export function OwnerSelect({
     id: '',
     pictureUrl: '',
   }
-  const isNewTask = !task.id
-  const isPublic = task?.visibility === Visibility.PUBLIC
-  const canChangeOwner = user && (isPublic || isNewTask)
+  const canChangeOwner = !!user
 
   const [editing, setEditing] = useState(false)
 

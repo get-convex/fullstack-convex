@@ -11,7 +11,6 @@ import {
   Status,
   Task,
   User,
-  Visibility,
 } from '../fullstack/types'
 import { BackendContext } from '../fullstack/backend'
 import { DataContext } from '../fullstack/data'
@@ -296,7 +295,6 @@ export function NewTaskDetails({
       title,
       description,
       status,
-      visibility: Visibility.PUBLIC,
       owner,
     } as NewTaskInfo
     return newTaskInfo

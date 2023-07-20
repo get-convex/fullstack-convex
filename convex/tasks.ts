@@ -6,7 +6,7 @@ import {
   findMatchingTasks,
   type FindTasksOptions,
 } from './internal'
-import { Visibility, type NewTaskInfo, type Task } from '../fullstack/types'
+import { type NewTaskInfo, type Task } from '../fullstack/types'
 import type { Id, Doc } from './_generated/dataModel'
 import type { PaginationOptions } from 'convex/server'
 
@@ -74,7 +74,7 @@ export const list = query(
 export const create = mutation(
   async (queryCtx, { taskInfo }: { taskInfo: NewTaskInfo }) => {
     const { db, auth } = queryCtx
-    const { title, description, visibility, status, owner } = taskInfo
+    const { title, description, status, owner } = taskInfo
     const ownerIdString = owner && owner.id
 
     const user = await findUser(db, auth)
@@ -107,7 +107,6 @@ export const create = mutation(
       number,
       title,
       description,
-      visibility,
       status,
       search: [title, description, ownerName].join(' '),
     })
@@ -141,11 +140,6 @@ export const update = mutation(
     const taskId = taskInfo.id as Id<'tasks'>
     if (!taskId) {
       throwUpdateError(`Invalid task ID ${taskInfo.id}`)
-    }
-
-    if (taskInfo.visibility === Visibility.PRIVATE && !taskInfo.owner?.id) {
-      // Client side validation should prevent this combination, but double check just in case
-      throwUpdateError('Private tasks must have an owner')
     }
 
     const user = await findUser(db, auth)

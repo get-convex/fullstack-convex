@@ -1,6 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
-import { Status, Visibility } from '../fullstack/types'
+import { Status } from '../fullstack/types'
 
 export default defineSchema({
   tasks: defineTable({
@@ -15,10 +15,6 @@ export default defineSchema({
       v.literal(Status.Cancelled)
     ),
     title: v.string(),
-    visibility: v.union(
-      v.literal(Visibility.PUBLIC),
-      v.literal(Visibility.PRIVATE)
-    ),
     commentCount: v.number(),
     fileCount: v.number(),
     search: v.string(),

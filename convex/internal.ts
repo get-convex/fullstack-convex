@@ -9,7 +9,6 @@ import { Doc, Id, DataModel } from './_generated/dataModel'
 import {
   Comment,
   File,
-  Visibility,
   Status,
   SortKey,
   SortOrder,
@@ -47,16 +46,6 @@ export function findMatchingTasks(
   const owners = options?.ownerFilter || OWNER_VALUES
   const searchTerm = options?.searchTerm || ''
 
-  const filterByUser = (q: FilterBuilder<TaskTableInfo>) =>
-    user
-      ? // Logged in users see their private tasks as well as public
-        q.or(
-          q.eq(q.field('visibility'), Visibility.PUBLIC),
-          q.eq(q.field('ownerId'), user._id)
-        )
-      : // Logged out users only see public tasks
-        q.eq(q.field('visibility'), Visibility.PUBLIC)
-
   const filterByStatus = (q: FilterBuilder<TaskTableInfo>, status: number) =>
     // Match any of the given status values
     q.eq(q.field('status'), status)
@@ -91,7 +80,6 @@ export function findMatchingTasks(
 
   const filtered = searchedOrSorted.filter((q) =>
     q.and(
-      filterByUser(q),
       q.or(...statuses.map((s) => filterByStatus(q, s))),
       q.or(...owners.map((o) => filterByOwner(q, o)))
     )
@@ -187,7 +175,6 @@ export async function getTaskFromDoc(
     number,
     title,
     description,
-    visibility,
     status,
   } = taskDoc
 
@@ -197,12 +184,8 @@ export async function getTaskFromDoc(
     number,
     title,
     description,
-    visibility,
     status,
   }
-
-  // Find the currently logged in user's identity (if any)
-  const identity = await auth.getUserIdentity()
 
   // Join with users table
   if (!(ownerId === null) && db.normalizeId('users', ownerId) === null)
@@ -211,11 +194,6 @@ export async function getTaskFromDoc(
     )
   const ownerDoc = ownerId ? await db.get(ownerId) : null
 
-  if (task.visibility === Visibility.PRIVATE) {
-    if (!identity) throw new Error('You must be logged in to view this task')
-    if (ownerDoc && identity.tokenIdentifier !== ownerDoc.tokenIdentifier)
-      throw new Error('You do not have permission to view this task')
-  }
   const owner = ownerDoc ? getUserFromDoc(ownerDoc) : ownerDoc
 
   // Join with comments table

@@ -9,7 +9,6 @@ export default [
     ownerName: 'Jamie Turner',
     status: 1.0,
     title: 'Generate test data',
-    visibility: 'public',
   },
   {
     creationTime: 1676574826049.41,
@@ -22,7 +21,6 @@ export default [
     ownerName: 'Anjana Sofia Vakil',
     status: 0.0,
     title: 'Proofread documentation',
-    visibility: 'public',
   },
   {
     creationTime: 1679437042752.7886,
@@ -35,7 +33,6 @@ export default [
     ownerName: 'Anjana Sofia Vakil',
     status: 1.0,
     title: 'Create an in progress task',
-    visibility: 'public',
   },
   {
     creationTime: 1676574341087.701,
@@ -48,7 +45,6 @@ export default [
     ownerName: 'Anjana Vakil',
     status: 2.0,
     title: 'Conduct user research',
-    visibility: 'public',
   },
   {
     creationTime: 1676575621552.7793,
@@ -61,7 +57,6 @@ export default [
     ownerName: 'Ian Macartney',
     status: 0.0,
     title: 'A/B test button placement',
-    visibility: 'public',
   },
   {
     creationTime: 1676575468635.1677,
@@ -74,7 +69,6 @@ export default [
     ownerName: 'Ian Macartney',
     status: 0.0,
     title: 'Publish outage postmortem',
-    visibility: 'public',
   },
   {
     creationTime: 1676575255948.1816,
@@ -87,7 +81,6 @@ export default [
     ownerName: 'Anjana Sofia Vakil',
     status: 2.0,
     title: 'Add new API endpoint',
-    visibility: 'public',
   },
   {
     creationTime: 1679454425769.6487,
@@ -100,7 +93,6 @@ export default [
     ownerName: 'Jamie Turner',
     status: 0.0,
     title: 'Schedule user conference',
-    visibility: 'public',
   },
   {
     creationTime: 1676574696612.193,
@@ -113,7 +105,6 @@ export default [
     ownerName: null,
     status: 1.0,
     title: 'Implement changes from design team',
-    visibility: 'public',
   },
   {
     creationTime: 1676574386269.6277,
@@ -126,7 +117,6 @@ export default [
     ownerName: 'contact@anjana.dev',
     status: 2.0,
     title: 'Reduce latency on new endpoint',
-    visibility: 'public',
   },
   {
     creationTime: 1676575184654.6672,
@@ -139,7 +129,6 @@ export default [
     ownerName: 'Ian Macartney',
     status: 1.0,
     title: 'Add new marketing copy',
-    visibility: 'public',
   },
   {
     creationTime: 1676575020131.6929,
@@ -152,7 +141,6 @@ export default [
     ownerName: 'Anjana Sofia Vakil',
     status: 2.0,
     title: 'Fix bug in user profile page',
-    visibility: 'public',
   },
   {
     creationTime: 1676574450667.0786,
@@ -166,7 +154,6 @@ export default [
     ownerName: 'Anjana Sofia Vakil',
     status: 1.0,
     title: 'Add even more integration tests',
-    visibility: 'public',
   },
   {
     creationTime: 1676575668259.5806,
@@ -180,7 +167,6 @@ export default [
     ownerName: null,
     status: 2.0,
     title: 'Implement safe file uploads',
-    visibility: 'public',
   },
   {
     creationTime: 1676602148263.3452,
@@ -193,7 +179,6 @@ export default [
     ownerName: 'Jamie Turner',
     status: 2.0,
     title: 'Reactively load data',
-    visibility: 'public',
   },
   {
     creationTime: 1676574803172.0708,
@@ -206,7 +191,6 @@ export default [
     ownerName: 'Anjana Sofia Vakil',
     status: 2.0,
     title: 'Refactor component structure',
-    visibility: 'public',
   },
   {
     creationTime: 1676575393498.7498,
@@ -219,7 +203,6 @@ export default [
     ownerName: 'Sandeep Kumar',
     status: 1.0,
     title: 'Increase file attachment limit',
-    visibility: 'public',
   },
   {
     creationTime: 1676574530552.6692,
@@ -232,6 +215,5 @@ export default [
     ownerName: 'Anjana Sofia Vakil',
     status: 3.0,
     title: 'Allow authentication with Github',
-    visibility: 'public',
   },
 ]

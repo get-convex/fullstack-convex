@@ -17,7 +17,7 @@ The app is a very simple Asana-style task management app that allows users to cr
   - [x] Change status (owner only)
   - [x] Reassign ownership (owner only)
 - [x] Filter tasks by ticket status or owner
-- [ ] Search tasks by title, description, or comments
+- [x] Search tasks by title, description, or comments
 - [x] Infinite-scroll pagination to support very large task collections
 
 ---

@@ -112,14 +112,13 @@ async function resetTable(db: DatabaseWriter, table: TableNames) {
 }
 
 export const reset = internalMutation({
-  args: {},
-  handler: async ({ db }) => {
-    const users = await resetTable(db, 'users')
-    const tasks = await resetTable(db, 'tasks')
-    const safeFiles = await resetTable(db, 'safeFiles')
-    const files = await resetTable(db, 'files')
-    const comments = await resetTable(db, 'comments')
-    await updateTaskAggregates(db)
+  handler: async (ctx) => {
+    const users = await resetTable(ctx.db, 'users')
+    const tasks = await resetTable(ctx.db, 'tasks')
+    const safeFiles = await resetTable(ctx.db, 'safeFiles')
+    const files = await resetTable(ctx.db, 'files')
+    const comments = await resetTable(ctx.db, 'comments')
+    await updateTaskAggregates(ctx.db)
 
     return { users, tasks, safeFiles, files, comments }
   },

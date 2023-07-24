@@ -18,7 +18,6 @@ import type * as comments from "../comments";
 import type * as crons from "../crons";
 import type * as data from "../data";
 import type * as files from "../files";
-import type * as internal_ from "../internal";
 import type * as tasks from "../tasks";
 import type * as users from "../users";
 import type * as util from "../util";
@@ -37,7 +36,6 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   data: typeof data;
   files: typeof files;
-  internal: typeof internal_;
   tasks: typeof tasks;
   users: typeof users;
   util: typeof util;

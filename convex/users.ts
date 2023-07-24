@@ -3,9 +3,8 @@ import { getUserFromDoc } from './util'
 
 // List all users
 export const list = query({
-  args: {},
-  handler: async ({ db }) => {
-    return await db.query('users').collect()
+  handler: async (ctx) => {
+    return await ctx.db.query('users').collect()
   },
 })
 
@@ -19,7 +18,6 @@ export const list = query({
 // application developer to determine which ones are available and to decide
 // which of those need to be persisted.
 export const save = mutation({
-  args: {},
   handler: async (queryCtx) => {
     const { db, auth } = queryCtx
     const identity = await auth.getUserIdentity()

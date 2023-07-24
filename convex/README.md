@@ -5,12 +5,12 @@ https://docs.convex.dev/using/writing-convex-functions for more.
 
 A query function that takes two arguments looks like:
 
-```javascript
-// myQueryFunction.js
+```ts
+// functions.js
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 
-export default query({
+export const myQueryFunction = query({
   // Validators for arguments.
   args: {
     first: v.number(),
@@ -18,10 +18,13 @@ export default query({
   },
 
   // Function implementation.
-  hander: async ({ db }, { first, second }) => {
+  hander: async (ctx, args) => {
     // Read the database as many times as you need here.
     // See https://docs.convex.dev/database/reading-data.
-    const documents = await db.query("tablename").collect();
+    const documents = await ctx.db.query("tablename").collect();
+
+    // Arguments passed from the client are properties of the args object.
+    console.log(args.first, args.second);
 
     // Write arbitrary JavaScript here: filter, aggregate, build derived data,
     // remove non-public properties, or create new objects.
@@ -32,18 +35,21 @@ export default query({
 
 Using this query function in a React component looks like:
 
-```javascript
-const data = useQuery("myQueryFunction", { first: 10, second: "hello" });
+```ts
+const data = useQuery(api.functions.myQueryFunction, {
+  first: 10,
+  second: "hello",
+});
 ```
 
 A mutation function looks like:
 
-```javascript
-// myMutationFunction.js
+```ts
+// functions.js
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-export default mutation({
+export const myMutationFunction = mutation({
   // Validators for arguments.
   args: {
     first: v.string(),
@@ -51,23 +57,23 @@ export default mutation({
   },
 
   // Function implementation.
-  hander: async ({ db }, { first, second }) => {
+  hander: async (ctx, args) => {
     // Insert or modify documents in the database here.
     // Mutations can also read from the database like queries.
     // See https://docs.convex.dev/database/writing-data.
-    const message = { body: first, author: second };
-    const id = await db.insert("messages", message);
+    const message = { body: args.first, author: args.second };
+    const id = await ctx.db.insert("messages", message);
 
     // Optionally, return a value from your mutation.
-    return await db.get(id);
+    return await ctx.db.get(id);
   },
 });
 ```
 
 Using this mutation function in a React component looks like:
 
-```javascript
-const mutation = useMutation("myMutationFunction");
+```ts
+const mutation = useMutation(api.functions.myMutationFunction);
 function handleButtonPress() {
   // fire and forget, the most common way to use mutations
   mutation({ first: "Hello!", second: "me" });
@@ -79,6 +85,6 @@ function handleButtonPress() {
 }
 ```
 
-The Convex CLI is your friend. See everything it can do by running
-`npx convex -h` in your project root directory. To learn more, launch the docs
-with `npx convex docs`.
+Use the Convex CLI to push your functions to a deployment. See everything
+the Convex CLI can do by running `npx convex -h` in your project root
+directory. To learn more, launch the docs with `npx convex docs`.

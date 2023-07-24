@@ -3,15 +3,14 @@
   "scripts": {
     "dev": "npm-run-all dev:init --parallel dev:server dev:client",
     "build": "tsc && next build",
-    "init": "convex init",
     "dev:server": "convex dev",
     "dev:client": "next dev",
-    "dev:init": "convex dev --once",
+    "dev:init": "convex dev --until-success",
     "start": "next start"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.0.1",
-    "convex": "latest",
+    "convex": "^1.0.2",
     "next": "latest",
     "node-fetch": "^3.3.1",
     "react": "^18.2.0",

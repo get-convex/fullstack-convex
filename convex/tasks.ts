@@ -16,8 +16,7 @@ export const getByNumber = query({
   handler: async (queryCtx, { taskNumber }) => {
     if (!taskNumber) return null
 
-    const { db } = queryCtx
-    const taskDoc = await db
+    const taskDoc = await queryCtx.db
       .query('tasks')
       .withIndex('by_number', (q) => q.eq('number', taskNumber))
       .unique()
@@ -31,10 +30,10 @@ export const getByNumber = query({
 // so we can display the total count even if paginated data hasn't loaded yet
 export const count = query({
   args: { filterOptions: vFindTaskOpts },
-  handler: async ({ db, auth }, { filterOptions }) => {
+  handler: async (ctx, { filterOptions }) => {
     // If logged in, fetch the stored user to get ID for filtering
-    const user = await findUser(db, auth)
-    const tasks = findMatchingTasks(db, user, filterOptions)
+    const user = await findUser(ctx.db, ctx.auth)
+    const tasks = findMatchingTasks(ctx.db, user, filterOptions)
 
     return await countResults(tasks)
   },

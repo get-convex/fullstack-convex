@@ -20,17 +20,16 @@ export type SafeFile = {
 }
 
 export const getSafeFiles = query({
-  args: {},
-  handler: async ({ db, storage }) => {
-    const safeFiles = await db.query('safeFiles').collect()
+  handler: async (ctx) => {
+    const safeFiles = await ctx.db.query('safeFiles').collect()
 
     const files = (await Promise.all(
       safeFiles.map(async (f) => {
-        const url = await storage.getUrl(f.storageId)
+        const url = await ctx.storage.getUrl(f.storageId)
         if (!url)
           throw new Error('Error loading file URL; does the file still exist?')
 
-        const metadata = await storage.getMetadata(f.storageId)
+        const metadata = await ctx.storage.getMetadata(f.storageId)
         if (!metadata)
           throw new Error(
             'Error loading file metadata; does the file still exist?'
@@ -56,10 +55,7 @@ export const upload = action({
       size: v.number(),
     }),
   },
-  handler: async (
-    { runQuery, runMutation, storage },
-    { taskId, fileInfo }
-  ): Promise<File> => {
+  handler: async (ctx, { taskId, fileInfo }): Promise<File> => {
     // This function uploads a file to Convex's file storage,
     // and stores that file's info & associated task in the
     // 'files' table. This function assumes that the file's
@@ -71,7 +67,7 @@ export const upload = action({
     const blob = new Blob([data], { type })
 
     // Store the file to Convex and get the generated storageId
-    const storageId = await storage.store(blob)
+    const storageId = await ctx.storage.store(blob)
 
     // Save the file metadata, url & storageId to 'files' table
     const fileDocInfo = {
@@ -82,11 +78,11 @@ export const upload = action({
       type,
     }
 
-    const uploadedFileId = await runMutation(internal.files.saveFileDoc, {
+    const uploadedFileId = await ctx.runMutation(internal.files.saveFileDoc, {
       fileDocInfo,
     })
 
-    const uploadedFile = await runQuery(internal.files.getFileById, {
+    const uploadedFile = await ctx.runQuery(internal.files.getFileById, {
       fileId: uploadedFileId,
     })
     if (!uploadedFile) throw new Error('Unexpected error retrieving saved file')
@@ -97,15 +93,15 @@ export const upload = action({
 
 export const remove = mutation({
   args: { fileId: v.string() },
-  handler: async ({ db, auth, storage }, { fileId }) => {
-    const id = db.normalizeId('files', fileId)
+  handler: async (ctx, { fileId }) => {
+    const id = ctx.db.normalizeId('files', fileId)
     if (id === null)
       throw new Error(`Could not delete file: Invalid fileId ${fileId}`)
-    const fileDoc = await db.get(id)
+    const fileDoc = await ctx.db.get(id)
     if (!fileDoc) throw new Error('Could not delete file: file not found')
     const { taskId, userId } = fileDoc
 
-    const user = await findUser(db, auth)
+    const user = await findUser(ctx.db, ctx.auth)
     if (!user)
       throw new Error('Could not delete file: User is not authenticated')
 
@@ -114,12 +110,12 @@ export const remove = mutation({
         'Could not delete file: Current user does not match file author'
       )
 
-    await storage.delete(fileDoc.storageId)
-    await db.delete(id)
+    await ctx.storage.delete(fileDoc.storageId)
+    await ctx.db.delete(id)
 
     // Update the denormalized file count for this task (for sorting)
-    const fileCount = await countResults(findByTask(db, taskId, 'files'))
-    await db.patch(taskId, { fileCount })
+    const fileCount = await countResults(findByTask(ctx.db, taskId, 'files'))
+    await ctx.db.patch(taskId, { fileCount })
     return null
   },
 })

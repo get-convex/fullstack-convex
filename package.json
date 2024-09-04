@@ -1,5 +1,6 @@
 {
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "npm-run-all --parallel dev:backend dev:frontend",
     "lint": "eslint . && tsc",
@@ -8,12 +9,13 @@
     "dev:frontend": "next dev",
     "init": "convex import ./fullstack/initialData/snapshot-fullstack-convex.zip",
     "init:prod": "convex import --prod ./fullstack/initialData/snapshot-fullstack-convex.zip",
-    "predev": "convex dev --until-success",
+    "setup": "convex dev --until-success && @convex-dev/auth",
     "start": "next start"
   },
   "dependencies": {
-    "@auth0/auth0-react": "^2.0.1",
-    "convex": "^1.16.0",
+    "@auth/core": "^0.34.2",
+    "@convex-dev/auth": "^0.0.63",
+    "convex": "^1.15.0",
     "next": "latest",
     "node-fetch": "^3.3.1",
     "react": "^18.2.0",

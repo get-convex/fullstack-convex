@@ -27,6 +27,7 @@ The app is a very simple Asana-style task management app that allows users to cr
 Run
 
 ```bash
+npm i
 npm run dev
 ```
 

@@ -1,10 +1,10 @@
 # Convex Fullstack App
 
-This example demonstrates a fullstack application built with Convex, React, Next.js, and Auth0.
+This example demonstrates a fullstack application built with Convex, React, and Next.js.
 
 The app is a very simple Asana-style task management app that allows users to create, view, and manage tasks. The app features:
 
-- [x] Basic Authentication & Authorization, implemented with Auth0 and Convex
+- [x] Basic Authentication & Authorization, implemented with Convex
 - [x] Task creation, where each task may have:
   - [x] Owner
   - [x] Title
@@ -28,6 +28,7 @@ Run
 
 ```bash
 npm i
+npm run setup
 npm run dev
 ```
 

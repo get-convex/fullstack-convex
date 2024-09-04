@@ -1,8 +1,10 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { Status } from '../fullstack/types'
+import { authTables } from '@convex-dev/auth/server'
 
 export default defineSchema({
+  ...authTables,
   tasks: defineTable({
     description: v.union(v.string(), v.null()),
     number: v.number(),

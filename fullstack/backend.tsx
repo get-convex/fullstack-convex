@@ -1,20 +1,16 @@
 import { api } from '../convex/_generated/api'
 import { useMutation, useAction } from 'convex/react'
-import React, { useMemo, useCallback, createContext } from 'react'
-import { useAuth0 } from '@auth0/auth0-react'
+import React, { useMemo, createContext } from 'react'
 import type { Context, PropsWithChildren } from 'react'
 import type { BackendEnvironment } from './types'
+import { useAuthActions } from '@convex-dev/auth/react'
 
 export const BackendContext = createContext(
   null
 ) as Context<BackendEnvironment | null>
 
 export default function BackendProvider({ children }: PropsWithChildren) {
-  const { loginWithRedirect: login, logout: auth0Logout } = useAuth0()
-  const logout = useCallback(
-    () => auth0Logout({ logoutParams: { returnTo: window.location.origin } }),
-    [auth0Logout]
-  )
+  const { signIn, signOut } = useAuthActions()
 
   const saveUser = useMutation(api.users.save),
     updateTask = useMutation(api.tasks.update),
@@ -27,8 +23,8 @@ export default function BackendProvider({ children }: PropsWithChildren) {
     () =>
       ({
         authentication: {
-          login,
-          logout,
+          login: () => signIn('github').then(() => void 0),
+          logout: () => signOut(),
           saveUser,
         },
         taskManagement: {
@@ -42,8 +38,8 @@ export default function BackendProvider({ children }: PropsWithChildren) {
         },
       } as BackendEnvironment),
     [
-      login,
-      logout,
+      signIn,
+      signOut,
       saveUser,
       createTask,
       updateTask,

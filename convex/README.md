@@ -1,7 +1,7 @@
 # Welcome to your Convex functions directory!
 
-Write your Convex functions here. See
-https://docs.convex.dev/using/writing-convex-functions for more.
+Write your Convex functions here.
+See https://docs.convex.dev/functions for more.
 
 A query function that takes two arguments looks like:
 
@@ -18,7 +18,7 @@ export const myQueryFunction = query({
   },
 
   // Function implementation.
-  hander: async (ctx, args) => {
+  handler: async (ctx, args) => {
     // Read the database as many times as you need here.
     // See https://docs.convex.dev/database/reading-data.
     const documents = await ctx.db.query("tablename").collect();
@@ -57,7 +57,7 @@ export const myMutationFunction = mutation({
   },
 
   // Function implementation.
-  hander: async (ctx, args) => {
+  handler: async (ctx, args) => {
     // Insert or modify documents in the database here.
     // Mutations can also read from the database like queries.
     // See https://docs.convex.dev/database/writing-data.
@@ -80,7 +80,7 @@ function handleButtonPress() {
   // OR
   // use the result once the mutation has completed
   mutation({ first: "Hello!", second: "me" }).then((result) =>
-    console.log(result)
+    console.log(result),
   );
 }
 ```

@@ -24,18 +24,20 @@ The app is a very simple Asana-style task management app that allows users to cr
 
 ## How to use
 
-Run
-
 ```bash
 npm i
 npm run dev
 ```
 
-to run `next dev` and a Convex file watcher at the same time. This command will log you into Convex, so you'll need to create a Convex account if this is your first project.
+This command will log you into Convex, so you'll need to create a Convex account if this is your first project.
 
-Once everything is working, commit your code and deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+You'll need to go through the [Auth0 setup](https://docs.convex.dev/auth/auth0)
+to set the local environment variables (in .env.local) and in your Convex
+backend (https://dashboard.convex.dev/deployment/settings/environment-variables)
 
-Use `npx convex deploy && npm run build` as the build command and set the `CONVEX_DEPLOY_KEY` environmental variable in Vercel ([Documentation](https://docs.convex.dev/getting-started/deployment/hosting/vercel)).
+Once it's set up, it will run `next dev` and `convex dev` (a file watcher syncing your Convex code to your backend) at the same time.
+
+Once everything is working, commit your code and deploy it to the cloud with [Vercel](https://docs.convex.dev/production/hosting/vercel).
 
 # What is Convex?
 

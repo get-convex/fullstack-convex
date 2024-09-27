@@ -1,16 +1,9 @@
 import { internalMutation, type DatabaseWriter } from './_generated/server'
 import { countResults, findByTask } from './util'
 import type { Id, Doc, TableNames } from './_generated/dataModel'
+import DATA from "../fullstack/initialData/allData"
 
-import users from '../fullstack/initialData/users'
-import tasks from '../fullstack/initialData/tasks'
-import comments from '../fullstack/initialData/comments'
-import files from '../fullstack/initialData/files'
-import safeFiles from '../fullstack/initialData/safeFiles'
-
-const DATA = { users, tasks, comments, files, safeFiles }
-type dataKey = keyof typeof DATA
-type dataType = (typeof DATA)[dataKey][0]
+type dataKey = keyof typeof DATA;
 
 async function updateTaskAggregates(db: DatabaseWriter) {
   const tasksToUpdate = await db.query('tasks').collect()
@@ -38,86 +31,96 @@ async function updateTaskAggregates(db: DatabaseWriter) {
   )
 }
 
+function normalizeIds(db: DatabaseWriter,
+  data: typeof DATA[keyof typeof DATA][number]
+) {
+  if ('ownerId' in data) {
+    const unsafeId = data.ownerId;
+    if (unsafeId) {
+      const id = db.normalizeId('users', unsafeId);
+      data.ownerId = id as Id<'users'>;
+    }
+  }
+  if ('userId' in data) {
+    const unsafeId = data.userId;
+    if (unsafeId) {
+      const id = db.normalizeId('users', unsafeId);
+      data.userId = id as Id<'users'>;
+    }
+  }
+  if ('taskId' in data) {
+    const unsafeId = data.taskId;
+    if (unsafeId) {
+      const id = db.normalizeId('tasks', unsafeId);
+      data.taskId = id as Id<'tasks'>;
+    }
+  }
+  return data;
+}
+
+
 async function resetTable(db: DatabaseWriter, table: TableNames) {
-  const KEEP = DATA[table as dataKey]
+  console.log('Resetting table:', table);
+  const INIT: typeof DATA[typeof table][number][] = DATA[table as dataKey]
+  console.log(INIT.length, 'docs in initial dataset:');
+  console.log(INIT.map(d => d._id));
 
-  const allDocs = await db.query(table).collect()
-  const docsToKeep = [] as Doc<TableNames>[],
-    docsToDelete = [] as Doc<TableNames>[]
+  const existingDocs = await db.query(table).collect();
+  console.log(existingDocs.length, 'docs currently in table');
 
-  for (const doc of allDocs) {
-    const isKeeper = KEEP.some((keeper) => keeper.id === doc._id)
-    if (isKeeper) {
-      docsToKeep.push(doc)
+  if (!existingDocs?.length) {
+    // Table is empty, must run setup script to import via CLI
+    // (cannot do this programmatically in a function because
+    // we need control over the ID values to maintain relations)
+    throw new Error(`Cannot reset table ${table}; table is empty.
+      Run 'npm run init' to import the initial dataset.`)
+  }
+
+  // Table is non-empty, filter to the initial dataset
+  const updated: Id<typeof table>[] = [];
+  const deleted: Id<typeof table>[] = [];
+
+  for (const doc of existingDocs) {
+    const initMatch = INIT.filter((d) =>
+      db.normalizeId(table, d._id) === doc._id)
+    if (initMatch.length === 0) {
+      // Doc is not part of the initial dataset; delete
+      const delId = db.normalizeId(table, doc._id);
+      if (!delId) throw new Error(`Could not normalize ID ${doc._id} in table ${table}`)
+      await db.delete(delId);
+      deleted.push(delId);
+    } else if (initMatch.length === 1) {
+      // This doc is part of the initial dataset
+      // Update to its data to revert any changes
+      const upId = db.normalizeId(table, doc._id);
+      if (!upId)
+        throw new Error(`Could not normalize ID ${doc._id} in table ${table}`)
+      const data = normalizeIds(db, initMatch[0]);
+      data._id = upId;
+      await db.patch(upId, data as Partial<Doc<typeof table>>);
+      updated.push(upId);
     } else {
-      docsToDelete.push(doc)
+      // Multiple initial documents matched; something is wrong
+      throw new Error(`Found multiple matches for doc ${doc._id} in initial dataset: ${initMatch}`);
     }
   }
 
-  if (docsToKeep.length !== KEEP.length) {
-    const offenders = [] as Id<TableNames>[]
-
-    for (const k of KEEP) {
-      const id = db.normalizeId(table, k.id)
-      if (id === null)
-        throw new Error(`Invalid document id ${k.id} for table ${table}`)
-      const doc = await db.get(id)
-      if (doc === null) {
-        offenders.push(id)
-      }
-    }
-
-    throw new Error(
-      `Wrong number of ${table} to keep: found ${docsToKeep.length}, expected ${
-        KEEP.length
-      }. Possible offenders:\n${offenders.join('\n')}`
-    )
-  }
-  if (docsToDelete.length !== allDocs.length - KEEP.length) {
-    throw new Error(
-      `Wrong number of ${table} to delete: found ${
-        docsToDelete.length
-      }, expected ${allDocs.length - KEEP.length}`
-    )
-  }
-
-  const updated = await Promise.all(
-    KEEP.map(async (keeper: dataType) => {
-      const info = { ...keeper } as Partial<
-        Doc<TableNames> & { id: string; creationTime: number }
-      >
-
-      const docId = db.normalizeId(table, keeper.id)
-      if (docId === null)
-        throw new Error(`Invalid document id ${keeper.id} for table ${table}`)
-
-      // Rename fields auto-populated by Convex
-      info._id = docId
-      delete info.id
-      info._creationTime = keeper.creationTime
-      delete info.creationTime
-
-      await db.patch(docId, info)
-      return db.get(docId)
-    })
-  )
-
-  const deleted = await Promise.all(
-    docsToDelete.map(async (d) => {
-      await db.delete(d._id)
-      return d
-    })
-  )
+  console.log(`Finished resetting table ${table}`);
+  console.log(`deleted docs: ${deleted}`);
+  console.log(`updated docs: ${updated}`);
   return { deleted, updated }
 }
 
 export const reset = internalMutation({
   handler: async (ctx) => {
+    console.log('Resetting database tables');
+
     const users = await resetTable(ctx.db, 'users')
     const tasks = await resetTable(ctx.db, 'tasks')
     const safeFiles = await resetTable(ctx.db, 'safeFiles')
     const files = await resetTable(ctx.db, 'files')
     const comments = await resetTable(ctx.db, 'comments')
+
     await updateTaskAggregates(ctx.db)
 
     return { users, tasks, safeFiles, files, comments }

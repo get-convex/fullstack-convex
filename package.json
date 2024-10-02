@@ -6,8 +6,8 @@
     "build": "tsc && next build",
     "dev:backend": "convex dev",
     "dev:frontend": "next dev",
-    "init:dev": "convex import --table users ./fullstack/initialData/users.json && convex import --table comments ./fullstack/initialData/comments.json && convex import --table tasks ./fullstack/initialData/tasks.json && convex import --table safeFiles ./fullstack/initialData/safeFiles.json && convex import --table files ./fullstack/initialData/files.json",
-    "init:prod": "convex import --prod --table users ./fullstack/initialData/users.json && convex import --prod --table comments ./fullstack/initialData/comments.json && convex import --prod --table tasks ./fullstack/initialData/tasks.json && convex import --prod --table safeFiles ./fullstack/initialData/safeFiles.json && convex import --prod --table files ./fullstack/initialData/files.json",
+    "init": "convex import ./fullstack/initialData/snapshot-fullstack-convex.zip",
+    "init:prod": "convex import --prod ./fullstack/initialData/snapshot-fullstack-convex.zip",
     "predev": "convex dev --until-success",
     "start": "next start"
   },

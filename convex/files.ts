@@ -25,18 +25,25 @@ export const getSafeFiles = query({
 
     const files = (await Promise.all(
       safeFiles.map(async (f) => {
-        const url = await ctx.storage.getUrl(f.storageId)
-        if (!url)
-          throw new Error('Error loading file URL; does the file still exist?')
+        const url = await ctx.storage.getUrl(f.storageId);
+        if (!url) {
+          console.error(`Error loading URL for file ${f.storageId}; does the file still exist?`);
+          return null;
+        } else {
 
-        const metadata = await ctx.storage.getMetadata(f.storageId)
-        if (!metadata)
-          throw new Error(
-            'Error loading file metadata; does the file still exist?'
-          )
-        const { size } = metadata
 
-        return { ...f, url, size }
+          const metadata = await ctx.storage.getMetadata(f.storageId)
+          if (!metadata) {
+            console.error(
+              'Error loading file metadata; does the file still exist?'
+            );
+            return { ...f, url }
+          } else {
+            const { size } = metadata
+            return { ...f, url, size }
+          }
+
+        }
       })
     )) as SafeFile[]
 

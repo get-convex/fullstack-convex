@@ -62,8 +62,8 @@ export function findMatchingTasks(
   const searchedOrSorted = searchTerm
     ? tasks.withSearchIndex('search_all', (q) => q.search('search', searchTerm))
     : tasks
-        .withIndex(`by_${options?.sortKey || SortKey.NUMBER}`)
-        .order(options?.sortOrder || SortOrder.DESC)
+      .withIndex(`by_${options?.sortKey || SortKey.NUMBER}`)
+      .order(options?.sortOrder || SortOrder.DESC)
 
   const filtered = searchedOrSorted.filter((q) =>
     q.and(
@@ -121,11 +121,11 @@ export async function getFileFromDoc(
   const author = getUserFromDoc(authorDoc)
   const url = await storage.getUrl(storageId)
   if (!url)
-    throw new Error('Error loading file URL; does the file still exist?')
+    throw new Error(`Error loading file URL; does the file still exist? storage ID: ${storageId}`)
 
   const metadata = await storage.getMetadata(storageId)
   if (!metadata)
-    throw new Error('Error loading file metadata; does the file still exist?')
+    throw new Error(`Error loading file metadata; does the file still exist? storageId: ${storageId}`)
   const { size } = metadata
 
   return {

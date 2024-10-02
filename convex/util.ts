@@ -87,16 +87,16 @@ export function findByTask(
 // Convert a Convex 'comments' Doc to a Comment object,
 // joining with User object
 export async function getCommentFromDoc(
-  { db }: QueryCtx,
+  ctx: QueryCtx,
   c: Doc<'comments'>
 ): Promise<Comment> {
   const { _id: id, _creationTime: creationTime, userId, body } = c
 
-  if (db.normalizeId('users', userId) === null)
+  if (ctx.db.normalizeId('users', userId) === null)
     throw new Error(`internal.js: Invalid userId ${userId} for comment ${id}`)
 
-  const authorDoc = await db.get(userId)
-  if (!authorDoc) throw new Error('Comment author not found')
+  const authorDoc = await ctx.db.get(userId)
+  if (!authorDoc) throw new Error(`Comment ${id} author not found: User ${userId} not found`)
 
   return {
     id: id.toString(),

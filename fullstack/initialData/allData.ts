@@ -1,8 +1,8 @@
-import users from './users.json'
-import tasks from './tasks.json'
-import comments from './comments.json'
-import files from './files.json'
-import safeFiles from './safeFiles.json'
+import users from './users'
+import tasks from './tasks'
+import comments from './comments'
+import files from './files'
+import safeFiles from './safeFiles'
 
 export default {
     users,

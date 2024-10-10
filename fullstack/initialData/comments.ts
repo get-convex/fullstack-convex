@@ -1,4 +1,4 @@
-[
+export default [
   {
     "_creationTime": 1681262553313.0789,
     "_id": "30dck8w1hphnvjq8z8t1q7mp9g1jmy8",

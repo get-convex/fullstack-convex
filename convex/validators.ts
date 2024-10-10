@@ -1,16 +1,19 @@
-import { v, Infer } from 'convex/values'
+import * as Values from 'convex/values'
 import {
   STATUS_VALUES,
   OWNER_VALUES,
   SortKey,
   SortOrder,
 } from '../fullstack/types'
+import type { Id } from './_generated/dataModel'
+
+const { v } = Values
 
 export const vUserId = v.id('users')
-export type tUserId = Infer<typeof vUserId>
+export type tUserId = Id<'users'>
 
 export const vTaskId = v.id('tasks')
-export type tTaskId = Infer<typeof vTaskId>
+export type tTaskId = Id<'tasks'>
 
 export const vUser = v.object({
   id: v.string(),

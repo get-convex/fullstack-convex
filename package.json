@@ -9,13 +9,13 @@
     "dev:frontend": "next dev",
     "init": "convex import ./fullstack/initialData/snapshot-fullstack-convex.zip",
     "init:prod": "convex import --prod ./fullstack/initialData/snapshot-fullstack-convex.zip",
-    "setup": "convex dev --until-success && @convex-dev/auth",
+    "setup": "convex dev --until-success && npx @convex-dev/auth",
     "start": "next start"
   },
   "dependencies": {
     "@auth/core": "^0.34.2",
-    "@convex-dev/auth": "^0.0.63",
-    "convex": "^1.15.0",
+    "@convex-dev/auth": "^0.0.71",
+    "convex": "^1.16.0",
     "next": "latest",
     "node-fetch": "^3.3.1",
     "react": "^18.2.0",

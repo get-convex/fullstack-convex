@@ -21,22 +21,22 @@ export default function BackendProvider({ children }: PropsWithChildren) {
 
   const backend = useMemo(
     () =>
-      ({
-        authentication: {
-          login: () => signIn('github').then(() => void 0),
-          logout: () => signOut(),
-          saveUser,
-        },
-        taskManagement: {
-          createTask,
-          updateTask,
-          saveComment,
-        },
-        fileManagement: {
-          saveFile,
-          deleteFile,
-        },
-      } as BackendEnvironment),
+    ({
+      authentication: {
+        login: () => signIn('password').then(() => void 0),
+        logout: () => signOut(),
+        saveUser,
+      },
+      taskManagement: {
+        createTask,
+        updateTask,
+        saveComment,
+      },
+      fileManagement: {
+        saveFile,
+        deleteFile,
+      },
+    } as BackendEnvironment),
     [
       signIn,
       signOut,

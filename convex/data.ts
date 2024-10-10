@@ -59,7 +59,7 @@ function normalizeIds(db: DatabaseWriter,
 }
 
 
-async function resetTable(db: DatabaseWriter, table: TableNames) {
+async function resetTable(db: DatabaseWriter, table: 'users' | 'tasks' | 'comments' | 'files' | 'safeFiles') {
   console.log('Resetting table:', table);
   const INIT: typeof DATA[typeof table][number][] = DATA[table as dataKey]
   console.log(INIT.length, 'docs in initial dataset:');
